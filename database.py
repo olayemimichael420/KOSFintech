@@ -1,8 +1,8 @@
 """
 Database foundation.
 
-Business-specific tables and repositories will be introduced
-in later development parts.
+Provides the SQLite connection and initializes the core
+application schema.
 """
 
 import sqlite3
@@ -36,7 +36,7 @@ def get_connection() -> sqlite3.Connection:
 
 
 def init_db() -> None:
-    """Initialize the database foundation."""
+    """Initialize the core database schema."""
 
     connection = get_connection()
 
@@ -46,6 +46,19 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS schema_meta (
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS schools (
+                tenant_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                school_type TEXT NOT NULL,
+                country TEXT NOT NULL,
+                currency TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
             """
         )
