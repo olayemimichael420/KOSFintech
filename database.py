@@ -65,18 +65,16 @@ def init_db() -> None:
 
         connection.execute(
             """
-            CREATE TABLE IF NOT EXISTS school_admins (
+            CREATE TABLE IF NOT EXISTS students (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
-                user_id INTEGER NOT NULL,
-                role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
-                phone TEXT NOT NULL UNIQUE,
-                email TEXT,
-                verified BOOLEAN DEFAULT 0,
-                verification_code TEXT,
-                code_expires TIMESTAMP,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (tenant_id) REFERENCES schools(tenant_id)
+                user_id INTEGER,
+                name TEXT NOT NULL,
+                class_name TEXT NOT NULL,
+                age INTEGER,
+                guardian_id INTEGER,
+                enrollment_date DATE,
+                status TEXT DEFAULT 'active'
             )
             """
         )
