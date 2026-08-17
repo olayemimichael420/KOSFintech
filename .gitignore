@@ -1,4 +1,19 @@
-x
-d
-x
+.env
+*.db
+*.sqlite
+*.sqlite3
+*.log
+*.tar.gz
+*.zip
+*.bin
+*.gguf
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+ollama/
+.DS_Store
 
+projects/
