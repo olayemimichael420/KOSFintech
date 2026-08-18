@@ -166,7 +166,8 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS user_schools (
                 tenant_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
-                PRIMARY KEY (tenant_id, user_id)
+                PRIMARY KEY (tenant_id, user_id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
             )
             """
         )
