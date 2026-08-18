@@ -113,7 +113,9 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS teacher_students (
                 teacher_id INTEGER NOT NULL,
                 student_id INTEGER NOT NULL,
-                PRIMARY KEY (teacher_id, student_id)
+                PRIMARY KEY (teacher_id, student_id),
+                FOREIGN KEY (teacher_id) REFERENCES teachers(id),
+                FOREIGN KEY (student_id) REFERENCES students(id)
             )
             """
         )
