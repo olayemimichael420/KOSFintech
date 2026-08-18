@@ -123,7 +123,8 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS school_teachers (
                 tenant_id TEXT NOT NULL,
                 teacher_id INTEGER NOT NULL,
-                PRIMARY KEY (tenant_id, teacher_id)
+                PRIMARY KEY (tenant_id, teacher_id),
+                FOREIGN KEY (teacher_id) REFERENCES teachers(id)
             )
             """
         )
