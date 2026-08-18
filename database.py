@@ -117,6 +117,16 @@ def init_db() -> None:
             """
         )
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS school_teachers (
+                tenant_id TEXT NOT NULL,
+                teacher_id INTEGER NOT NULL,
+                PRIMARY KEY (tenant_id, teacher_id)
+            )
+            """
+        )
+
         connection.commit()
 
     finally:
