@@ -147,6 +147,19 @@ def init_db() -> None:
             """
         )
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                email TEXT,
+                role TEXT NOT NULL,
+                status TEXT DEFAULT 'active'
+            )
+            """
+        )
+
         connection.commit()
 
     finally:
