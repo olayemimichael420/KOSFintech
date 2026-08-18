@@ -145,7 +145,8 @@ def init_db() -> None:
             CREATE TABLE IF NOT EXISTS parent_schools (
                 tenant_id TEXT NOT NULL,
                 parent_id INTEGER NOT NULL,
-                PRIMARY KEY (tenant_id, parent_id)
+                PRIMARY KEY (tenant_id, parent_id),
+                FOREIGN KEY (parent_id) REFERENCES parents(id)
             )
             """
         )
