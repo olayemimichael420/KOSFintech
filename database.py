@@ -182,6 +182,17 @@ def init_db() -> None:
             """
         )
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS user_roles (
+                tenant_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                role_id INTEGER NOT NULL,
+                PRIMARY KEY (tenant_id, user_id, role_id)
+            )
+            """
+        )
+
         connection.commit()
 
     finally:
