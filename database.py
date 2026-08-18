@@ -214,7 +214,9 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 role_id INTEGER NOT NULL,
                 permission_id INTEGER NOT NULL,
-                PRIMARY KEY (tenant_id, role_id, permission_id)
+                PRIMARY KEY (tenant_id, role_id, permission_id),
+                FOREIGN KEY (role_id) REFERENCES roles(id),
+                FOREIGN KEY (permission_id) REFERENCES permissions(id)
             )
             """
         )
