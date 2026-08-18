@@ -31,6 +31,7 @@ def get_connection() -> sqlite3.Connection:
     )
 
     connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
 
     return connection
 
@@ -188,7 +189,9 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 role_id INTEGER NOT NULL,
-                PRIMARY KEY (tenant_id, user_id, role_id)
+                PRIMARY KEY (tenant_id, user_id, role_id),
+                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (role_id) REFERENCES roles(id)
             )
             """
         )
