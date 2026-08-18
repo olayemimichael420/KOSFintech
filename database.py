@@ -205,6 +205,17 @@ def init_db() -> None:
             """
         )
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS role_permissions (
+                tenant_id TEXT NOT NULL,
+                role_id INTEGER NOT NULL,
+                permission_id INTEGER NOT NULL,
+                PRIMARY KEY (tenant_id, role_id, permission_id)
+            )
+            """
+        )
+
         connection.commit()
 
     finally:
