@@ -53,6 +53,19 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS administrations (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL UNIQUE,
+                name TEXT NOT NULL,
+                administration_type TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS schools (
                 tenant_id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,
@@ -195,6 +208,89 @@ def init_db() -> None:
                 code_expires TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (tenant_id) REFERENCES schools(tenant_id),
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS platform_authorities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                role TEXT NOT NULL CHECK(role IN ('super_admin')),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                transferred_at TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_platform_authorities_active_role
+            ON platform_authorities(role)
+            WHERE status = 'active'
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_platform_authorities_active_user
+            ON platform_authorities(user_id)
+            WHERE status = 'active'
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS platform_authorities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                role TEXT NOT NULL CHECK(role IN ('super_admin')),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                transferred_at TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_platform_authorities_active_role
+            ON platform_authorities(role)
+            WHERE status = 'active'
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_platform_authorities_active_user
+            ON platform_authorities(user_id)
+            WHERE status = 'active'
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS administration_authorities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                administration_id INTEGER NOT NULL,
+                user_id INTEGER NOT NULL,
+                role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
+                status TEXT NOT NULL DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(administration_id, role),
+                UNIQUE(administration_id, user_id),
+                FOREIGN KEY (administration_id) REFERENCES administrations(id),
                 FOREIGN KEY (user_id) REFERENCES users(id)
             )
             """
