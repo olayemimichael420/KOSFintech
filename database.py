@@ -93,6 +93,20 @@ def init_db() -> None:
             """
         )
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS parents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                user_id INTEGER,
+                name TEXT NOT NULL,
+                phone TEXT,
+                email TEXT,
+                status TEXT DEFAULT 'active'
+            )
+            """
+        )
+
         connection.commit()
 
     finally:
