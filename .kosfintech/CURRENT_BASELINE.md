@@ -10,7 +10,7 @@
 
 Commit:
 
-    6d00a5c
+    26e0744
 
 Branch:
 
@@ -37,7 +37,7 @@ Test command:
 
 Verified result:
 
-    87 passed
+    104 passed
 
 The existing passing test suite is part of the development contract.
 
