@@ -117,3 +117,47 @@ def test_authorization_service_rejects_cross_tenant_permission():
     ) is False
 
     connection.close()
+
+def test_governance_role_does_not_grant_application_permission():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    user_id = seed(connection)
+
+    # The user has application permission only because it is explicitly
+    # assigned through RBAC. Remove that assignment.
+    connection.execute("DELETE FROM role_permissions")
+    connection.commit()
+
+    service = AuthorizationService(connection)
+
+    assert service.has_permission(
+        user_id=user_id,
+        permission_name="student.read",
+        tenant_id="tenant-a",
+    ) is False
+
+    connection.close()
+
+
+def test_application_permission_does_not_grant_governance_authority():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    from tests.test_authorization_context_bridge import create_tables as create_bridge_tables
+    from services.authorization_context_service import AuthorizationContextService
+
+    create_bridge_tables(connection)
+
+    context_service = AuthorizationContextService(connection)
+
+    context = context_service.resolve(
+        user_id=1,
+        administration_id=1,
+        tenant_id="tenant-001",
+    )
+
+    assert context.administration_role is None
+
+    connection.close()
