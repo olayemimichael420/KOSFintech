@@ -48,6 +48,13 @@ def evaluate(request: AuthorizationRequest) -> tuple[bool, str]:
             Action.MANAGE_ROLES,
             Action.MANAGE_PERMISSIONS,
         }:
+            if (
+                authority.jurisdiction_id is not None
+                and request.resource_id is not None
+                and request.resource_id != authority.jurisdiction_id
+            ):
+                return False, "resource administration mismatch"
+
             return True, "owner authorized within administration"
 
         return False, "action is not permitted for owner"
@@ -67,6 +74,13 @@ def evaluate(request: AuthorizationRequest) -> tuple[bool, str]:
             Action.MANAGE_ROLES,
             Action.MANAGE_PERMISSIONS,
         }:
+            if (
+                authority.jurisdiction_id is not None
+                and request.resource_id is not None
+                and request.resource_id != authority.jurisdiction_id
+            ):
+                return False, "resource administration mismatch"
+
             return True, "administrator authorized within administration"
 
         return False, "action is not permitted for administrator"
