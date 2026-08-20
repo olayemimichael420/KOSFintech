@@ -48,6 +48,7 @@ class AuthorizationContextService:
         self,
         user_id: int,
         administration_id: Optional[int] = None,
+        tenant_id: Optional[str] = None,
     ) -> AuthorizationContext:
         platform_authority = self.platform_repository.get_active_by_user(user_id)
 
@@ -63,9 +64,32 @@ class AuthorizationContextService:
                 platform_role=platform_role,
             )
 
+        # If the caller does not provide tenant_id, derive it from
+        # the authenticated user's database record. Application roles
+        # are never used as governance authority.
+        if tenant_id is None:
+            user_row = self.connection.execute(
+                """
+                SELECT tenant_id
+                FROM users
+                WHERE id = ?
+                """,
+                (user_id,),
+            ).fetchone()
+
+            if user_row is None:
+                return AuthorizationContext(
+                    user_id=user_id,
+                    platform_role=platform_role,
+                    administration_id=administration_id,
+                )
+
+            tenant_id = user_row["tenant_id"]
+
         administration_authority = (
             self.administration_repository
             .get_active_by_user_and_administration(
+                tenant_id=tenant_id,
                 user_id=user_id,
                 administration_id=administration_id,
             )

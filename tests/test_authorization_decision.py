@@ -29,6 +29,7 @@ def create_tables(connection):
     connection.execute("""
         CREATE TABLE administration_authorities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
             administration_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
@@ -98,13 +99,15 @@ def add_authority(
 ):
     connection.execute("""
         INSERT INTO administration_authorities (
+            tenant_id,
             administration_id,
             user_id,
             role,
             status
         )
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
     """, (
+        "tenant-001",
         administration_id,
         user_id,
         role,

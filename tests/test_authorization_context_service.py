@@ -39,6 +39,7 @@ def create_tables(connection):
     connection.execute("""
         CREATE TABLE administration_authorities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
             administration_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
@@ -114,6 +115,7 @@ def test_administration_authority_is_resolved():
     repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=10,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -125,6 +127,7 @@ def test_administration_authority_is_resolved():
     context = service.resolve(
         user_id=1,
         administration_id=10,
+        tenant_id="tenant-001",
     )
 
     assert context.administration_id == 10

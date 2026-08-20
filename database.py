@@ -281,17 +281,40 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_administrations_id_tenant
+            ON administrations(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_users_id_tenant
+            ON users(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS administration_authorities (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
                 administration_id INTEGER NOT NULL,
                 user_id INTEGER NOT NULL,
                 role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
-                status TEXT NOT NULL DEFAULT 'active',
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
                 UNIQUE(administration_id, role),
                 UNIQUE(administration_id, user_id),
-                FOREIGN KEY (administration_id) REFERENCES administrations(id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
+
+                FOREIGN KEY (administration_id, tenant_id)
+                    REFERENCES administrations(id, tenant_id),
+
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
             )
             """
         )

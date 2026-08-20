@@ -17,14 +17,16 @@ class AdministrationAuthorityRepository:
         cursor = self.connection.execute(
             """
             INSERT INTO administration_authorities (
+                tenant_id,
                 administration_id,
                 user_id,
                 role,
                 status
             )
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
             """,
             (
+                authority.tenant_id,
                 authority.administration_id,
                 authority.user_id,
                 authority.role.value,
@@ -38,6 +40,7 @@ class AdministrationAuthorityRepository:
             """
             SELECT
                 id,
+                tenant_id,
                 administration_id,
                 user_id,
                 role,
@@ -59,6 +62,7 @@ class AdministrationAuthorityRepository:
             """
             SELECT
                 id,
+                tenant_id,
                 administration_id,
                 user_id,
                 role,
@@ -74,6 +78,7 @@ class AdministrationAuthorityRepository:
 
     def get_active_by_user_and_administration(
         self,
+        tenant_id: str,
         user_id: int,
         administration_id: int,
     ) -> Optional[AdministrationAuthority]:
@@ -81,17 +86,20 @@ class AdministrationAuthorityRepository:
             """
             SELECT
                 id,
+                tenant_id,
                 administration_id,
                 user_id,
                 role,
                 status,
                 created_at
             FROM administration_authorities
-            WHERE user_id = ?
+            WHERE tenant_id = ?
+              AND user_id = ?
               AND administration_id = ?
               AND status = 'active'
             """,
             (
+                tenant_id,
                 user_id,
                 administration_id,
             ),
@@ -101,6 +109,7 @@ class AdministrationAuthorityRepository:
 
     def get_active_by_administration_and_role(
         self,
+        tenant_id: str,
         administration_id: int,
         role: AdministrationAuthorityRole,
     ) -> Optional[AdministrationAuthority]:
@@ -108,17 +117,20 @@ class AdministrationAuthorityRepository:
             """
             SELECT
                 id,
+                tenant_id,
                 administration_id,
                 user_id,
                 role,
                 status,
                 created_at
             FROM administration_authorities
-            WHERE administration_id = ?
+            WHERE tenant_id = ?
+              AND administration_id = ?
               AND role = ?
               AND status = 'active'
             """,
             (
+                tenant_id,
                 administration_id,
                 role.value,
             ),
@@ -128,27 +140,36 @@ class AdministrationAuthorityRepository:
 
     def list_by_administration(
         self,
+        tenant_id: str,
         administration_id: int,
     ) -> list[AdministrationAuthority]:
         rows = self.connection.execute(
             """
             SELECT
                 id,
+                tenant_id,
                 administration_id,
                 user_id,
                 role,
                 status,
                 created_at
             FROM administration_authorities
-            WHERE administration_id = ?
+            WHERE tenant_id = ?
+              AND administration_id = ?
             ORDER BY id
             """,
-            (administration_id,),
+            (
+                tenant_id,
+                administration_id,
+            ),
         ).fetchall()
 
         return [self._to_model(row) for row in rows]
 
-    def deactivate(self, authority_id: int) -> Optional[AdministrationAuthority]:
+    def deactivate(
+        self,
+        authority_id: int,
+    ) -> Optional[AdministrationAuthority]:
         self.connection.execute(
             """
             UPDATE administration_authorities
@@ -166,6 +187,7 @@ class AdministrationAuthorityRepository:
     def _to_model(row) -> AdministrationAuthority:
         return AdministrationAuthority(
             id=row["id"],
+            tenant_id=row["tenant_id"],
             administration_id=row["administration_id"],
             user_id=row["user_id"],
             role=AdministrationAuthorityRole(row["role"]),

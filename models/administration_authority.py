@@ -13,6 +13,7 @@ class AdministrationAuthorityRole(str, Enum):
 @dataclass(frozen=True)
 class AdministrationAuthority:
     id: Optional[int]
+    tenant_id: str
     administration_id: int
     user_id: int
     role: AdministrationAuthorityRole

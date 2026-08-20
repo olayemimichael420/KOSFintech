@@ -46,6 +46,7 @@ def create_tables(connection):
         """
         CREATE TABLE administration_authorities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
             administration_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
@@ -97,6 +98,7 @@ def test_active_owner_maps_to_owner_authority():
     repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -104,6 +106,7 @@ def test_active_owner_maps_to_owner_authority():
     )
 
     assignment = repository.get_active_by_user_and_administration(
+        tenant_id="tenant-001",
         user_id=1,
         administration_id=1,
     )
@@ -131,6 +134,7 @@ def test_inactive_authority_does_not_produce_active_assignment():
     authority = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -140,6 +144,7 @@ def test_inactive_authority_does_not_produce_active_assignment():
     repository.deactivate(authority.id)
 
     assignment = repository.get_active_by_user_and_administration(
+        tenant_id="tenant-001",
         user_id=1,
         administration_id=1,
     )
@@ -159,6 +164,7 @@ def test_authorization_request_uses_administration_jurisdiction():
     assignment = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,

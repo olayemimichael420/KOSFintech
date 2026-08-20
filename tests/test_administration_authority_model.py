@@ -7,6 +7,7 @@ from models.administration_authority import (
 def test_owner_authority():
     authority = AdministrationAuthority(
         id=None,
+        tenant_id="tenant-001",
         administration_id=1,
         user_id=10,
         role=AdministrationAuthorityRole.OWNER,
@@ -23,6 +24,7 @@ def test_admin_roles():
     ):
         authority = AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=10,
             role=role,

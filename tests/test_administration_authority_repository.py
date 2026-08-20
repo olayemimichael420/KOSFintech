@@ -34,6 +34,7 @@ def create_tables(connection):
         """
         CREATE TABLE administration_authorities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
             administration_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
@@ -79,6 +80,7 @@ def test_create_and_get_authority():
 
     authority = AdministrationAuthority(
         id=None,
+        tenant_id="tenant-001",
         administration_id=1,
         user_id=1,
         role=AdministrationAuthorityRole.OWNER,
@@ -109,6 +111,7 @@ def test_get_active_authority_by_user_and_administration():
     authority = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -116,6 +119,7 @@ def test_get_active_authority_by_user_and_administration():
     )
 
     result = repository.get_active_by_user_and_administration(
+        tenant_id="tenant-001",
         user_id=1,
         administration_id=1,
     )
@@ -135,6 +139,7 @@ def test_get_active_authority_by_role():
     authority = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -142,6 +147,7 @@ def test_get_active_authority_by_role():
     )
 
     result = repository.get_active_by_administration_and_role(
+        tenant_id="tenant-001",
         administration_id=1,
         role=AdministrationAuthorityRole.OWNER,
     )
@@ -161,6 +167,7 @@ def test_list_authorities_by_administration():
     owner = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -170,13 +177,14 @@ def test_list_authorities_by_administration():
     admin = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=2,
             role=AdministrationAuthorityRole.ADMIN_1,
         )
     )
 
-    authorities = repository.list_by_administration(1)
+    authorities = repository.list_by_administration("tenant-001", 1)
 
     assert len(authorities) == 2
     assert authorities[0] == owner
@@ -195,6 +203,7 @@ def test_deactivate_authority():
     authority = repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -207,6 +216,7 @@ def test_deactivate_authority():
     assert deactivated.status == "inactive"
 
     active = repository.get_active_by_user_and_administration(
+        tenant_id="tenant-001",
         user_id=1,
         administration_id=1,
     )

@@ -31,6 +31,7 @@ class AuthorizationService:
     """
 
     def __init__(self, connection):
+        self.connection = connection
         self.repository = AdministrationAuthorityRepository(connection)
 
     def authorize(
@@ -67,8 +68,26 @@ class AuthorizationService:
         and an explanatory reason.
         """
 
+        user_row = self.connection.execute(
+            """
+            SELECT tenant_id
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        ).fetchone()
+
+        if user_row is None:
+            return AuthorizationDecision(
+                allowed=False,
+                reason="authenticated user not found",
+            )
+
+        tenant_id = user_row["tenant_id"]
+
         assignment = (
             self.repository.get_active_by_user_and_administration(
+                tenant_id=tenant_id,
                 user_id=user_id,
                 administration_id=administration_id,
             )

@@ -64,6 +64,7 @@ def create_tables(connection):
     connection.execute("""
         CREATE TABLE administration_authorities (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
             administration_id INTEGER NOT NULL,
             user_id INTEGER NOT NULL,
             role TEXT NOT NULL CHECK(role IN ('owner', 'admin1', 'admin2')),
@@ -115,6 +116,7 @@ def test_context_bridge_allows_authorized_owner():
     repository.create(
         AdministrationAuthority(
             id=None,
+            tenant_id="tenant-001",
             administration_id=1,
             user_id=1,
             role=AdministrationAuthorityRole.OWNER,
@@ -125,6 +127,7 @@ def test_context_bridge_allows_authorized_owner():
     context = context_service.resolve(
         user_id=1,
         administration_id=1,
+        tenant_id="tenant-001",
     )
 
     authorization_service = AuthorizationService(connection)
@@ -150,6 +153,7 @@ def test_context_bridge_denies_user_without_authority():
     context = context_service.resolve(
         user_id=1,
         administration_id=1,
+        tenant_id="tenant-001",
     )
 
     authorization_service = AuthorizationService(connection)
@@ -175,6 +179,7 @@ def test_application_role_is_not_used_as_governance_authority():
     context = context_service.resolve(
         user_id=1,
         administration_id=1,
+        tenant_id="tenant-001",
     )
 
     assert context.administration_role is None
