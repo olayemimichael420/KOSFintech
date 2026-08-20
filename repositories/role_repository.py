@@ -29,7 +29,7 @@ class RoleRepository:
         role.id = cursor.lastrowid
         return role
 
-    def get(self, role_id: int):
+    def get(self, tenant_id: str, role_id: int):
         row = self.connection.execute(
             """
             SELECT
@@ -39,9 +39,10 @@ class RoleRepository:
                 description,
                 status
             FROM roles
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (role_id,),
+            (tenant_id, role_id),
         ).fetchone()
 
         if row is None:

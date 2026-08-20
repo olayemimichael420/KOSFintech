@@ -29,7 +29,7 @@ class PermissionRepository:
         permission.id = cursor.lastrowid
         return permission
 
-    def get(self, permission_id: int):
+    def get(self, tenant_id: str, permission_id: int):
         row = self.connection.execute(
             """
             SELECT
@@ -39,9 +39,10 @@ class PermissionRepository:
                 description,
                 status
             FROM permissions
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (permission_id,),
+            (tenant_id, permission_id),
         ).fetchone()
 
         if row is None:

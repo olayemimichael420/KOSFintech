@@ -37,7 +37,7 @@ def test_create_and_get_role():
     assert created.description == "Teaching staff"
     assert created.status == "active"
 
-    result = repository.get(created.id)
+    result = repository.get("school-001", created.id)
 
     assert result is not None
     assert result.id == created.id

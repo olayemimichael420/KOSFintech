@@ -326,7 +326,8 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT,
-                status TEXT DEFAULT 'active'
+                status TEXT DEFAULT 'active',
+                UNIQUE(id, tenant_id)
             )
             """
         )
@@ -338,8 +339,10 @@ def init_db() -> None:
                 user_id INTEGER NOT NULL,
                 role_id INTEGER NOT NULL,
                 PRIMARY KEY (tenant_id, user_id, role_id),
-                FOREIGN KEY (user_id) REFERENCES users(id),
-                FOREIGN KEY (role_id) REFERENCES roles(id)
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+                FOREIGN KEY (role_id, tenant_id)
+                    REFERENCES roles(id, tenant_id)
             )
             """
         )
@@ -351,7 +354,8 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 name TEXT NOT NULL,
                 description TEXT,
-                status TEXT DEFAULT 'active'
+                status TEXT DEFAULT 'active',
+                UNIQUE(id, tenant_id)
             )
             """
         )
@@ -363,8 +367,10 @@ def init_db() -> None:
                 role_id INTEGER NOT NULL,
                 permission_id INTEGER NOT NULL,
                 PRIMARY KEY (tenant_id, role_id, permission_id),
-                FOREIGN KEY (role_id) REFERENCES roles(id),
-                FOREIGN KEY (permission_id) REFERENCES permissions(id)
+                FOREIGN KEY (role_id, tenant_id)
+                    REFERENCES roles(id, tenant_id),
+                FOREIGN KEY (permission_id, tenant_id)
+                    REFERENCES permissions(id, tenant_id)
             )
             """
         )
