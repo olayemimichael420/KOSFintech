@@ -246,38 +246,6 @@ def init_db() -> None:
             """
         )
 
-        connection.execute(
-            """
-            CREATE TABLE IF NOT EXISTS platform_authorities (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                user_id INTEGER NOT NULL,
-                role TEXT NOT NULL CHECK(role IN ('super_admin')),
-                status TEXT NOT NULL DEFAULT 'active'
-                    CHECK(status IN ('active', 'inactive')),
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                transferred_at TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id)
-            )
-            """
-        )
-
-        connection.execute(
-            """
-            CREATE UNIQUE INDEX IF NOT EXISTS
-            ux_platform_authorities_active_role
-            ON platform_authorities(role)
-            WHERE status = 'active'
-            """
-        )
-
-        connection.execute(
-            """
-            CREATE UNIQUE INDEX IF NOT EXISTS
-            ux_platform_authorities_active_user
-            ON platform_authorities(user_id)
-            WHERE status = 'active'
-            """
-        )
 
         connection.execute(
             """
