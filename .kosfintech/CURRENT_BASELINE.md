@@ -10,7 +10,7 @@
 
 Commit:
 
-    26e0744
+    f5f3da7
 
 Branch:
 
@@ -18,7 +18,7 @@ Branch:
 
 Commit description:
 
-    Implement platform authority and super admin transfer
+    KOS-DEV-0006 Establish authorization context bridge
 
 This commit is the current verified source-code baseline unless a later
 baseline is explicitly recorded.
@@ -28,8 +28,7 @@ baseline is explicitly recorded.
 ## 2. VERIFIED TEST BASELINE
 
 Python:
-
-    Python 3.13.13
+Python 3.13.13
 
 Test command:
 
@@ -37,7 +36,7 @@ Test command:
 
 Verified result:
 
-    104 passed
+    110 passed
 
 The existing passing test suite is part of the development contract.
 
@@ -66,6 +65,9 @@ inspected before creating alternatives:
 - Administration authority
 - Platform authority
 - Authorization service
+- Authorization context resolution
+- Authorization context service
+- Authorization context bridge
 - Authority policy
 - Super Admin transfer
 - Repository layer
