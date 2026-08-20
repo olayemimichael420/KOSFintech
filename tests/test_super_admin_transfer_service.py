@@ -307,3 +307,65 @@ def test_transfer_requires_current_authority_to_remain_active():
     assert active["count"] == 0
 
     connection.close()
+
+def test_transfer_rolls_back_when_new_authority_insert_fails():
+    class FailingTransferConnection:
+        def __init__(self, connection):
+            self.connection = connection
+            self.insert_attempted = False
+
+        def execute(self, sql, params=()):
+            normalized = " ".join(sql.split()).upper()
+
+            if normalized.startswith("INSERT INTO PLATFORM_AUTHORITIES"):
+                self.insert_attempted = True
+                raise sqlite3.IntegrityError(
+                    "forced transfer insert failure"
+                )
+
+            return self.connection.execute(sql, params)
+
+        def commit(self):
+            return self.connection.commit()
+
+        def rollback(self):
+            return self.connection.rollback()
+
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+
+    create_tables(connection)
+    add_super_admin(connection, 1)
+
+    failing_connection = FailingTransferConnection(connection)
+    service = SuperAdminTransferService(failing_connection)
+
+    result = service.transfer(
+        current_user_id=1,
+        target_user_id=2,
+    )
+
+    assert result.allowed is False
+    assert result.reason == "super admin transfer failed"
+    assert failing_connection.insert_attempted is True
+
+    current = connection.execute("""
+        SELECT status
+        FROM platform_authorities
+        WHERE user_id = 1
+    """).fetchone()
+
+    target = connection.execute("""
+        SELECT COUNT(*) AS count
+        FROM platform_authorities
+        WHERE user_id = 2
+          AND role = 'super_admin'
+          AND status = 'active'
+    """).fetchone()
+
+    # The failed transfer must leave the original authority untouched.
+    assert current["status"] == "active"
+    assert target["count"] == 0
+
+    connection.close()
