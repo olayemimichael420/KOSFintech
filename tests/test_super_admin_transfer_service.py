@@ -270,3 +270,40 @@ def test_successful_super_admin_transfer_emits_audit_event(caplog):
         assert payload["metadata"]["to_user_id"] == 2
 
         connection.close()
+
+def test_transfer_requires_current_authority_to_remain_active():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+
+    create_tables(connection)
+    add_super_admin(connection, 1)
+
+    # The caller is no longer the active Super Admin.
+    connection.execute("""
+        UPDATE platform_authorities
+        SET status = 'inactive'
+        WHERE user_id = 1
+    """)
+    connection.commit()
+
+    service = SuperAdminTransferService(connection)
+
+    result = service.transfer(
+        current_user_id=1,
+        target_user_id=2,
+    )
+
+    assert result.allowed is False
+    assert result.reason == "current user is not the active super admin"
+
+    active = connection.execute("""
+        SELECT COUNT(*) AS count
+        FROM platform_authorities
+        WHERE role = 'super_admin'
+          AND status = 'active'
+    """).fetchone()
+
+    assert active["count"] == 0
+
+    connection.close()
