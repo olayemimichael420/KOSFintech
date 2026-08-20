@@ -332,3 +332,70 @@ def test_admin1_cannot_authorize_resource_in_another_administration():
     assert decision.reason == "resource administration mismatch"
 
     connection.close()
+
+def test_super_admin_context_cannot_use_administration_action():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute(
+        """
+        INSERT INTO platform_authorities (user_id, role, status)
+        VALUES (1, 'super_admin', 'active')
+        """
+    )
+    connection.commit()
+
+    context_service = AuthorizationContextService(connection)
+    context = context_service.resolve(
+        user_id=1,
+        administration_id=1,
+        tenant_id="tenant-001",
+    )
+
+    assert context.is_super_admin is True
+
+    authorization_service = AuthorizationService(connection)
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.MANAGE_USERS,
+    )
+
+    assert decision.allowed is False
+    assert decision.reason == "action is not permitted for super_admin"
+
+    connection.close()
+
+
+def test_super_admin_context_can_transfer_super_admin():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute(
+        """
+        INSERT INTO platform_authorities (user_id, role, status)
+        VALUES (1, 'super_admin', 'active')
+        """
+    )
+    connection.commit()
+
+    context_service = AuthorizationContextService(connection)
+    context = context_service.resolve(user_id=1)
+
+    assert context.is_super_admin is True
+
+    authorization_service = AuthorizationService(connection)
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.TRANSFER_SUPER_ADMIN,
+        resource_type="platform_authority",
+        resource_id="2",
+    )
+
+    assert decision.allowed is True
+    assert decision.reason == "super_admin authorized at platform level"
+
+    connection.close()
