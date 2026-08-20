@@ -204,3 +204,40 @@ def test_authenticated_users_tenant_resolves_valid_authority():
     assert context.has_administration_authority is True
 
     connection.close()
+
+def test_supplied_tenant_cannot_select_cross_tenant_authority():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.administration_authority_repository",
+        fromlist=["AdministrationAuthorityRepository"],
+    ).AdministrationAuthorityRepository(connection)
+
+    # Authenticated user belongs to tenant-001.
+    # Deliberately create an authority row claiming tenant-002.
+    repository.create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-002",
+            administration_id=10,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    service = AuthorizationContextService(connection)
+
+    context = service.resolve(
+        user_id=1,
+        administration_id=10,
+        tenant_id="tenant-002",
+    )
+
+    assert context.user_id == 1
+    assert context.administration_id == 10
+    assert context.administration_role is None
+    assert context.has_administration_authority is False
+
+    connection.close()

@@ -64,27 +64,39 @@ class AuthorizationContextService:
                 platform_role=platform_role,
             )
 
-        # If the caller does not provide tenant_id, derive it from
-        # the authenticated user's database record. Application roles
-        # are never used as governance authority.
-        if tenant_id is None:
-            user_row = self.connection.execute(
-                """
-                SELECT tenant_id
-                FROM users
-                WHERE id = ?
-                """,
-                (user_id,),
-            ).fetchone()
+        # The authenticated user's tenant is authoritative.
+        # A caller-supplied tenant_id may confirm that tenant, but must
+        # never override or replace it. Application roles are never used
+        # as governance authority.
+        user_row = self.connection.execute(
+            """
+            SELECT tenant_id
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        ).fetchone()
 
-            if user_row is None:
-                return AuthorizationContext(
-                    user_id=user_id,
-                    platform_role=platform_role,
-                    administration_id=administration_id,
-                )
+        if user_row is None:
+            return AuthorizationContext(
+                user_id=user_id,
+                platform_role=platform_role,
+                administration_id=administration_id,
+            )
 
-            tenant_id = user_row["tenant_id"]
+        authenticated_tenant_id = user_row["tenant_id"]
+
+        if (
+            tenant_id is not None
+            and tenant_id != authenticated_tenant_id
+        ):
+            return AuthorizationContext(
+                user_id=user_id,
+                platform_role=platform_role,
+                administration_id=administration_id,
+            )
+
+        tenant_id = authenticated_tenant_id
 
         administration_authority = (
             self.administration_repository
