@@ -13,6 +13,7 @@ from policies.authority_policy import evaluate
 from repositories.administration_authority_repository import (
     AdministrationAuthorityRepository,
 )
+from services.permission_resolution_service import PermissionResolutionService
 
 
 class AuthorizationService:
@@ -33,6 +34,20 @@ class AuthorizationService:
     def __init__(self, connection):
         self.connection = connection
         self.repository = AdministrationAuthorityRepository(connection)
+        self.permission_service = PermissionResolutionService(connection)
+
+    def has_permission(
+        self,
+        user_id: int,
+        permission_name: str,
+        tenant_id: Optional[str] = None,
+    ) -> bool:
+        """Check application RBAC permission independently of governance authority."""
+        return self.permission_service.has_permission(
+            user_id=user_id,
+            permission_name=permission_name,
+            tenant_id=tenant_id,
+        )
 
     def authorize(
         self,
