@@ -50,6 +50,24 @@ class AuthorizationContextService:
         administration_id: Optional[int] = None,
         tenant_id: Optional[str] = None,
     ) -> AuthorizationContext:
+        # The authenticated user's database record is authoritative.
+        # Inactive or missing users cannot hold effective governance
+        # authority, even if a stale authority row still exists.
+        user_row = self.connection.execute(
+            """
+            SELECT tenant_id, status
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        ).fetchone()
+
+        if user_row is None or user_row["status"] != "active":
+            return AuthorizationContext(
+                user_id=user_id,
+                administration_id=administration_id,
+            )
+
         platform_authority = self.platform_repository.get_active_by_user(user_id)
 
         platform_role = (
@@ -68,21 +86,6 @@ class AuthorizationContextService:
         # A caller-supplied tenant_id may confirm that tenant, but must
         # never override or replace it. Application roles are never used
         # as governance authority.
-        user_row = self.connection.execute(
-            """
-            SELECT tenant_id
-            FROM users
-            WHERE id = ?
-            """,
-            (user_id,),
-        ).fetchone()
-
-        if user_row is None:
-            return AuthorizationContext(
-                user_id=user_id,
-                platform_role=platform_role,
-                administration_id=administration_id,
-            )
 
         authenticated_tenant_id = user_row["tenant_id"]
 

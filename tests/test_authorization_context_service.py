@@ -241,3 +241,38 @@ def test_supplied_tenant_cannot_select_cross_tenant_authority():
     assert context.has_administration_authority is False
 
     connection.close()
+
+def test_inactive_user_does_not_resolve_as_super_admin():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.platform_authority_repository",
+        fromlist=["PlatformAuthorityRepository"],
+    ).PlatformAuthorityRepository(connection)
+
+    repository.create(
+        PlatformAuthority(
+            id=None,
+            user_id=1,
+            role=PlatformAuthorityRole.SUPER_ADMIN,
+        )
+    )
+
+    connection.execute(
+        """
+        UPDATE users
+        SET status = 'inactive'
+        WHERE id = 1
+        """
+    )
+    connection.commit()
+
+    service = AuthorizationContextService(connection)
+    context = service.resolve(user_id=1)
+
+    assert context.is_super_admin is False
+    assert context.platform_role is None
+
+    connection.close()
