@@ -201,3 +201,34 @@ def test_admin_cannot_remove_admin():
     )
 
     connection.close()
+
+def test_authorize_denies_administration_from_another_tenant():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute("""
+        INSERT INTO administrations (
+            tenant_id, name, administration_type
+        )
+        VALUES ('tenant-002', 'Second School', 'school')
+    """)
+
+    connection.commit()
+
+    # User 1 belongs to tenant-001.
+    # The requested administration belongs to tenant-002.
+    add_authority(connection, 2, 1, "owner")
+
+    service = AuthorizationService(connection)
+
+    decision = service.authorize_decision(
+        user_id=1,
+        administration_id=2,
+        action=Action.MANAGE_USERS,
+    )
+
+    assert decision.allowed is False
+    assert decision.reason == "administration tenant mismatch"
+
+    connection.close()

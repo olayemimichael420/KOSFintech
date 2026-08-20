@@ -85,6 +85,27 @@ class AuthorizationService:
 
         tenant_id = user_row["tenant_id"]
 
+        administration_row = self.connection.execute(
+            """
+            SELECT tenant_id
+            FROM administrations
+            WHERE id = ?
+            """,
+            (administration_id,),
+        ).fetchone()
+
+        if administration_row is None:
+            return AuthorizationDecision(
+                allowed=False,
+                reason="administration not found",
+            )
+
+        if administration_row["tenant_id"] != tenant_id:
+            return AuthorizationDecision(
+                allowed=False,
+                reason="administration tenant mismatch",
+            )
+
         assignment = (
             self.repository.get_active_by_user_and_administration(
                 tenant_id=tenant_id,
