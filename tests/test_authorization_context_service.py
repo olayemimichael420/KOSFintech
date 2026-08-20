@@ -135,3 +135,72 @@ def test_administration_authority_is_resolved():
     assert context.has_administration_authority is True
 
     connection.close()
+
+
+def test_supplied_tenant_cannot_override_authenticated_users_tenant():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.administration_authority_repository",
+        fromlist=["AdministrationAuthorityRepository"],
+    ).AdministrationAuthorityRepository(connection)
+
+    repository.create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=10,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    service = AuthorizationContextService(connection)
+
+    context = service.resolve(
+        user_id=1,
+        administration_id=10,
+        tenant_id="tenant-002",
+    )
+
+    assert context.user_id == 1
+    assert context.administration_id == 10
+    assert context.administration_role is None
+    assert context.has_administration_authority is False
+
+    connection.close()
+
+
+def test_authenticated_users_tenant_resolves_valid_authority():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.administration_authority_repository",
+        fromlist=["AdministrationAuthorityRepository"],
+    ).AdministrationAuthorityRepository
+
+    repository(connection).create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=10,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    service = AuthorizationContextService(connection)
+
+    context = service.resolve(
+        user_id=1,
+        administration_id=10,
+    )
+
+    assert context.administration_role == "owner"
+    assert context.has_administration_authority is True
+
+    connection.close()

@@ -56,6 +56,7 @@ class AdministrationAuthorityRepository:
 
     def get(
         self,
+        tenant_id: str,
         authority_id: int,
     ) -> Optional[AdministrationAuthority]:
         row = self.connection.execute(
@@ -69,9 +70,13 @@ class AdministrationAuthorityRepository:
                 status,
                 created_at
             FROM administration_authorities
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (authority_id,),
+            (
+                tenant_id,
+                authority_id,
+            ),
         ).fetchone()
 
         return self._to_model(row) if row else None
@@ -168,20 +173,28 @@ class AdministrationAuthorityRepository:
 
     def deactivate(
         self,
+        tenant_id: str,
         authority_id: int,
     ) -> Optional[AdministrationAuthority]:
         self.connection.execute(
             """
             UPDATE administration_authorities
             SET status = 'inactive'
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (authority_id,),
+            (
+                tenant_id,
+                authority_id,
+            ),
         )
 
         self.connection.commit()
 
-        return self.get(authority_id)
+        return self.get(
+            tenant_id=tenant_id,
+            authority_id=authority_id,
+        )
 
     @staticmethod
     def _to_model(row) -> AdministrationAuthority:

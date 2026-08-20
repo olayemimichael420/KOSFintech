@@ -141,7 +141,7 @@ def test_inactive_authority_does_not_produce_active_assignment():
         )
     )
 
-    repository.deactivate(authority.id)
+    repository.deactivate(tenant_id="tenant-001", authority_id=authority.id)
 
     assignment = repository.get_active_by_user_and_administration(
         tenant_id="tenant-001",

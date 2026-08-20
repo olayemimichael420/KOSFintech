@@ -94,7 +94,7 @@ def test_create_and_get_authority():
     assert created.role == AdministrationAuthorityRole.OWNER
     assert created.status == "active"
 
-    fetched = repository.get(created.id)
+    fetched = repository.get(tenant_id="tenant-001", authority_id=created.id)
 
     assert fetched == created
 
@@ -210,7 +210,7 @@ def test_deactivate_authority():
         )
     )
 
-    deactivated = repository.deactivate(authority.id)
+    deactivated = repository.deactivate(tenant_id="tenant-001", authority_id=authority.id)
 
     assert deactivated is not None
     assert deactivated.status == "inactive"
