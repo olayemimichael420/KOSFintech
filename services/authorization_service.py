@@ -178,7 +178,28 @@ class AuthorizationService:
             )
 
         # Platform authority is distinct from administration authority.
+        # A resolved context is a snapshot, so platform authority must be
+        # revalidated against the current database state before authorization.
         if context.is_super_admin:
+            current_platform_authority = (
+                self.connection.execute(
+                    """
+                    SELECT id
+                    FROM platform_authorities
+                    WHERE user_id = ?
+                      AND role = 'super_admin'
+                      AND status = 'active'
+                    LIMIT 1
+                    """,
+                    (context.user_id,),
+                ).fetchone()
+            )
+
+            if current_platform_authority is None:
+                return AuthorizationDecision(
+                    allowed=False,
+                    reason="no active platform super admin authority",
+                )
             authority = Authority(
                 actor_id=context.user_id,
                 actor_type=ActorType.HUMAN,

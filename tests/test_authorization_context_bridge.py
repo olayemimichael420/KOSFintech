@@ -399,3 +399,56 @@ def test_super_admin_context_can_transfer_super_admin():
     assert decision.reason == "super_admin authorized at platform level"
 
     connection.close()
+
+def test_stale_super_admin_context_cannot_authorize_after_transfer():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute(
+        """
+        INSERT INTO platform_authorities (user_id, role, status)
+        VALUES (1, 'super_admin', 'active')
+        """
+    )
+    connection.commit()
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    # Resolve while user 1 is legitimately the active Super Admin.
+    context = context_service.resolve(user_id=1)
+    assert context.is_super_admin is True
+
+    # Authority is subsequently transferred away from user 1.
+    connection.execute(
+        """
+        UPDATE platform_authorities
+        SET status = 'inactive',
+            transferred_at = '2026-08-20T00:00:00+00:00'
+        WHERE user_id = 1
+          AND role = 'super_admin'
+          AND status = 'active'
+        """
+    )
+    connection.execute(
+        """
+        INSERT INTO platform_authorities (user_id, role, status)
+        VALUES (2, 'super_admin', 'active')
+        """
+    )
+    connection.commit()
+
+    # The previously resolved context is now stale and must not
+    # retain platform governance authority.
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.TRANSFER_SUPER_ADMIN,
+        resource_type="platform_authority",
+        resource_id="3",
+    )
+
+    assert decision.allowed is False
+
+    connection.close()
