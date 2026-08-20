@@ -10,7 +10,7 @@
 
 Commit:
 
-    f5f3da7
+    b060c59
 
 Branch:
 
@@ -18,7 +18,7 @@ Branch:
 
 Commit description:
 
-    KOS-DEV-0006 Establish authorization context bridge
+    Harden tenant-scoped administration authorization
 
 This commit is the current verified source-code baseline unless a later
 baseline is explicitly recorded.
