@@ -236,14 +236,35 @@ class AuthorizationService:
                 reason="administration context mismatch",
             )
 
-        if not context.has_administration_authority:
+        # The resolved context is a snapshot. Revalidate the current
+        # administration authority before granting governance access.
+        current_authority = self.connection.execute(
+            """
+            SELECT aa.role
+            FROM administration_authorities AS aa
+            JOIN users AS u
+              ON u.id = aa.user_id
+            WHERE aa.tenant_id = u.tenant_id
+              AND aa.administration_id = ?
+              AND aa.user_id = ?
+              AND aa.status = 'active'
+              AND u.status = 'active'
+            LIMIT 1
+            """,
+            (
+                administration_id,
+                context.user_id,
+            ),
+        ).fetchone()
+
+        if current_authority is None:
             return AuthorizationDecision(
                 allowed=False,
                 reason="no active authority assignment",
             )
 
         try:
-            role = AuthorityRole(context.administration_role)
+            role = AuthorityRole(current_authority["role"])
         except (TypeError, ValueError):
             return AuthorizationDecision(
                 allowed=False,
