@@ -153,6 +153,30 @@ def test_inactive_authority_is_denied():
     connection.close()
 
 
+def test_inactive_user_with_active_authority_is_denied():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    add_authority(connection, 1, 1, "owner", "active")
+
+    connection.execute(
+        "UPDATE users SET status = 'inactive' WHERE id = ?",
+        (1,),
+    )
+    connection.commit()
+
+    service = AuthorizationService(connection)
+
+    assert not service.authorize(
+        user_id=1,
+        administration_id=1,
+        action=Action.REMOVE_ADMIN,
+    )
+
+    connection.close()
+
+
 def test_user_without_authority_is_denied():
     connection = sqlite3.connect(":memory:")
     connection.row_factory = sqlite3.Row

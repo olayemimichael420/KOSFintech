@@ -85,7 +85,7 @@ class AuthorizationService:
 
         user_row = self.connection.execute(
             """
-            SELECT tenant_id
+            SELECT tenant_id, status
             FROM users
             WHERE id = ?
             """,
@@ -96,6 +96,12 @@ class AuthorizationService:
             return AuthorizationDecision(
                 allowed=False,
                 reason="authenticated user not found",
+            )
+
+        if user_row["status"] != "active":
+            return AuthorizationDecision(
+                allowed=False,
+                reason="authenticated user is inactive",
             )
 
         tenant_id = user_row["tenant_id"]
