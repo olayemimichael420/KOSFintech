@@ -16,6 +16,7 @@ from telegram.ext import (
     ContextTypes,
 )
 
+import database
 from config import settings
 
 
@@ -83,6 +84,11 @@ def main() -> None:
     """Application entry point."""
 
     logger.info("Starting KOSFintech foundation...")
+
+    logger.info("Initializing production database...")
+    database.init_db()
+
+    logger.info("Production database initialized.")
 
     application = build_application()
 
