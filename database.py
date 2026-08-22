@@ -275,8 +275,6 @@ def init_db() -> None:
                     CHECK(status IN ('active', 'inactive')),
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
-                UNIQUE(administration_id, role),
-                UNIQUE(administration_id, user_id),
 
                 FOREIGN KEY (administration_id, tenant_id)
                     REFERENCES administrations(id, tenant_id),
@@ -284,6 +282,22 @@ def init_db() -> None:
                 FOREIGN KEY (user_id, tenant_id)
                     REFERENCES users(id, tenant_id)
             )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_administration_authorities_active_role
+            ON administration_authorities(administration_id, role)
+            WHERE status = 'active'
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS ux_administration_authorities_active_user
+            ON administration_authorities(administration_id, user_id)
+            WHERE status = 'active'
             """
         )
 
