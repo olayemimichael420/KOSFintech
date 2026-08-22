@@ -132,3 +132,90 @@ def test_authority_action_is_not_an_rbac_permission():
 
     assert allowed is False
     assert reason == "action is not permitted for administrator"
+
+def test_ai_agent_cannot_transfer_super_admin():
+    authority = Authority(
+        actor_id=1,
+        actor_type=ActorType.AI_AGENT,
+        role=AuthorityRole.SUPER_ADMIN,
+        jurisdiction_type=JurisdictionType.PLATFORM,
+        jurisdiction_id="platform",
+    )
+
+    request = AuthorizationRequest(
+        authority=authority,
+        action=Action.TRANSFER_SUPER_ADMIN,
+        resource_type="platform_authority",
+        resource_id="2",
+    )
+
+    allowed, reason = evaluate(request)
+
+    assert allowed is False
+    assert reason == "ai agent cannot exercise human governance authority"
+
+
+def test_system_cannot_transfer_super_admin():
+    authority = Authority(
+        actor_id=1,
+        actor_type=ActorType.SYSTEM,
+        role=AuthorityRole.SUPER_ADMIN,
+        jurisdiction_type=JurisdictionType.PLATFORM,
+        jurisdiction_id="platform",
+    )
+
+    request = AuthorizationRequest(
+        authority=authority,
+        action=Action.TRANSFER_SUPER_ADMIN,
+        resource_type="platform_authority",
+        resource_id="2",
+    )
+
+    allowed, reason = evaluate(request)
+
+    assert allowed is False
+    assert reason == "system cannot exercise human governance authority"
+
+
+def test_ai_agent_autonomous_action_is_denied_by_default():
+    authority = Authority(
+        actor_id=1,
+        actor_type=ActorType.AI_AGENT,
+        role=AuthorityRole.MEMBER,
+        jurisdiction_type=JurisdictionType.RESOURCE,
+        jurisdiction_id="resource-1",
+    )
+
+    request = AuthorizationRequest(
+        authority=authority,
+        action=Action.EXECUTE_AUTONOMOUS_ACTION,
+        resource_type="resource",
+        resource_id="resource-1",
+    )
+
+    allowed, reason = evaluate(request)
+
+    assert allowed is False
+    assert reason == "authorization denied by default"
+
+
+def test_system_autonomous_action_is_denied_by_default():
+    authority = Authority(
+        actor_id=1,
+        actor_type=ActorType.SYSTEM,
+        role=AuthorityRole.MEMBER,
+        jurisdiction_type=JurisdictionType.RESOURCE,
+        jurisdiction_id="resource-1",
+    )
+
+    request = AuthorizationRequest(
+        authority=authority,
+        action=Action.EXECUTE_AUTONOMOUS_ACTION,
+        resource_type="resource",
+        resource_id="resource-1",
+    )
+
+    allowed, reason = evaluate(request)
+
+    assert allowed is False
+    assert reason == "authorization denied by default"

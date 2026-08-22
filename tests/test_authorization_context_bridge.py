@@ -503,3 +503,92 @@ def test_stale_administration_context_cannot_authorize_after_deactivation():
     assert decision.allowed is False
 
     connection.close()
+
+
+def test_stale_super_admin_context_cannot_authorize_after_user_deactivation():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute("""
+        INSERT INTO platform_authorities (user_id, role, status)
+        VALUES (1, 'super_admin', 'active')
+    """)
+    connection.commit()
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    context = context_service.resolve(user_id=1)
+
+    assert context.is_super_admin is True
+
+    connection.execute("""
+        UPDATE users
+        SET status = 'inactive'
+        WHERE id = 1
+    """)
+    connection.commit()
+
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.TRANSFER_SUPER_ADMIN,
+        resource_type="platform_authority",
+        resource_id="2",
+    )
+
+    assert decision.allowed is False
+    assert decision.reason == "authenticated user is inactive"
+
+    connection.close()
+
+
+def test_stale_administration_context_cannot_authorize_after_user_deactivation():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = AdministrationAuthorityRepository(connection)
+
+    repository.create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=1,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    context = context_service.resolve(
+        user_id=1,
+        administration_id=1,
+        tenant_id="tenant-001",
+    )
+
+    assert context.administration_role == "owner"
+    assert context.has_administration_authority is True
+
+    connection.execute("""
+        UPDATE users
+        SET status = 'inactive'
+        WHERE id = 1
+    """)
+    connection.commit()
+
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.MANAGE_USERS,
+        resource_type="administration",
+        resource_id="1",
+    )
+
+    assert decision.allowed is False
+    assert decision.reason == "authenticated user is inactive"
+
+    connection.close()

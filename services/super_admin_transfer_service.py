@@ -1,6 +1,6 @@
-import json
-import logging
 from datetime import datetime, timezone
+
+from audit import audit_event
 
 from models.authority import (
     Action,
@@ -145,21 +145,15 @@ class SuperAdminTransferService:
                 "super admin transfer failed",
             )
 
-        logging.getLogger("kosfintech.audit").info(
-            "AUDIT %s",
-            json.dumps(
-                {
-                    "event_type": "super_admin_transfer",
-                    "actor_id": current_user_id,
-                    "tenant_id": "platform",
-                    "action": "transfer_super_admin",
-                    "metadata": {
-                        "from_user_id": current_user_id,
-                        "to_user_id": target_user_id,
-                    },
-                },
-                sort_keys=True,
-            ),
+        audit_event(
+            event_type="super_admin_transfer",
+            actor_id=current_user_id,
+            tenant_id="platform",
+            action="transfer_super_admin",
+            metadata={
+                "from_user_id": current_user_id,
+                "to_user_id": target_user_id,
+            },
         )
 
         return SuperAdminTransferDecision(

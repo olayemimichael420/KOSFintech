@@ -1,6 +1,7 @@
 from models.authority import (
     Action,
     AuthorizationRequest,
+    ActorType,
     AuthorityRole,
     JurisdictionType,
 )
@@ -16,6 +17,21 @@ def evaluate(request: AuthorizationRequest) -> tuple[bool, str]:
     """
 
     authority = request.authority
+
+    # AI agents and system actors cannot exercise human
+    # governance authority. Autonomous actions remain
+    # deny-by-default until explicitly governed.
+    if authority.actor_type == ActorType.AI_AGENT:
+        if authority.role != AuthorityRole.MEMBER:
+            return False, "ai agent cannot exercise human governance authority"
+
+    if authority.actor_type == ActorType.SYSTEM:
+        if authority.role != AuthorityRole.MEMBER:
+            return False, "system cannot exercise human governance authority"
+
+    if authority.actor_type in {ActorType.AI_AGENT, ActorType.SYSTEM}:
+        if request.action == Action.EXECUTE_AUTONOMOUS_ACTION:
+            return False, "authorization denied by default"
 
     # ---------------------------------------------------------
     # SUPER ADMIN

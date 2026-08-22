@@ -198,6 +198,29 @@ class AuthorizationService:
                 reason="missing authenticated user",
             )
 
+        # A resolved context is a snapshot. Revalidate the authenticated
+        # user's current status before granting any governance authority.
+        user_row = self.connection.execute(
+            """
+            SELECT status
+            FROM users
+            WHERE id = ?
+            """,
+            (context.user_id,),
+        ).fetchone()
+
+        if user_row is None:
+            return AuthorizationDecision(
+                allowed=False,
+                reason="authenticated user not found",
+            )
+
+        if user_row["status"] != "active":
+            return AuthorizationDecision(
+                allowed=False,
+                reason="authenticated user is inactive",
+            )
+
         # Platform authority is distinct from administration authority.
         # A resolved context is a snapshot, so platform authority must be
         # revalidated against the current database state before authorization.
