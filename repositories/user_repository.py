@@ -31,7 +31,7 @@ class UserRepository:
         user.id = cursor.lastrowid
         return user
 
-    def get(self, user_id: int):
+    def get(self, tenant_id: str, user_id: int):
         row = self.connection.execute(
             """
             SELECT
@@ -42,9 +42,10 @@ class UserRepository:
                 role,
                 status
             FROM users
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (user_id,),
+            (tenant_id, user_id),
         ).fetchone()
 
         if row is None:

@@ -36,6 +36,77 @@ def get_connection() -> sqlite3.Connection:
     return connection
 
 
+
+def _migrate_user_schools_tenant_fk(connection: sqlite3.Connection) -> None:
+    """Upgrade legacy user_schools FK to tenant-scoped composite FK."""
+
+    table = connection.execute(
+        """
+        SELECT sql
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'user_schools'
+        """
+    ).fetchone()
+
+    if table is None:
+        return
+
+    table_sql = table["sql"] or ""
+
+    if "FOREIGN KEY (user_id, tenant_id)" in table_sql:
+        return
+
+    invalid_rows = connection.execute(
+        """
+        SELECT
+            us.tenant_id,
+            us.user_id,
+            u.tenant_id AS user_tenant
+        FROM user_schools AS us
+        LEFT JOIN users AS u
+            ON u.id = us.user_id
+        WHERE u.id IS NULL
+           OR us.tenant_id != u.tenant_id
+        """
+    ).fetchall()
+
+    if invalid_rows:
+        raise RuntimeError(
+            "Cannot migrate user_schools: existing rows contain "
+            "invalid or cross-tenant user relationships."
+        )
+
+    connection.execute(
+        """
+        CREATE TABLE user_schools_new (
+            tenant_id TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            PRIMARY KEY (tenant_id, user_id),
+            FOREIGN KEY (user_id, tenant_id)
+                REFERENCES users(id, tenant_id)
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        INSERT INTO user_schools_new (tenant_id, user_id)
+        SELECT tenant_id, user_id
+        FROM user_schools
+        """
+    )
+
+    connection.execute("DROP TABLE user_schools")
+
+    connection.execute(
+        """
+        ALTER TABLE user_schools_new
+        RENAME TO user_schools
+        """
+    )
+
+
 def init_db() -> None:
     """Initialize the core database schema."""
 
@@ -230,11 +301,22 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_users_id_tenant
+            ON users(id, tenant_id)
+            """
+        )
+
+        _migrate_user_schools_tenant_fk(connection)
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS user_schools (
                 tenant_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
                 PRIMARY KEY (tenant_id, user_id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
             )
             """
         )
