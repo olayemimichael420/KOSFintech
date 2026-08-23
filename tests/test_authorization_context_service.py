@@ -276,3 +276,157 @@ def test_inactive_user_does_not_resolve_as_super_admin():
     assert context.platform_role is None
 
     connection.close()
+
+
+def test_inactive_platform_authority_does_not_resolve_as_super_admin():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.platform_authority_repository",
+        fromlist=["PlatformAuthorityRepository"],
+    ).PlatformAuthorityRepository(connection)
+
+    authority = repository.create(
+        PlatformAuthority(
+            id=None,
+            user_id=1,
+            role=PlatformAuthorityRole.SUPER_ADMIN,
+        )
+    )
+
+    connection.execute(
+        """
+        UPDATE platform_authorities
+        SET status = 'inactive'
+        WHERE id = ?
+        """,
+        (authority.id,),
+    )
+    connection.commit()
+
+    service = AuthorizationContextService(connection)
+    context = service.resolve(user_id=1)
+
+    assert context.platform_role is None
+    assert context.is_super_admin is False
+
+    connection.close()
+
+
+def test_inactive_administration_authority_does_not_resolve():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.administration_authority_repository",
+        fromlist=["AdministrationAuthorityRepository"],
+    ).AdministrationAuthorityRepository
+
+    authority = repository(connection).create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=10,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    connection.execute(
+        """
+        UPDATE administration_authorities
+        SET status = 'inactive'
+        WHERE id = ?
+        """,
+        (authority.id,),
+    )
+    connection.commit()
+
+    service = AuthorizationContextService(connection)
+    context = service.resolve(
+        user_id=1,
+        administration_id=10,
+    )
+
+    assert context.administration_role is None
+    assert context.has_administration_authority is False
+
+    connection.close()
+
+
+def test_missing_user_cannot_resolve_authority():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    service = AuthorizationContextService(connection)
+
+    context = service.resolve(user_id=999)
+
+    assert context.user_id == 999
+    assert context.platform_role is None
+    assert context.administration_role is None
+    assert context.is_super_admin is False
+    assert context.has_administration_authority is False
+
+    connection.close()
+
+
+def test_application_role_cannot_become_governance_authority():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute(
+        """
+        UPDATE users
+        SET role = 'owner'
+        WHERE id = 1
+        """
+    )
+    connection.commit()
+
+    service = AuthorizationContextService(connection)
+
+    context = service.resolve(
+        user_id=1,
+        administration_id=10,
+    )
+
+    assert context.administration_role is None
+    assert context.has_administration_authority is False
+
+    connection.close()
+
+
+def test_context_without_administration_is_platform_only():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = __import__(
+        "repositories.platform_authority_repository",
+        fromlist=["PlatformAuthorityRepository"],
+    ).PlatformAuthorityRepository
+
+    repository(connection).create(
+        PlatformAuthority(
+            id=None,
+            user_id=1,
+            role=PlatformAuthorityRole.SUPER_ADMIN,
+        )
+    )
+
+    service = AuthorizationContextService(connection)
+
+    context = service.resolve(user_id=1)
+
+    assert context.is_super_admin is True
+    assert context.platform_role == "super_admin"
+    assert context.administration_id is None
+    assert context.administration_role is None
+
+    connection.close()

@@ -592,3 +592,206 @@ def test_stale_administration_context_cannot_authorize_after_user_deactivation()
     assert decision.reason == "authenticated user is inactive"
 
     connection.close()
+
+
+def test_stale_owner_context_cannot_retain_owner_privileges_after_role_change():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = AdministrationAuthorityRepository(connection)
+    repository.create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=1,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    context = context_service.resolve(
+        user_id=1,
+        administration_id=1,
+        tenant_id="tenant-001",
+    )
+
+    assert context.administration_role == "owner"
+
+    connection.execute(
+        """
+        UPDATE administration_authorities
+        SET role = 'admin1'
+        WHERE administration_id = 1
+          AND user_id = 1
+          AND status = 'active'
+        """
+    )
+    connection.commit()
+
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.REMOVE_ADMIN,
+    )
+
+    assert decision.allowed is False
+
+
+def test_stale_admin1_context_uses_current_role_after_promotion_to_owner():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    repository = AdministrationAuthorityRepository(connection)
+    repository.create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=1,
+            user_id=1,
+            role=AdministrationAuthorityRole.ADMIN_1,
+        )
+    )
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    context = context_service.resolve(
+        user_id=1,
+        administration_id=1,
+        tenant_id="tenant-001",
+    )
+
+    assert context.administration_role == "admin1"
+
+    connection.execute(
+        """
+        UPDATE administration_authorities
+        SET role = 'owner'
+        WHERE administration_id = 1
+          AND user_id = 1
+          AND status = 'active'
+        """
+    )
+    connection.commit()
+
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.REMOVE_ADMIN,
+    )
+
+    assert decision.allowed is True
+    assert decision.reason == "owner authorized within administration"
+
+
+def test_stale_context_cannot_cross_tenant_after_user_tenant_change():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute(
+        """
+        INSERT INTO administrations (
+            tenant_id,
+            name,
+            administration_type
+        )
+        VALUES (
+            'tenant-002',
+            'Second School',
+            'school'
+        )
+        """
+    )
+
+    repository = AdministrationAuthorityRepository(connection)
+    repository.create(
+        AdministrationAuthority(
+            id=None,
+            tenant_id="tenant-001",
+            administration_id=1,
+            user_id=1,
+            role=AdministrationAuthorityRole.OWNER,
+        )
+    )
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    context = context_service.resolve(
+        user_id=1,
+        administration_id=1,
+        tenant_id="tenant-001",
+    )
+
+    assert context.administration_role == "owner"
+
+    connection.execute(
+        """
+        UPDATE users
+        SET tenant_id = 'tenant-002'
+        WHERE id = 1
+        """
+    )
+    connection.commit()
+
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.MANAGE_USERS,
+        resource_id="1",
+    )
+
+    assert decision.allowed is False
+
+
+def test_stale_super_admin_context_cannot_survive_authority_deactivation():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    create_tables(connection)
+
+    connection.execute(
+        """
+        INSERT INTO platform_authorities (
+            user_id,
+            role,
+            status
+        )
+        VALUES (1, 'super_admin', 'active')
+        """
+    )
+    connection.commit()
+
+    context_service = AuthorizationContextService(connection)
+    authorization_service = AuthorizationService(connection)
+
+    context = context_service.resolve(user_id=1)
+
+    assert context.is_super_admin is True
+
+    connection.execute(
+        """
+        UPDATE platform_authorities
+        SET status = 'inactive'
+        WHERE user_id = 1
+          AND role = 'super_admin'
+          AND status = 'active'
+        """
+    )
+    connection.commit()
+
+    decision = authorization_service.authorize_context(
+        context=context,
+        administration_id=1,
+        action=Action.TRANSFER_SUPER_ADMIN,
+        resource_type="platform_authority",
+        resource_id="2",
+    )
+
+    assert decision.allowed is False
+    assert decision.reason == "no active platform super admin authority"
