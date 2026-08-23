@@ -127,12 +127,54 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teachers_id_tenant
+            ON teachers(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_students_id_tenant
+            ON students(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_parents_id_tenant
+            ON parents(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS teacher_students (
+                tenant_id TEXT NOT NULL,
                 teacher_id INTEGER NOT NULL,
                 student_id INTEGER NOT NULL,
-                PRIMARY KEY (teacher_id, student_id),
-                FOREIGN KEY (teacher_id) REFERENCES teachers(id),
-                FOREIGN KEY (student_id) REFERENCES students(id)
+                PRIMARY KEY (tenant_id, teacher_id, student_id),
+                FOREIGN KEY (teacher_id, tenant_id)
+                    REFERENCES teachers(id, tenant_id),
+                FOREIGN KEY (student_id, tenant_id)
+                    REFERENCES students(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS parent_students (
+                tenant_id TEXT NOT NULL,
+                parent_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL,
+                PRIMARY KEY (tenant_id, parent_id, student_id),
+                FOREIGN KEY (parent_id, tenant_id)
+                    REFERENCES parents(id, tenant_id),
+                FOREIGN KEY (student_id, tenant_id)
+                    REFERENCES students(id, tenant_id)
             )
             """
         )
@@ -143,7 +185,8 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 teacher_id INTEGER NOT NULL,
                 PRIMARY KEY (tenant_id, teacher_id),
-                FOREIGN KEY (teacher_id) REFERENCES teachers(id)
+                FOREIGN KEY (teacher_id, tenant_id)
+                    REFERENCES teachers(id, tenant_id)
             )
             """
         )
@@ -154,7 +197,8 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 student_id INTEGER NOT NULL,
                 PRIMARY KEY (tenant_id, student_id),
-                FOREIGN KEY (student_id) REFERENCES students(id)
+                FOREIGN KEY (student_id, tenant_id)
+                    REFERENCES students(id, tenant_id)
             )
             """
         )
@@ -165,7 +209,8 @@ def init_db() -> None:
                 tenant_id TEXT NOT NULL,
                 parent_id INTEGER NOT NULL,
                 PRIMARY KEY (tenant_id, parent_id),
-                FOREIGN KEY (parent_id) REFERENCES parents(id)
+                FOREIGN KEY (parent_id, tenant_id)
+                    REFERENCES parents(id, tenant_id)
             )
             """
         )

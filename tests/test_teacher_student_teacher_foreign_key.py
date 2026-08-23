@@ -87,12 +87,13 @@ def test_teacher_students_enforce_teacher_foreign_key(
         connection.execute(
             """
             INSERT INTO teacher_students (
+                tenant_id,
                 teacher_id,
                 student_id
             )
-            VALUES (?, ?)
+            VALUES (?, ?, ?)
             """,
-            (teacher_id, student_id),
+            ("school-001", teacher_id, student_id),
         )
 
         connection.commit()
@@ -101,10 +102,11 @@ def test_teacher_students_enforce_teacher_foreign_key(
             """
             SELECT teacher_id, student_id
             FROM teacher_students
-            WHERE teacher_id = ?
+            WHERE tenant_id = ?
+              AND teacher_id = ?
               AND student_id = ?
             """,
-            (teacher_id, student_id),
+            ("school-001", teacher_id, student_id),
         ).fetchone()
 
         assert valid is not None
@@ -113,12 +115,13 @@ def test_teacher_students_enforce_teacher_foreign_key(
             connection.execute(
                 """
                 INSERT INTO teacher_students (
-                    teacher_id,
-                    student_id
-                )
-                VALUES (?, ?)
+                        tenant_id,
+                        teacher_id,
+                        student_id
+                    )
+                    VALUES (?, ?, ?)
                 """,
-                (999999, student_id),
+                ("school-001", 999999, student_id),
             )
 
     finally:

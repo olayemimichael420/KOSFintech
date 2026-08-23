@@ -5,11 +5,11 @@ import pytest
 import database
 
 
-def test_teacher_students_enforce_student_foreign_key(
+def test_parent_students_enforce_same_tenant(
     tmp_path,
     monkeypatch,
 ):
-    db_path = tmp_path / "teacher_student_student_fk.db"
+    db_path = tmp_path / "parent_student_tenant_fk.db"
 
     monkeypatch.setattr(
         database,
@@ -18,35 +18,34 @@ def test_teacher_students_enforce_student_foreign_key(
     )
 
     database.init_db()
-
     connection = database.get_connection()
 
     try:
         connection.execute(
             """
-            INSERT INTO teachers (
+            INSERT INTO parents (
                 tenant_id,
                 user_id,
                 name,
-                subject,
-                qualification,
+                phone,
+                email,
                 status
             )
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
-                "school-001",
+                "school-A",
                 None,
-                "Test Teacher",
-                "Mathematics",
-                "B.Ed",
+                "Parent A",
+                None,
+                None,
                 "active",
             ),
         )
 
-        teacher_id = connection.execute(
-            "SELECT id FROM teachers WHERE name = ?",
-            ("Test Teacher",),
+        parent_id = connection.execute(
+            "SELECT id FROM parents WHERE name = ?",
+            ("Parent A",),
         ).fetchone()["id"]
 
         connection.execute(
@@ -64,11 +63,11 @@ def test_teacher_students_enforce_student_foreign_key(
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "school-001",
+                "school-A",
                 None,
-                "Test Student",
-                "Primary 1",
-                7,
+                "Student A",
+                "JSS 1",
+                12,
                 None,
                 None,
                 "active",
@@ -77,34 +76,34 @@ def test_teacher_students_enforce_student_foreign_key(
 
         student_id = connection.execute(
             "SELECT id FROM students WHERE name = ?",
-            ("Test Student",),
+            ("Student A",),
         ).fetchone()["id"]
 
         connection.commit()
 
         connection.execute(
             """
-            INSERT INTO teacher_students (
+            INSERT INTO parent_students (
                 tenant_id,
-                teacher_id,
+                parent_id,
                 student_id
             )
             VALUES (?, ?, ?)
             """,
-            ("school-001", teacher_id, student_id),
+            ("school-A", parent_id, student_id),
         )
 
         connection.commit()
 
         valid = connection.execute(
             """
-            SELECT teacher_id, student_id
-            FROM teacher_students
+            SELECT tenant_id, parent_id, student_id
+            FROM parent_students
             WHERE tenant_id = ?
-              AND teacher_id = ?
+              AND parent_id = ?
               AND student_id = ?
             """,
-            ("school-001", teacher_id, student_id),
+            ("school-A", parent_id, student_id),
         ).fetchone()
 
         assert valid is not None
@@ -112,14 +111,14 @@ def test_teacher_students_enforce_student_foreign_key(
         with pytest.raises(sqlite3.IntegrityError):
             connection.execute(
                 """
-                INSERT INTO teacher_students (
-                        tenant_id,
-                        teacher_id,
-                        student_id
-                    )
-                    VALUES (?, ?, ?)
+                INSERT INTO parent_students (
+                    tenant_id,
+                    parent_id,
+                    student_id
+                )
+                VALUES (?, ?, ?)
                 """,
-                ("school-001", teacher_id, 999999),
+                ("school-B", parent_id, student_id),
             )
 
     finally:

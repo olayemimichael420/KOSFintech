@@ -33,11 +33,10 @@ class StudentRepository:
         )
 
         self.connection.commit()
-
         student.id = cursor.lastrowid
         return student
 
-    def get(self, student_id: int):
+    def get(self, tenant_id: str, student_id: int):
         row = self.connection.execute(
             """
             SELECT
@@ -51,9 +50,10 @@ class StudentRepository:
                 enrollment_date,
                 status
             FROM students
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (student_id,),
+            (tenant_id, student_id),
         ).fetchone()
 
         if row is None:

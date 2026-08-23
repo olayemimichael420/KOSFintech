@@ -38,7 +38,7 @@ def test_create_and_get_parent():
     assert created.id is not None
     assert created.tenant_id == "school-001"
 
-    result = repository.get(created.id)
+    result = repository.get("school-001", created.id)
 
     assert result is not None
     assert result.id == created.id

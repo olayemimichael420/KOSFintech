@@ -9,37 +9,50 @@ class TeacherStudentRepository:
         self.connection.execute(
             """
             INSERT INTO teacher_students (
+                tenant_id,
                 teacher_id,
                 student_id
             )
-            VALUES (?, ?)
+            VALUES (?, ?, ?)
             """,
             (
+                link.tenant_id,
                 link.teacher_id,
                 link.student_id,
             ),
         )
-
         self.connection.commit()
         return link
 
-    def get(self, teacher_id: int, student_id: int):
+    def get(
+        self,
+        tenant_id: str,
+        teacher_id: int,
+        student_id: int,
+    ):
         row = self.connection.execute(
             """
             SELECT
+                tenant_id,
                 teacher_id,
                 student_id
             FROM teacher_students
-            WHERE teacher_id = ?
+            WHERE tenant_id = ?
+              AND teacher_id = ?
               AND student_id = ?
             """,
-            (teacher_id, student_id),
+            (
+                tenant_id,
+                teacher_id,
+                student_id,
+            ),
         ).fetchone()
 
         if row is None:
             return None
 
         return TeacherStudentLink(
+            tenant_id=row["tenant_id"],
             teacher_id=row["teacher_id"],
             student_id=row["student_id"],
         )

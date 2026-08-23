@@ -5,11 +5,11 @@ import pytest
 import database
 
 
-def test_teacher_students_enforce_student_foreign_key(
+def test_teacher_students_reject_cross_tenant_relationship(
     tmp_path,
     monkeypatch,
 ):
-    db_path = tmp_path / "teacher_student_student_fk.db"
+    db_path = tmp_path / "teacher_student_cross_tenant.db"
 
     monkeypatch.setattr(
         database,
@@ -18,7 +18,6 @@ def test_teacher_students_enforce_student_foreign_key(
     )
 
     database.init_db()
-
     connection = database.get_connection()
 
     try:
@@ -35,9 +34,9 @@ def test_teacher_students_enforce_student_foreign_key(
             VALUES (?, ?, ?, ?, ?, ?)
             """,
             (
-                "school-001",
+                "school-A",
                 None,
-                "Test Teacher",
+                "Teacher A",
                 "Mathematics",
                 "B.Ed",
                 "active",
@@ -45,8 +44,12 @@ def test_teacher_students_enforce_student_foreign_key(
         )
 
         teacher_id = connection.execute(
-            "SELECT id FROM teachers WHERE name = ?",
-            ("Test Teacher",),
+            """
+            SELECT id
+            FROM teachers
+            WHERE name = ?
+            """,
+            ("Teacher A",),
         ).fetchone()["id"]
 
         connection.execute(
@@ -64,11 +67,11 @@ def test_teacher_students_enforce_student_foreign_key(
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
-                "school-001",
+                "school-B",
                 None,
-                "Test Student",
-                "Primary 1",
-                7,
+                "Student B",
+                "JSS 1",
+                12,
                 None,
                 None,
                 "active",
@@ -76,50 +79,31 @@ def test_teacher_students_enforce_student_foreign_key(
         )
 
         student_id = connection.execute(
-            "SELECT id FROM students WHERE name = ?",
-            ("Test Student",),
+            """
+            SELECT id
+            FROM students
+            WHERE name = ?
+            """,
+            ("Student B",),
         ).fetchone()["id"]
 
         connection.commit()
-
-        connection.execute(
-            """
-            INSERT INTO teacher_students (
-                tenant_id,
-                teacher_id,
-                student_id
-            )
-            VALUES (?, ?, ?)
-            """,
-            ("school-001", teacher_id, student_id),
-        )
-
-        connection.commit()
-
-        valid = connection.execute(
-            """
-            SELECT teacher_id, student_id
-            FROM teacher_students
-            WHERE tenant_id = ?
-              AND teacher_id = ?
-              AND student_id = ?
-            """,
-            ("school-001", teacher_id, student_id),
-        ).fetchone()
-
-        assert valid is not None
 
         with pytest.raises(sqlite3.IntegrityError):
             connection.execute(
                 """
                 INSERT INTO teacher_students (
-                        tenant_id,
-                        teacher_id,
-                        student_id
-                    )
-                    VALUES (?, ?, ?)
+                    tenant_id,
+                    teacher_id,
+                    student_id
+                )
+                VALUES (?, ?, ?)
                 """,
-                ("school-001", teacher_id, 999999),
+                (
+                    "school-A",
+                    teacher_id,
+                    student_id,
+                ),
             )
 
     finally:

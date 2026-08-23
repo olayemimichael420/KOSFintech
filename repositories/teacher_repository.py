@@ -29,11 +29,10 @@ class TeacherRepository:
         )
 
         self.connection.commit()
-
         teacher.id = cursor.lastrowid
         return teacher
 
-    def get(self, teacher_id: int):
+    def get(self, tenant_id: str, teacher_id: int):
         row = self.connection.execute(
             """
             SELECT
@@ -45,9 +44,10 @@ class TeacherRepository:
                 qualification,
                 status
             FROM teachers
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (teacher_id,),
+            (tenant_id, teacher_id),
         ).fetchone()
 
         if row is None:

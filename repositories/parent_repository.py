@@ -33,7 +33,7 @@ class ParentRepository:
 
         return parent
 
-    def get(self, parent_id: int):
+    def get(self, tenant_id: str, parent_id: int):
         row = self.connection.execute(
             """
             SELECT
@@ -45,9 +45,10 @@ class ParentRepository:
                 email,
                 status
             FROM parents
-            WHERE id = ?
+            WHERE tenant_id = ?
+              AND id = ?
             """,
-            (parent_id,),
+            (tenant_id, parent_id),
         ).fetchone()
 
         if row is None:
