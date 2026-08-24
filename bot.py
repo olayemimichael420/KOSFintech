@@ -18,6 +18,7 @@ from telegram.ext import (
 
 import database
 from config import settings
+from services.application_service_factory import ApplicationServiceFactory
 
 
 logging.basicConfig(
@@ -68,6 +69,13 @@ def build_application() -> Application:
         .token(settings.bot_token)
         .build()
     )
+
+    # Application-scoped dependency composition.
+    # The database connection is supplied to the service factory once,
+    # keeping repository/service construction out of Telegram handlers.
+    connection = database.get_connection()
+    application.bot_data["db_connection"] = connection
+    application.bot_data["service_factory"] = ApplicationServiceFactory(connection)
 
     application.add_handler(
         CommandHandler("start", start)

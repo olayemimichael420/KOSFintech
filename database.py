@@ -470,6 +470,14 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_service_acts_id_tenant
+            ON service_acts(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE INDEX IF NOT EXISTS ix_service_acts_tenant_status
             ON service_acts(tenant_id, status)
             """
@@ -486,6 +494,34 @@ def init_db() -> None:
             """
             CREATE INDEX IF NOT EXISTS ix_service_acts_recipient
             ON service_acts(tenant_id, recipient_user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS verifications (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                service_act_id INTEGER NOT NULL,
+                verifier_user_id INTEGER NOT NULL,
+                decision TEXT NOT NULL
+                    CHECK(decision IN ('approved', 'rejected')),
+                reason TEXT,
+
+                FOREIGN KEY (service_act_id, tenant_id)
+                    REFERENCES service_acts(id, tenant_id),
+
+                FOREIGN KEY (verifier_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_verifications_verifier_act
+            ON verifications(tenant_id, service_act_id, verifier_user_id)
             """
         )
 
