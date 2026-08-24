@@ -369,3 +369,47 @@ def test_transfer_rolls_back_when_new_authority_insert_fails():
     assert target["count"] == 0
 
     connection.close()
+
+def test_inactive_current_super_admin_cannot_transfer():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.execute("PRAGMA foreign_keys = ON")
+
+    create_tables(connection)
+    add_super_admin(connection, 1)
+
+    connection.execute("""
+        UPDATE users
+        SET status = 'inactive'
+        WHERE id = 1
+    """)
+    connection.commit()
+
+    service = SuperAdminTransferService(connection)
+
+    result = service.transfer(
+        current_user_id=1,
+        target_user_id=2,
+    )
+
+    assert result.allowed is False
+    assert result.reason == "current user is inactive"
+
+    current = connection.execute("""
+        SELECT status
+        FROM platform_authorities
+        WHERE user_id = 1
+    """).fetchone()
+
+    target = connection.execute("""
+        SELECT COUNT(*) AS count
+        FROM platform_authorities
+        WHERE user_id = 2
+          AND role = 'super_admin'
+          AND status = 'active'
+    """).fetchone()
+
+    assert current["status"] == "active"
+    assert target["count"] == 0
+
+    connection.close()

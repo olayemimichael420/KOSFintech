@@ -55,6 +55,27 @@ class SuperAdminTransferService:
                 "current user is not the active super admin",
             )
 
+        current_user = self.connection.execute(
+            """
+            SELECT status
+            FROM users
+            WHERE id = ?
+            """,
+            (current_user_id,),
+        ).fetchone()
+
+        if current_user is None:
+            return SuperAdminTransferDecision(
+                False,
+                "current user does not exist",
+            )
+
+        if current_user["status"] != "active":
+            return SuperAdminTransferDecision(
+                False,
+                "current user is inactive",
+            )
+
         target = self.connection.execute(
             """
             SELECT
