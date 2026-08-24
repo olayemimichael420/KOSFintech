@@ -87,6 +87,40 @@ class ReputationRepository:
 
         return [self._to_model(row) for row in rows]
 
+    def get_score_summary(
+        self,
+        tenant_id: str,
+        subject_user_id: int,
+    ) -> dict[str, float | int]:
+        """Return the complete reputation score distribution for a subject."""
+
+        row = self.connection.execute(
+            """
+            SELECT
+                COUNT(*) AS total_reviews,
+                COALESCE(AVG(score), 0) AS average_score,
+                SUM(CASE WHEN score = 5 THEN 1 ELSE 0 END) AS score_5_count,
+                SUM(CASE WHEN score = 4 THEN 1 ELSE 0 END) AS score_4_count,
+                SUM(CASE WHEN score = 3 THEN 1 ELSE 0 END) AS score_3_count,
+                SUM(CASE WHEN score = 2 THEN 1 ELSE 0 END) AS score_2_count,
+                SUM(CASE WHEN score = 1 THEN 1 ELSE 0 END) AS score_1_count
+            FROM reputation_events
+            WHERE tenant_id = ?
+              AND subject_user_id = ?
+            """,
+            (tenant_id, subject_user_id),
+        ).fetchone()
+
+        return {
+            "total_reviews": int(row["total_reviews"]),
+            "average_score": float(row["average_score"]),
+            "score_5_count": int(row["score_5_count"] or 0),
+            "score_4_count": int(row["score_4_count"] or 0),
+            "score_3_count": int(row["score_3_count"] or 0),
+            "score_2_count": int(row["score_2_count"] or 0),
+            "score_1_count": int(row["score_1_count"] or 0),
+        }
+
     def get_average_score(
         self,
         tenant_id: str,
