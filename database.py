@@ -527,6 +527,48 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS reputation_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                service_act_id INTEGER NOT NULL,
+                subject_user_id INTEGER NOT NULL,
+                reviewer_user_id INTEGER NOT NULL,
+                score INTEGER NOT NULL CHECK(score BETWEEN 1 AND 5),
+                comment TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (service_act_id, tenant_id)
+                    REFERENCES service_acts(id, tenant_id),
+
+                FOREIGN KEY (subject_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                FOREIGN KEY (reviewer_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                UNIQUE(service_act_id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_reputation_events_tenant_subject
+            ON reputation_events(tenant_id, subject_user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_reputation_events_tenant_reviewer
+            ON reputation_events(tenant_id, reviewer_user_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS talent_point_transactions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
