@@ -428,6 +428,67 @@ def init_db() -> None:
             """
         )
 
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS service_acts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                provider_user_id INTEGER NOT NULL,
+                recipient_user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'created'
+                    CHECK(
+                        status IN (
+                            'created',
+                            'accepted',
+                            'in_progress',
+                            'submitted',
+                            'completed',
+                            'cancelled'
+                        )
+                    ),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                accepted_at TIMESTAMP,
+                started_at TIMESTAMP,
+                submitted_at TIMESTAMP,
+                completed_at TIMESTAMP,
+                cancelled_at TIMESTAMP,
+                cancellation_reason TEXT,
+
+                FOREIGN KEY (provider_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                FOREIGN KEY (recipient_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                CHECK(provider_user_id != recipient_user_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS ix_service_acts_tenant_status
+            ON service_acts(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS ix_service_acts_provider
+            ON service_acts(tenant_id, provider_user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS ix_service_acts_recipient
+            ON service_acts(tenant_id, recipient_user_id)
+            """
+        )
+
         connection.execute(
             """
             CREATE TABLE IF NOT EXISTS roles (
@@ -488,3 +549,6 @@ def init_db() -> None:
 
     finally:
         connection.close()
+
+# Service Act schema
+# Added during Phase 3: Service Act Engine.
