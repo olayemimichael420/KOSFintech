@@ -527,6 +527,62 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS talent_point_transactions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                service_act_id INTEGER NOT NULL,
+                amount INTEGER NOT NULL CHECK(amount > 0),
+                transaction_type TEXT NOT NULL,
+                reference TEXT,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                FOREIGN KEY (service_act_id, tenant_id)
+                    REFERENCES service_acts(id, tenant_id),
+
+                UNIQUE(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_talent_point_transactions_tenant_user
+            ON talent_point_transactions(tenant_id, user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_talent_point_transactions_tenant_act
+            ON talent_point_transactions(tenant_id, service_act_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_talent_point_transactions_tenant_type
+            ON talent_point_transactions(tenant_id, transaction_type)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_talent_point_issuance_service_act
+            ON talent_point_transactions(tenant_id, service_act_id)
+            WHERE transaction_type = 'issuance'
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS roles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,

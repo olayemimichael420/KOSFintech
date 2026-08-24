@@ -25,3 +25,7 @@ class ApplicationServices:
     @property
     def service_act(self):
         return self.factory.build_service_act_service()
+
+    @property
+    def talent_point_issuance(self):
+        return self.factory.build_talent_point_issuance_service()

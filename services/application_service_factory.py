@@ -1,11 +1,13 @@
 from repositories.service_act_repository import ServiceActRepository
 from repositories.verification_repository import VerificationRepository
+from repositories.talent_point_repository import TalentPointRepository
 
 from services.service_act_service import ServiceActService
 from services.verification_service import VerificationService
 from services.verification_decision_service import VerificationDecisionService
 from services.service_act_verification_service import ServiceActVerificationService
 from services.verification_workflow_service import VerificationWorkflowService
+from services.talent_point_issuance_service import TalentPointIssuanceService
 
 
 class ApplicationServiceFactory:
@@ -25,6 +27,14 @@ class ApplicationServiceFactory:
 
     def build_verification_repository(self):
         return VerificationRepository(self.connection)
+
+    def build_talent_point_repository(self):
+        return TalentPointRepository(self.connection)
+
+    def build_talent_point_issuance_service(self):
+        return TalentPointIssuanceService(
+            self.build_talent_point_repository()
+        )
 
     def build_service_act_service(self):
         return ServiceActService(
