@@ -19,6 +19,7 @@ from telegram.ext import (
 import database
 from config import settings
 from services.application_service_factory import ApplicationServiceFactory
+from services.application_services import ApplicationServices
 
 
 logging.basicConfig(
@@ -75,7 +76,9 @@ def build_application() -> Application:
     # keeping repository/service construction out of Telegram handlers.
     connection = database.get_connection()
     application.bot_data["db_connection"] = connection
-    application.bot_data["service_factory"] = ApplicationServiceFactory(connection)
+    service_factory = ApplicationServiceFactory(connection)
+    application.bot_data["service_factory"] = service_factory
+    application.bot_data["services"] = ApplicationServices(service_factory)
 
     application.add_handler(
         CommandHandler("start", start)

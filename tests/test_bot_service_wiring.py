@@ -3,6 +3,7 @@ import sqlite3
 import bot
 
 from services.application_service_factory import ApplicationServiceFactory
+from services.application_services import ApplicationServices
 
 
 def test_build_application_wires_service_factory(monkeypatch):
@@ -25,5 +26,10 @@ def test_build_application_wires_service_factory(monkeypatch):
             ApplicationServiceFactory,
         )
         assert application.bot_data["service_factory"].connection is connection
+        assert isinstance(
+            application.bot_data["services"],
+            ApplicationServices,
+        )
+        assert application.bot_data["services"].factory is application.bot_data["service_factory"]
     finally:
         connection.close()
