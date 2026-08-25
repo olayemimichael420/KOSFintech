@@ -1,6 +1,8 @@
 from repositories.service_act_repository import ServiceActRepository
 from repositories.verification_repository import VerificationRepository
 from repositories.talent_point_repository import TalentPointRepository
+from repositories.dispute_repository import DisputeRepository
+from repositories.reputation_repository import ReputationRepository
 
 from services.service_act_service import ServiceActService
 from services.verification_service import VerificationService
@@ -8,6 +10,9 @@ from services.verification_decision_service import VerificationDecisionService
 from services.service_act_verification_service import ServiceActVerificationService
 from services.verification_workflow_service import VerificationWorkflowService
 from services.talent_point_issuance_service import TalentPointIssuanceService
+from services.dispute_service import DisputeService
+from services.reputation_service import ReputationService
+from services.reputation_profile_service import ReputationProfileService
 
 
 class ApplicationServiceFactory:
@@ -30,6 +35,12 @@ class ApplicationServiceFactory:
 
     def build_talent_point_repository(self):
         return TalentPointRepository(self.connection)
+
+    def build_dispute_repository(self):
+        return DisputeRepository(self.connection)
+
+    def build_reputation_repository(self):
+        return ReputationRepository(self.connection)
 
     def build_talent_point_issuance_service(self):
         return TalentPointIssuanceService(
@@ -64,4 +75,21 @@ class ApplicationServiceFactory:
             service_act_verification_service=(
                 self.build_service_act_verification_service()
             ),
+        )
+
+    def build_dispute_service(self):
+        return DisputeService(
+            repository=self.build_dispute_repository(),
+            service_act_repository=self.build_service_act_repository(),
+        )
+
+    def build_reputation_service(self):
+        return ReputationService(
+            repository=self.build_reputation_repository(),
+            service_act_repository=self.build_service_act_repository(),
+        )
+
+    def build_reputation_profile_service(self):
+        return ReputationProfileService(
+            repository=self.build_reputation_repository(),
         )

@@ -29,3 +29,15 @@ class ApplicationServices:
     @property
     def talent_point_issuance(self):
         return self.factory.build_talent_point_issuance_service()
+
+    @property
+    def dispute(self):
+        return self.factory.build_dispute_service()
+
+    @property
+    def reputation(self):
+        return self.factory.build_reputation_service()
+
+    @property
+    def reputation_profile(self):
+        return self.factory.build_reputation_profile_service()
