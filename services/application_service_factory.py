@@ -19,77 +19,128 @@ class ApplicationServiceFactory:
     """
     Composition root for KOSFintech application services.
 
-    This class constructs real repositories and services from one
-    database connection. Business logic remains inside the services;
-    dependency wiring remains here.
+    The factory constructs one coherent application service graph from
+    one database connection.
+
+    Repositories are constructed once.
+    Services are constructed once.
+    Composite services receive the already-constructed dependencies.
+
+    Business logic remains inside services; dependency wiring remains here.
     """
 
     def __init__(self, connection):
         self.connection = connection
 
-    def build_service_act_repository(self):
-        return ServiceActRepository(self.connection)
+        # ---------------------------------------------------------------
+        # Repository graph
+        # ---------------------------------------------------------------
 
-    def build_verification_repository(self):
-        return VerificationRepository(self.connection)
+        self._service_act_repository = ServiceActRepository(connection)
+        self._verification_repository = VerificationRepository(connection)
+        self._talent_point_repository = TalentPointRepository(connection)
+        self._dispute_repository = DisputeRepository(connection)
+        self._reputation_repository = ReputationRepository(connection)
 
-    def build_talent_point_repository(self):
-        return TalentPointRepository(self.connection)
+        # ---------------------------------------------------------------
+        # Core service graph
+        # ---------------------------------------------------------------
 
-    def build_dispute_repository(self):
-        return DisputeRepository(self.connection)
-
-    def build_reputation_repository(self):
-        return ReputationRepository(self.connection)
-
-    def build_talent_point_issuance_service(self):
-        return TalentPointIssuanceService(
-            self.build_talent_point_repository()
+        self._service_act_service = ServiceActService(
+            self._service_act_repository
         )
 
-    def build_service_act_service(self):
-        return ServiceActService(
-            self.build_service_act_repository()
+        self._verification_service = VerificationService(
+            repository=self._verification_repository,
+            service_act_repository=self._service_act_repository,
         )
 
-    def build_verification_service(self):
-        return VerificationService(
-            repository=self.build_verification_repository(),
-            service_act_repository=self.build_service_act_repository(),
+        self._verification_decision_service = VerificationDecisionService(
+            self._verification_repository
         )
 
-    def build_verification_decision_service(self):
-        return VerificationDecisionService(
-            self.build_verification_repository()
+        self._service_act_verification_service = (
+            ServiceActVerificationService(
+                verification_decision_service=(
+                    self._verification_decision_service
+                ),
+                service_act_service=self._service_act_service,
+            )
         )
 
-    def build_service_act_verification_service(self):
-        return ServiceActVerificationService(
-            verification_decision_service=self.build_verification_decision_service(),
-            service_act_service=self.build_service_act_service(),
-        )
-
-    def build_verification_workflow_service(self):
-        return VerificationWorkflowService(
-            verification_service=self.build_verification_service(),
+        self._verification_workflow_service = VerificationWorkflowService(
+            verification_service=self._verification_service,
             service_act_verification_service=(
-                self.build_service_act_verification_service()
+                self._service_act_verification_service
             ),
         )
 
-    def build_dispute_service(self):
-        return DisputeService(
-            repository=self.build_dispute_repository(),
-            service_act_repository=self.build_service_act_repository(),
+        self._talent_point_issuance_service = (
+            TalentPointIssuanceService(
+                self._talent_point_repository
+            )
         )
+
+        self._dispute_service = DisputeService(
+            repository=self._dispute_repository,
+            service_act_repository=self._service_act_repository,
+        )
+
+        self._reputation_service = ReputationService(
+            repository=self._reputation_repository,
+            service_act_repository=self._service_act_repository,
+        )
+
+        self._reputation_profile_service = ReputationProfileService(
+            repository=self._reputation_repository,
+        )
+
+    # -------------------------------------------------------------------
+    # Repository access
+    # -------------------------------------------------------------------
+
+    def build_service_act_repository(self):
+        return self._service_act_repository
+
+    def build_verification_repository(self):
+        return self._verification_repository
+
+    def build_talent_point_repository(self):
+        return self._talent_point_repository
+
+    def build_dispute_repository(self):
+        return self._dispute_repository
+
+    def build_reputation_repository(self):
+        return self._reputation_repository
+
+    # -------------------------------------------------------------------
+    # Service access
+    # -------------------------------------------------------------------
+
+    def build_talent_point_issuance_service(self):
+        return self._talent_point_issuance_service
+
+    def build_service_act_service(self):
+        return self._service_act_service
+
+    def build_verification_service(self):
+        return self._verification_service
+
+    def build_verification_decision_service(self):
+        return self._verification_decision_service
+
+    def build_service_act_verification_service(self):
+        return self._service_act_verification_service
+
+    def build_verification_workflow_service(self):
+        return self._verification_workflow_service
+
+    def build_dispute_service(self):
+        return self._dispute_service
 
     def build_reputation_service(self):
-        return ReputationService(
-            repository=self.build_reputation_repository(),
-            service_act_repository=self.build_service_act_repository(),
-        )
+        return self._reputation_service
 
     def build_reputation_profile_service(self):
-        return ReputationProfileService(
-            repository=self.build_reputation_repository(),
-        )
+        return self._reputation_profile_service
