@@ -625,6 +625,77 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS disputes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                service_act_id INTEGER NOT NULL,
+                initiator_user_id INTEGER NOT NULL,
+                initiator_role TEXT NOT NULL
+                    CHECK(initiator_role IN ('provider', 'recipient')),
+                reason TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'open'
+                    CHECK(status IN (
+                        'open',
+                        'under_review',
+                        'resolved',
+                        'rejected',
+                        'withdrawn'
+                    )),
+                resolution TEXT
+                    CHECK(resolution IS NULL OR resolution IN (
+                        'provider_favored',
+                        'recipient_favored',
+                        'mutual_settlement',
+                        'no_fault'
+                    )),
+                resolution_reason TEXT,
+                resolved_by_user_id INTEGER,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                resolved_at TIMESTAMP,
+                FOREIGN KEY (service_act_id, tenant_id)
+                    REFERENCES service_acts(id, tenant_id),
+                FOREIGN KEY (initiator_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+                FOREIGN KEY (resolved_by_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_disputes_id_tenant
+            ON disputes(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_disputes_tenant_status
+            ON disputes(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_disputes_tenant_service_act
+            ON disputes(tenant_id, service_act_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_disputes_tenant_initiator
+            ON disputes(tenant_id, initiator_user_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS roles (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
