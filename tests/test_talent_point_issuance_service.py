@@ -581,3 +581,67 @@ def test_tp_issuance_emits_audit_event(tmp_path, monkeypatch, caplog):
 
     finally:
         connection.close()
+
+
+def test_tp_issuance_rolls_back_when_audit_persistence_fails(
+    tmp_path, monkeypatch
+):
+    connection = _setup_db(tmp_path, monkeypatch)
+
+    try:
+        provider = _create_user(
+            connection,
+            "tenant-1",
+            "Provider",
+        )
+
+        recipient = _create_user(
+            connection,
+            "tenant-1",
+            "Recipient",
+        )
+
+        act = _create_act(
+            connection,
+            "tenant-1",
+            provider,
+            recipient,
+        )
+
+        service = TalentPointIssuanceService(
+            TalentPointRepository(connection)
+        )
+
+        def failing_audit_event(*args, **kwargs):
+            raise RuntimeError("simulated audit failure")
+
+        monkeypatch.setattr(
+            "services.talent_point_issuance_service.audit_event",
+            failing_audit_event,
+        )
+
+        with pytest.raises(
+            RuntimeError,
+            match="simulated audit failure",
+        ):
+            service.issue_for_service_act(
+                tenant_id="tenant-1",
+                service_act=act,
+                amount=100,
+                reference="atomicity-test",
+            )
+
+        tp_count = connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM talent_point_transactions
+            WHERE tenant_id = ?
+              AND service_act_id = ?
+            """,
+            ("tenant-1", act.id),
+        ).fetchone()[0]
+
+        assert tp_count == 0
+
+    finally:
+        connection.close()

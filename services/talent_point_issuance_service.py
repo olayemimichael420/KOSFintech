@@ -113,27 +113,39 @@ class TalentPointIssuanceService:
             created_at=None,
         )
 
-        transaction = self.repository.create(transaction)
+        connection = self.repository.connection
 
-        # ---------------------------------------------------------
-        # 9. Emit audit event after successful persistence
-        # ---------------------------------------------------------
-        audit_event(
-            event_type="talent_point_issuance",
-            actor_id=transaction.user_id,
-            tenant_id=transaction.tenant_id,
-            action="issue_talent_points",
-            metadata={
-                "transaction_id": transaction.id,
-                "service_act_id": transaction.service_act_id,
-                "user_id": transaction.user_id,
-                "amount": transaction.amount,
-                "transaction_type": transaction.transaction_type,
-                "reference": transaction.reference,
-            },
-        )
+        try:
+            connection.execute("BEGIN")
 
-        # ---------------------------------------------------------
-        # 10. Return persisted transaction
-        # ---------------------------------------------------------
-        return transaction
+            transaction = self.repository.create(transaction)
+
+            # ---------------------------------------------------------
+            # 9. Emit audit event using the SAME transaction
+            # ---------------------------------------------------------
+            audit_event(
+                event_type="talent_point_issuance",
+                actor_id=transaction.user_id,
+                tenant_id=transaction.tenant_id,
+                action="issue_talent_points",
+                metadata={
+                    "transaction_id": transaction.id,
+                    "service_act_id": transaction.service_act_id,
+                    "user_id": transaction.user_id,
+                    "amount": transaction.amount,
+                    "transaction_type": transaction.transaction_type,
+                    "reference": transaction.reference,
+                },
+                connection=connection,
+            )
+
+            connection.commit()
+
+            # ---------------------------------------------------------
+            # 10. Return committed transaction
+            # ---------------------------------------------------------
+            return transaction
+
+        except Exception:
+            connection.rollback()
+            raise

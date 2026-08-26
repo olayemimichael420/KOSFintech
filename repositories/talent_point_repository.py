@@ -36,8 +36,6 @@ class TalentPointRepository:
             ),
         )
 
-        self.connection.commit()
-
         transaction.id = cursor.lastrowid
 
         return self.get(
