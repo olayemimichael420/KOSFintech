@@ -2,12 +2,20 @@
 Audit logging foundation.
 
 All consequential operations, including AI-driven actions,
-will eventually be recorded here.
+are recorded as structured log events and persisted to the
+audit_events database table.
+
+The public audit_event() API intentionally remains stable so
+existing application services do not need to change.
 """
 
 import json
 import logging
 from datetime import datetime, timezone
+
+from database import get_connection
+from models.audit_event import AuditEvent
+from repositories.audit_event_repository import AuditEventRepository
 
 
 logger = logging.getLogger("kosfintech.audit")
@@ -20,18 +28,42 @@ def audit_event(
     action=None,
     metadata=None,
 ) -> None:
-    """Record a structured audit event."""
+    """
+    Record a structured and persistent audit event.
 
-    event = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "event_type": event_type,
-        "actor_id": actor_id,
-        "tenant_id": tenant_id,
-        "action": action,
-        "metadata": metadata or {},
-    }
+    The existing structured logging contract is preserved while
+    the same event is durably persisted in audit_events.
+    """
+
+    event = AuditEvent(
+        id=None,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        event_type=event_type,
+        actor_id=actor_id,
+        tenant_id=tenant_id,
+        action=action,
+        metadata=metadata or {},
+    )
+
+    connection = get_connection()
+
+    try:
+        repository = AuditEventRepository(connection)
+        repository.create(event)
+    finally:
+        connection.close()
 
     logger.info(
         "AUDIT %s",
-        json.dumps(event, default=str),
+        json.dumps(
+            {
+                "timestamp": event.timestamp,
+                "event_type": event.event_type,
+                "actor_id": event.actor_id,
+                "tenant_id": event.tenant_id,
+                "action": event.action,
+                "metadata": event.metadata,
+            },
+            default=str,
+        ),
     )

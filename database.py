@@ -107,6 +107,25 @@ def _migrate_user_schools_tenant_fk(connection: sqlite3.Connection) -> None:
     )
 
 
+def _create_audit_immutability_triggers(connection: sqlite3.Connection) -> None:
+    """Prevent modification or deletion of persisted audit events."""
+    connection.execute("""
+        CREATE TRIGGER IF NOT EXISTS trg_audit_events_no_update
+        BEFORE UPDATE ON audit_events
+        BEGIN
+            SELECT RAISE(ABORT, 'audit_events are immutable');
+        END;
+    """)
+
+    connection.execute("""
+        CREATE TRIGGER IF NOT EXISTS trg_audit_events_no_delete
+        BEFORE DELETE ON audit_events
+        BEGIN
+            SELECT RAISE(ABORT, 'audit_events are immutable');
+        END;
+    """)
+
+
 def init_db() -> None:
     """Initialize the core database schema."""
 
@@ -119,6 +138,45 @@ def init_db() -> None:
                 key TEXT PRIMARY KEY,
                 value TEXT NOT NULL
             )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS audit_events (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                timestamp TEXT NOT NULL,
+                event_type TEXT NOT NULL,
+                actor_id INTEGER,
+                tenant_id TEXT,
+                action TEXT,
+                metadata TEXT NOT NULL DEFAULT '{}'
+            )
+            """
+        )
+        _create_audit_immutability_triggers(connection)
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_audit_events_tenant_id
+            ON audit_events(tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_audit_events_event_type
+            ON audit_events(event_type)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_audit_events_timestamp
+            ON audit_events(timestamp)
             """
         )
 
