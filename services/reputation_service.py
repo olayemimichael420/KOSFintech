@@ -68,21 +68,38 @@ class ReputationService:
             created_at=None,
         )
 
-        event = self.repository.create(event)
+        connection = self.repository.connection
 
-        # 7. Record consequential action.
-        audit_event(
-            event_type="reputation_submitted",
-            actor_id=reviewer_user_id,
-            tenant_id=tenant_id,
-            action="submit_service_act_reputation",
-            metadata={
-                "reputation_event_id": event.id,
-                "service_act_id": event.service_act_id,
-                "subject_user_id": event.subject_user_id,
-                "reviewer_user_id": event.reviewer_user_id,
-                "score": event.score,
-            },
-        )
+        try:
+            connection.execute("BEGIN")
 
-        return event
+            event = self.repository.create(event)
+
+            # ---------------------------------------------------------
+            # 7. Emit audit event using the SAME transaction
+            # ---------------------------------------------------------
+            audit_event(
+                event_type="reputation_submitted",
+                actor_id=reviewer_user_id,
+                tenant_id=tenant_id,
+                action="submit_service_act_reputation",
+                metadata={
+                    "reputation_event_id": event.id,
+                    "service_act_id": event.service_act_id,
+                    "subject_user_id": event.subject_user_id,
+                    "reviewer_user_id": event.reviewer_user_id,
+                    "score": event.score,
+                },
+                connection=connection,
+            )
+
+            connection.commit()
+
+            # ---------------------------------------------------------
+            # 8. Return committed reputation event
+            # ---------------------------------------------------------
+            return event
+
+        except Exception:
+            connection.rollback()
+            raise

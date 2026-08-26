@@ -30,8 +30,6 @@ class ReputationRepository:
             ),
         )
 
-        self.connection.commit()
-
         event.id = cursor.lastrowid
 
         return self.get(event.tenant_id, event.id)

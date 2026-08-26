@@ -348,3 +348,53 @@ def test_reputation_audit_event_is_emitted(tmp_path, caplog):
     assert '"score": 5' in caplog.text
 
     connection.close()
+
+
+def test_reputation_submission_rolls_back_when_audit_persistence_fails(
+    tmp_path, monkeypatch
+):
+    connection, service_act_repository, _, service, ids = _setup(tmp_path)
+
+    try:
+        provider_id, recipient_id, _ = ids
+
+        act = _completed_act(
+            service_act_repository,
+            provider_id,
+            recipient_id,
+        )
+
+        def failing_audit_event(*args, **kwargs):
+            raise RuntimeError("simulated audit failure")
+
+        monkeypatch.setattr(
+            "services.reputation_service.audit_event",
+            failing_audit_event,
+        )
+
+        with pytest.raises(
+            RuntimeError,
+            match="simulated audit failure",
+        ):
+            service.submit(
+                tenant_id="tenant-001",
+                service_act_id=act.id,
+                reviewer_user_id=recipient_id,
+                score=5,
+                comment="atomicity-test",
+            )
+
+        reputation_count = connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM reputation_events
+            WHERE tenant_id = ?
+              AND service_act_id = ?
+            """,
+            ("tenant-001", act.id),
+        ).fetchone()[0]
+
+        assert reputation_count == 0
+
+    finally:
+        connection.close()
