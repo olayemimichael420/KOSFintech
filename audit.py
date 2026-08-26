@@ -27,6 +27,7 @@ def audit_event(
     tenant_id=None,
     action=None,
     metadata=None,
+    connection=None,
 ) -> None:
     """
     Record a structured and persistent audit event.
@@ -45,13 +46,16 @@ def audit_event(
         metadata=metadata or {},
     )
 
-    connection = get_connection()
+    owns_connection = connection is None
+    if owns_connection:
+        connection = get_connection()
 
     try:
         repository = AuditEventRepository(connection)
-        repository.create(event)
+        repository.create(event, commit=owns_connection)
     finally:
-        connection.close()
+        if owns_connection:
+            connection.close()
 
     logger.info(
         "AUDIT %s",

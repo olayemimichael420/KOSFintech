@@ -10,7 +10,11 @@ class AuditEventRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def create(self, event: AuditEvent) -> AuditEvent:
+    def create(
+        self,
+        event: AuditEvent,
+        commit: bool = True,
+    ) -> AuditEvent:
         cursor = self.connection.execute(
             """
             INSERT INTO audit_events (
@@ -33,7 +37,8 @@ class AuditEventRepository:
             ),
         )
 
-        self.connection.commit()
+        if commit:
+            self.connection.commit()
 
         return self.get(cursor.lastrowid)
 
