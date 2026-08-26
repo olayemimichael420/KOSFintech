@@ -156,6 +156,18 @@ class SuperAdminTransferService:
                 ),
             )
 
+            audit_event(
+                event_type="super_admin_transfer",
+                actor_id=current_user_id,
+                tenant_id="platform",
+                action="transfer_super_admin",
+                metadata={
+                    "from_user_id": current_user_id,
+                    "to_user_id": target_user_id,
+                },
+                connection=self.connection,
+            )
+
             self.connection.commit()
 
         except Exception:
@@ -165,17 +177,6 @@ class SuperAdminTransferService:
                 False,
                 "super admin transfer failed",
             )
-
-        audit_event(
-            event_type="super_admin_transfer",
-            actor_id=current_user_id,
-            tenant_id="platform",
-            action="transfer_super_admin",
-            metadata={
-                "from_user_id": current_user_id,
-                "to_user_id": target_user_id,
-            },
-        )
 
         return SuperAdminTransferDecision(
             True,
