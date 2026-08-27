@@ -444,3 +444,101 @@ def test_cancelled_service_act_cannot_accept_verification(
             )
     finally:
         connection.close()
+
+
+def test_verification_rolls_back_when_audit_persistence_fails(
+    tmp_path,
+    monkeypatch,
+):
+    connection, act, verifier_id, service = _setup(
+        tmp_path,
+        monkeypatch,
+    )
+
+    try:
+        def failing_audit_event(*args, **kwargs):
+            raise RuntimeError("simulated audit failure")
+
+        monkeypatch.setattr(
+            "services.verification_service.audit_event",
+            failing_audit_event,
+        )
+
+        with pytest.raises(
+            RuntimeError,
+            match="simulated audit failure",
+        ):
+            service.verify(
+                "tenant-001",
+                act.id,
+                verifier_id,
+                VerificationDecision.APPROVED,
+            )
+
+        verification_count = connection.execute(
+            """
+            SELECT COUNT(*)
+            FROM verifications
+            WHERE tenant_id = ?
+              AND service_act_id = ?
+              AND verifier_user_id = ?
+            """,
+            (
+                "tenant-001",
+                act.id,
+                verifier_id,
+            ),
+        ).fetchone()[0]
+
+        assert verification_count == 0
+
+    finally:
+        connection.close()
+
+
+def test_verification_persists_audit_event_atomically(
+    tmp_path,
+    monkeypatch,
+):
+    connection, act, verifier_id, service = _setup(
+        tmp_path,
+        monkeypatch,
+    )
+
+    try:
+        verification = service.verify(
+            "tenant-001",
+            act.id,
+            verifier_id,
+            VerificationDecision.APPROVED,
+        )
+
+        audit_rows = connection.execute(
+            """
+            SELECT
+                event_type,
+                actor_id,
+                tenant_id,
+                action,
+                metadata
+            FROM audit_events
+            WHERE tenant_id = ?
+              AND event_type = ?
+            ORDER BY id
+            """,
+            (
+                "tenant-001",
+                "verification_submitted",
+            ),
+        ).fetchall()
+
+        assert len(audit_rows) == 1
+
+        row = audit_rows[0]
+
+        assert row["actor_id"] == verifier_id
+        assert row["tenant_id"] == "tenant-001"
+        assert row["action"] == "submit_verification"
+
+    finally:
+        connection.close()

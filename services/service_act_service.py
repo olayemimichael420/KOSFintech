@@ -36,6 +36,7 @@ class ServiceActService:
         act_id: int,
         target_status: ServiceActStatus,
         cancellation_reason: str | None = None,
+        commit: bool = True,
     ):
         act = self.repository.get(tenant_id, act_id)
 
@@ -108,6 +109,7 @@ class ServiceActService:
             ),
         )
 
-        self.repository.connection.commit()
+        if commit:
+            self.repository.connection.commit()
 
         return self.repository.get(tenant_id, act_id)

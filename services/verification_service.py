@@ -77,20 +77,34 @@ class VerificationService:
             reason=reason,
         )
 
-        created = self.repository.create(verification)
+        connection = self.repository.connection
 
-        audit_event(
-            event_type="verification_submitted",
-            actor_id=verifier_user_id,
-            tenant_id=tenant_id,
-            action="submit_verification",
-            metadata={
-                "verification_id": created.id,
-                "service_act_id": service_act_id,
-                "decision": created.decision.value,
-                "reason": created.reason,
-            },
-        )
+        try:
+            connection.execute("BEGIN")
 
-        return created
+            created = self.repository.create(
+                verification,
+                commit=False,
+            )
+
+            audit_event(
+                event_type="verification_submitted",
+                actor_id=verifier_user_id,
+                tenant_id=tenant_id,
+                action="submit_verification",
+                metadata={
+                    "verification_id": created.id,
+                    "service_act_id": service_act_id,
+                    "decision": created.decision.value,
+                    "reason": created.reason,
+                },
+                connection=connection,
+            )
+
+            connection.commit()
+            return created
+
+        except Exception:
+            connection.rollback()
+            raise
 

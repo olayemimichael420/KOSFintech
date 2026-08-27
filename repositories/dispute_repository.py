@@ -12,7 +12,11 @@ class DisputeRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def create(self, dispute: Dispute) -> Dispute:
+    def create(
+        self,
+        dispute: Dispute,
+        commit: bool = True,
+    ) -> Dispute:
         cursor = self.connection.execute(
             """
             INSERT INTO disputes (
@@ -43,7 +47,8 @@ class DisputeRepository:
             ),
         )
 
-        self.connection.commit()
+        if commit:
+            self.connection.commit()
 
 
 

@@ -78,22 +78,36 @@ class DisputeService:
             resolved_at=None,
         )
 
-        dispute = self.repository.create(dispute)
+        connection = self.repository.connection
 
-        audit_event(
-            event_type="dispute_opened",
-            actor_id=initiator_user_id,
-            tenant_id=tenant_id,
-            action="open_dispute",
-            metadata={
-                "dispute_id": dispute.id,
-                "service_act_id": dispute.service_act_id,
-                "initiator_user_id": dispute.initiator_user_id,
-                "initiator_role": dispute.initiator_role.value,
-            },
-        )
+        try:
+            connection.execute("BEGIN")
 
-        return dispute
+            dispute = self.repository.create(
+                dispute,
+                commit=False,
+            )
+
+            audit_event(
+                event_type="dispute_opened",
+                actor_id=initiator_user_id,
+                tenant_id=tenant_id,
+                action="open_dispute",
+                metadata={
+                    "dispute_id": dispute.id,
+                    "service_act_id": dispute.service_act_id,
+                    "initiator_user_id": dispute.initiator_user_id,
+                    "initiator_role": dispute.initiator_role.value,
+                },
+                connection=connection,
+            )
+
+            connection.commit()
+            return dispute
+
+        except Exception:
+            connection.rollback()
+            raise
 
     def move_to_review(
         self,
@@ -110,24 +124,36 @@ class DisputeService:
                 "only open disputes can be moved to review"
             )
 
-        dispute = self._update_status(
-            tenant_id=tenant_id,
-            dispute_id=dispute_id,
-            status=DisputeStatus.UNDER_REVIEW,
-        )
+        connection = self.repository.connection
 
-        audit_event(
-            event_type="dispute_under_review",
-            actor_id=actor_user_id,
-            tenant_id=tenant_id,
-            action="review_dispute",
-            metadata={
-                "dispute_id": dispute.id,
-                "service_act_id": dispute.service_act_id,
-            },
-        )
+        try:
+            connection.execute("BEGIN")
 
-        return dispute
+            dispute = self._update_status(
+                tenant_id=tenant_id,
+                dispute_id=dispute_id,
+                status=DisputeStatus.UNDER_REVIEW,
+                commit=False,
+            )
+
+            audit_event(
+                event_type="dispute_under_review",
+                actor_id=actor_user_id,
+                tenant_id=tenant_id,
+                action="review_dispute",
+                metadata={
+                    "dispute_id": dispute.id,
+                    "service_act_id": dispute.service_act_id,
+                },
+                connection=connection,
+            )
+
+            connection.commit()
+            return dispute
+
+        except Exception:
+            connection.rollback()
+            raise
 
     def resolve(
         self,
@@ -157,50 +183,59 @@ class DisputeService:
 
         now = datetime.now(timezone.utc).isoformat()
 
-        self.repository.connection.execute(
-            """
-            UPDATE disputes
-            SET
-                status = ?,
-                resolution = ?,
-                resolution_reason = ?,
-                resolved_by_user_id = ?,
-                resolved_at = ?
-            WHERE tenant_id = ?
-              AND id = ?
-            """,
-            (
-                DisputeStatus.RESOLVED.value,
-                resolution.value,
-                resolution_reason.strip(),
-                resolved_by_user_id,
-                now,
+        connection = self.repository.connection
+
+        try:
+            connection.execute("BEGIN")
+
+            connection.execute(
+                """
+                UPDATE disputes
+                SET
+                    status = ?,
+                    resolution = ?,
+                    resolution_reason = ?,
+                    resolved_by_user_id = ?,
+                    resolved_at = ?
+                WHERE tenant_id = ?
+                  AND id = ?
+                """,
+                (
+                    DisputeStatus.RESOLVED.value,
+                    resolution.value,
+                    resolution_reason.strip(),
+                    resolved_by_user_id,
+                    now,
+                    tenant_id,
+                    dispute_id,
+                ),
+            )
+
+            resolved = self.repository.get(
                 tenant_id,
                 dispute_id,
-            ),
-        )
+            )
 
-        self.repository.connection.commit()
+            audit_event(
+                event_type="dispute_resolved",
+                actor_id=resolved_by_user_id,
+                tenant_id=tenant_id,
+                action="resolve_dispute",
+                metadata={
+                    "dispute_id": resolved.id,
+                    "service_act_id": resolved.service_act_id,
+                    "resolution": resolved.resolution.value,
+                    "resolution_reason": resolved.resolution_reason,
+                },
+                connection=connection,
+            )
 
-        resolved = self.repository.get(
-            tenant_id,
-            dispute_id,
-        )
+            connection.commit()
+            return resolved
 
-        audit_event(
-            event_type="dispute_resolved",
-            actor_id=resolved_by_user_id,
-            tenant_id=tenant_id,
-            action="resolve_dispute",
-            metadata={
-                "dispute_id": resolved.id,
-                "service_act_id": resolved.service_act_id,
-                "resolution": resolved.resolution.value,
-                "resolution_reason": resolved.resolution_reason,
-            },
-        )
-
-        return resolved
+        except Exception:
+            connection.rollback()
+            raise
 
     def reject(
         self,
@@ -223,47 +258,56 @@ class DisputeService:
 
         now = datetime.now(timezone.utc).isoformat()
 
-        self.repository.connection.execute(
-            """
-            UPDATE disputes
-            SET
-                status = ?,
-                resolution_reason = ?,
-                resolved_by_user_id = ?,
-                resolved_at = ?
-            WHERE tenant_id = ?
-              AND id = ?
-            """,
-            (
-                DisputeStatus.REJECTED.value,
-                reason.strip(),
-                rejected_by_user_id,
-                now,
+        connection = self.repository.connection
+
+        try:
+            connection.execute("BEGIN")
+
+            connection.execute(
+                """
+                UPDATE disputes
+                SET
+                    status = ?,
+                    resolution_reason = ?,
+                    resolved_by_user_id = ?,
+                    resolved_at = ?
+                WHERE tenant_id = ?
+                  AND id = ?
+                """,
+                (
+                    DisputeStatus.REJECTED.value,
+                    reason.strip(),
+                    rejected_by_user_id,
+                    now,
+                    tenant_id,
+                    dispute_id,
+                ),
+            )
+
+            rejected = self.repository.get(
                 tenant_id,
                 dispute_id,
-            ),
-        )
+            )
 
-        self.repository.connection.commit()
+            audit_event(
+                event_type="dispute_rejected",
+                actor_id=rejected_by_user_id,
+                tenant_id=tenant_id,
+                action="reject_dispute",
+                metadata={
+                    "dispute_id": rejected.id,
+                    "service_act_id": rejected.service_act_id,
+                    "reason": rejected.resolution_reason,
+                },
+                connection=connection,
+            )
 
-        rejected = self.repository.get(
-            tenant_id,
-            dispute_id,
-        )
+            connection.commit()
+            return rejected
 
-        audit_event(
-            event_type="dispute_rejected",
-            actor_id=rejected_by_user_id,
-            tenant_id=tenant_id,
-            action="reject_dispute",
-            metadata={
-                "dispute_id": rejected.id,
-                "service_act_id": rejected.service_act_id,
-                "reason": rejected.resolution_reason,
-            },
-        )
-
-        return rejected
+        except Exception:
+            connection.rollback()
+            raise
 
     def withdraw(
         self,
@@ -289,43 +333,52 @@ class DisputeService:
                 "only the dispute initiator may withdraw the dispute"
             )
 
-        self.repository.connection.execute(
-            """
-            UPDATE disputes
-            SET
-                status = ?,
-                resolution_reason = ?
-            WHERE tenant_id = ?
-              AND id = ?
-            """,
-            (
-                DisputeStatus.WITHDRAWN.value,
-                reason.strip(),
+        connection = self.repository.connection
+
+        try:
+            connection.execute("BEGIN")
+
+            connection.execute(
+                """
+                UPDATE disputes
+                SET
+                    status = ?,
+                    resolution_reason = ?
+                WHERE tenant_id = ?
+                  AND id = ?
+                """,
+                (
+                    DisputeStatus.WITHDRAWN.value,
+                    reason.strip(),
+                    tenant_id,
+                    dispute_id,
+                ),
+            )
+
+            withdrawn = self.repository.get(
                 tenant_id,
                 dispute_id,
-            ),
-        )
+            )
 
-        self.repository.connection.commit()
+            audit_event(
+                event_type="dispute_withdrawn",
+                actor_id=actor_user_id,
+                tenant_id=tenant_id,
+                action="withdraw_dispute",
+                metadata={
+                    "dispute_id": withdrawn.id,
+                    "service_act_id": withdrawn.service_act_id,
+                    "reason": withdrawn.resolution_reason,
+                },
+                connection=connection,
+            )
 
-        withdrawn = self.repository.get(
-            tenant_id,
-            dispute_id,
-        )
+            connection.commit()
+            return withdrawn
 
-        audit_event(
-            event_type="dispute_withdrawn",
-            actor_id=actor_user_id,
-            tenant_id=tenant_id,
-            action="withdraw_dispute",
-            metadata={
-                "dispute_id": withdrawn.id,
-                "service_act_id": withdrawn.service_act_id,
-                "reason": withdrawn.resolution_reason,
-            },
-        )
-
-        return withdrawn
+        except Exception:
+            connection.rollback()
+            raise
 
     def _get_dispute(
         self,
@@ -347,6 +400,7 @@ class DisputeService:
         tenant_id: str,
         dispute_id: int,
         status: DisputeStatus,
+        commit: bool = True,
     ) -> Dispute:
         self.repository.connection.execute(
             """
@@ -362,7 +416,8 @@ class DisputeService:
             ),
         )
 
-        self.repository.connection.commit()
+        if commit:
+            self.repository.connection.commit()
 
         return self.repository.get(
             tenant_id,
