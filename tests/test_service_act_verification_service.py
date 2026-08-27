@@ -29,6 +29,7 @@ class FakeServiceActService:
         target_status,
         cancellation_reason=None,
         commit=True,
+        actor_id=None,
     ):
         self.calls.append(
             (
@@ -236,6 +237,7 @@ class TransactionServiceActService:
         target_status,
         cancellation_reason=None,
         commit=True,
+        actor_id=None,
     ):
         self.calls.append(
             (

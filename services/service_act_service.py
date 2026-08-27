@@ -37,6 +37,7 @@ class ServiceActService:
         target_status: ServiceActStatus,
         cancellation_reason: str | None = None,
         commit: bool = True,
+        actor_id: int | None = None,
     ):
         act = self.repository.get(tenant_id, act_id)
 

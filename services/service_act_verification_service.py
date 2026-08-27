@@ -45,6 +45,7 @@ class ServiceActVerificationService:
                     service_act_id,
                     ServiceActStatus.COMPLETED,
                     commit=False,
+                    actor_id=actor_id,
                 )
 
                 audit_event(
@@ -71,6 +72,7 @@ class ServiceActVerificationService:
                         "Service Act rejected by verification."
                     ),
                     commit=False,
+                    actor_id=actor_id,
                 )
 
                 audit_event(
