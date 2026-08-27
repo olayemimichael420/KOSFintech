@@ -107,6 +107,107 @@ def _migrate_user_schools_tenant_fk(connection: sqlite3.Connection) -> None:
     )
 
 
+def _migrate_talent_point_transactions(connection: sqlite3.Connection) -> None:
+    """Upgrade the legacy Talent Point transaction schema for transfers."""
+
+    table = connection.execute(
+        """
+        SELECT sql
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'talent_point_transactions'
+        """
+    ).fetchone()
+
+    if table is None:
+        return
+
+    table_sql = table["sql"] or ""
+
+    if (
+        "service_act_id INTEGER," in table_sql
+        and "CHECK(amount != 0)" in table_sql
+        and "CHECK(transaction_type IN ('issuance', 'transfer'))" in table_sql
+    ):
+        return
+
+    invalid_rows = connection.execute(
+        """
+        SELECT id
+        FROM talent_point_transactions
+        WHERE amount <= 0
+           OR transaction_type != 'issuance'
+           OR service_act_id IS NULL
+        LIMIT 1
+        """
+    ).fetchone()
+
+    if invalid_rows:
+        raise RuntimeError(
+            "Cannot migrate talent_point_transactions: "
+            "existing rows are incompatible with the expected legacy "
+            "issuance-only schema."
+        )
+
+    connection.execute(
+        """
+        CREATE TABLE talent_point_transactions_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            user_id INTEGER NOT NULL,
+            service_act_id INTEGER,
+            amount INTEGER NOT NULL CHECK(amount != 0),
+            transaction_type TEXT NOT NULL
+                CHECK(transaction_type IN ('issuance', 'transfer')),
+            reference TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (user_id, tenant_id)
+                REFERENCES users(id, tenant_id),
+
+            FOREIGN KEY (service_act_id, tenant_id)
+                REFERENCES service_acts(id, tenant_id),
+
+            UNIQUE(id, tenant_id)
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        INSERT INTO talent_point_transactions_new (
+            id,
+            tenant_id,
+            user_id,
+            service_act_id,
+            amount,
+            transaction_type,
+            reference,
+            created_at
+        )
+        SELECT
+            id,
+            tenant_id,
+            user_id,
+            service_act_id,
+            amount,
+            transaction_type,
+            reference,
+            created_at
+        FROM talent_point_transactions
+        """
+    )
+
+    connection.execute("DROP TABLE talent_point_transactions")
+
+    connection.execute(
+        """
+        ALTER TABLE talent_point_transactions_new
+        RENAME TO talent_point_transactions
+        """
+    )
+
+
 def _create_audit_immutability_triggers(connection: sqlite3.Connection) -> None:
     """Prevent modification or deletion of persisted audit events."""
     connection.execute("""
@@ -366,6 +467,7 @@ def init_db() -> None:
         )
 
         _migrate_user_schools_tenant_fk(connection)
+        _migrate_talent_point_transactions(connection)
 
         connection.execute(
             """
@@ -631,9 +733,10 @@ def init_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
                 user_id INTEGER NOT NULL,
-                service_act_id INTEGER NOT NULL,
-                amount INTEGER NOT NULL CHECK(amount > 0),
-                transaction_type TEXT NOT NULL,
+                service_act_id INTEGER,
+                amount INTEGER NOT NULL CHECK(amount != 0),
+                transaction_type TEXT NOT NULL
+                    CHECK(transaction_type IN ('issuance', 'transfer')),
                 reference TEXT,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 

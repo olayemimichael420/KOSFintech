@@ -25,6 +25,9 @@ class ApplicationServices:
         self._talent_point_issuance = (
             factory.build_talent_point_issuance_service()
         )
+        self._talent_point_transfer = (
+            factory.build_talent_point_transfer_service()
+        )
         self._dispute = factory.build_dispute_service()
         self._reputation = factory.build_reputation_service()
         self._reputation_profile = (
@@ -46,6 +49,10 @@ class ApplicationServices:
     @property
     def talent_point_issuance(self):
         return self._talent_point_issuance
+
+    @property
+    def talent_point_transfer(self):
+        return self._talent_point_transfer
 
     @property
     def dispute(self):

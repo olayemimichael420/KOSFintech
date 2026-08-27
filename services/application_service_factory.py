@@ -10,6 +10,7 @@ from services.verification_decision_service import VerificationDecisionService
 from services.service_act_verification_service import ServiceActVerificationService
 from services.verification_workflow_service import VerificationWorkflowService
 from services.talent_point_issuance_service import TalentPointIssuanceService
+from services.talent_point_transfer_service import TalentPointTransferService
 from services.dispute_service import DisputeService
 from services.reputation_service import ReputationService
 from services.reputation_profile_service import ReputationProfileService
@@ -80,6 +81,11 @@ class ApplicationServiceFactory:
                 self._talent_point_repository
             )
         )
+        self._talent_point_transfer_service = (
+            TalentPointTransferService(
+                self._talent_point_repository
+            )
+        )
 
         self._dispute_service = DisputeService(
             repository=self._dispute_repository,
@@ -120,6 +126,9 @@ class ApplicationServiceFactory:
 
     def build_talent_point_issuance_service(self):
         return self._talent_point_issuance_service
+
+    def build_talent_point_transfer_service(self):
+        return self._talent_point_transfer_service
 
     def build_service_act_service(self):
         return self._service_act_service

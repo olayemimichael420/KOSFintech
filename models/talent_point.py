@@ -8,7 +8,7 @@ class TalentPointTransaction:
     id: Optional[int]
     tenant_id: str
     user_id: int
-    service_act_id: int
+    service_act_id: Optional[int]
     amount: int
     transaction_type: str
     created_at: Optional[datetime] = None
