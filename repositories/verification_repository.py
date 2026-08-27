@@ -7,7 +7,11 @@ class VerificationRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def create(self, verification: Verification) -> Verification:
+    def create(
+        self,
+        verification: Verification,
+        commit: bool = True,
+    ) -> Verification:
         cursor = self.connection.execute(
             """
             INSERT INTO verifications (
@@ -28,7 +32,8 @@ class VerificationRepository:
             ),
         )
 
-        self.connection.commit()
+        if commit:
+            self.connection.commit()
         verification.id = cursor.lastrowid
         return self.get(verification.tenant_id, verification.id)
 
