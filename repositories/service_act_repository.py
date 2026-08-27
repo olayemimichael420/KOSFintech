@@ -7,7 +7,11 @@ class ServiceActRepository:
     def __init__(self, connection):
         self.connection = connection
 
-    def create(self, act: ServiceAct) -> ServiceAct:
+    def create(
+        self,
+        act: ServiceAct,
+        commit: bool = True,
+    ) -> ServiceAct:
         cursor = self.connection.execute(
             """
             INSERT INTO service_acts (
@@ -30,7 +34,9 @@ class ServiceActRepository:
             ),
         )
 
-        self.connection.commit()
+        if commit:
+            self.connection.commit()
+
         act.id = cursor.lastrowid
 
         return self.get(act.tenant_id, act.id)
