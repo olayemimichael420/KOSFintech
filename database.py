@@ -911,6 +911,78 @@ def init_db() -> None:
             """
         )
 
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS governance_proposals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                proposer_user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'draft'
+                    CHECK(status IN ('draft', 'open', 'closed', 'cancelled')),
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                opened_at TEXT,
+                closed_at TEXT,
+                UNIQUE(id, tenant_id),
+                FOREIGN KEY (proposer_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_governance_proposals_tenant_status
+            ON governance_proposals(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_governance_proposals_proposer
+            ON governance_proposals(tenant_id, proposer_user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS governance_votes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                proposal_id INTEGER NOT NULL,
+                voter_user_id INTEGER NOT NULL,
+                choice TEXT NOT NULL
+                    CHECK(choice IN ('yes', 'no', 'abstain')),
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(id, tenant_id),
+                UNIQUE(tenant_id, proposal_id, voter_user_id),
+                FOREIGN KEY (proposal_id, tenant_id)
+                    REFERENCES governance_proposals(id, tenant_id),
+                FOREIGN KEY (voter_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_governance_votes_proposal
+            ON governance_votes(tenant_id, proposal_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_governance_votes_voter
+            ON governance_votes(tenant_id, voter_user_id)
+            """
+        )
+
         connection.commit()
 
     finally:
