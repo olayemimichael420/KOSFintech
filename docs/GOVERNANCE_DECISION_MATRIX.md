@@ -7189,3 +7189,345 @@ Current status:
 - Executable authorization: NOT GRANTED
 
 **GOVERNANCE CONSTITUTIONAL CONTINUITY, EMERGENCY CONDITIONS AND PRESERVATION OF CONSTITUTIONAL ORDER: UNRESOLVED — IMPLEMENTATION NOT AUTHORIZED.**
+## 43. Governance Constitutional Compliance, Enforcement and Remedial Authority — Constitutional Determination
+
+### Deterministic Question
+
+What constitutional conditions determine whether a Governance Authority, Governance Mandate, Governance Decision, constitutional determination, or other constitutionally significant action complies with the applicable constitutional framework, what authority may determine non-compliance, what remedies may be authorized, and what limits prevent enforcement or remediation from becoming an independent source of constitutional power?
+
+A constitutional compliance or enforcement mechanism MUST NOT acquire constitutional authority merely because software, an administrator, an authenticated account, a database state, an API response, an operational practice, or an enforcement workflow treats an action as compliant, non-compliant, enforceable, invalid, or remedial.
+
+### Proposed Constitutional Direction
+
+Constitutional compliance and remediation SHOULD be explicitly determinable by:
+
+- applicable constitutional source;
+- applicable constitutional hierarchy;
+- compliance standard;
+- authority subject to compliance;
+- authority competent to determine compliance;
+- required evidence;
+- applicable jurisdiction;
+- required review or determination procedure;
+- available enforcement authority;
+- permissible remedies;
+- limits upon enforcement and remedial authority;
+- treatment of defective or unauthorized acts;
+- treatment of completed and pending actions;
+- restoration or corrective requirements;
+- review and challenge rights;
+- temporal effect;
+- historical preservation; and
+- finality requirements.
+
+Constitutional compliance MUST remain distinguishable from software validation, automated policy checking, administrative preference, operational enforcement, security controls, and technical error handling.
+
+### Compliance Preconditions
+
+A constitutionally significant action MUST NOT be treated as constitutionally compliant unless the applicable constitutional framework establishes:
+
+- the constitutional rule against which compliance is assessed;
+- the authority subject to that rule;
+- the applicable jurisdiction;
+- the required evidence;
+- the authority competent to determine compliance;
+- the required determination procedure;
+- the applicable temporal conditions;
+- and the constitutional consequence of compliance or non-compliance.
+
+Compliance prerequisites remain UNRESOLVED.
+
+### Constitutional Compliance Standard
+
+The constitutional framework MUST determine:
+
+- what constitutes compliance;
+- whether compliance requires affirmative evidence;
+- whether absence of prohibited conduct is sufficient;
+- whether procedural compliance is distinct from substantive compliance;
+- whether partial compliance may exist;
+- whether compliance may be conditional;
+- whether compliance may be presumed;
+- and whether compliance determinations may be revised.
+
+Compliance-standard rules remain UNRESOLVED.
+
+### Non-Compliance
+
+The constitutional framework MUST determine what constitutes constitutional non-compliance, including where applicable:
+
+- exercise of authority without constitutional authorization;
+- exercise of authority beyond jurisdiction;
+- violation of constitutional limitation;
+- failure to satisfy required procedure;
+- reliance upon insufficient evidence;
+- defective ratification or determination;
+- unauthorized delegation or transfer;
+- unauthorized amendment or alteration;
+- unauthorized emergency action;
+- or other constitutionally established breach.
+
+Non-compliance rules remain UNRESOLVED.
+
+### Compliance Determination Authority
+
+The constitutional framework MUST determine:
+
+- who may determine constitutional compliance;
+- who may determine non-compliance;
+- whether compliance determination may be delegated;
+- whether automated determination is permitted;
+- what evidence is required;
+- whether independent confirmation is required;
+- applicable jurisdiction;
+- applicable review procedure;
+- and whether the determination itself has constitutional effect.
+
+Compliance-determination authority remains UNRESOLVED.
+
+### Enforcement Authority
+
+Where constitutional enforcement is permitted, the framework MUST determine:
+
+- who possesses enforcement authority;
+- the constitutional source of enforcement authority;
+- the purposes for which enforcement may occur;
+- the jurisdiction of enforcement;
+- permissible enforcement measures;
+- prohibited enforcement measures;
+- whether enforcement authority may be delegated;
+- whether enforcement authority may be transferred;
+- and whether enforcement may itself be challenged.
+
+Enforcement-authority rules remain UNRESOLVED.
+
+### Remedial Authority
+
+The constitutional framework MUST determine:
+
+- what remedies may be imposed or authorized;
+- who may authorize each remedy;
+- whether corrective action is mandatory or discretionary;
+- whether restoration may be required;
+- whether an unauthorized act may be reversed;
+- whether a defective decision may be suspended;
+- whether a new determination is required;
+- whether compensation, restitution, correction, or other remedy is constitutionally available where applicable;
+- and the limits of remedial authority.
+
+Remedial-authority rules remain UNRESOLVED.
+
+### Treatment of Unauthorized Acts
+
+The constitutional framework MUST determine the treatment of an act performed:
+
+- without authority;
+- beyond authority;
+- under defective delegation;
+- under defective ratification;
+- under an invalid determination;
+- during an unauthorized emergency;
+- through unauthorized amendment;
+- or otherwise contrary to constitutional requirements.
+
+The framework MUST distinguish, where constitutionally relevant, between:
+
+- void acts;
+- voidable acts;
+- defective but preservable acts;
+- acts requiring correction;
+- acts requiring reversal;
+- and acts whose effects remain temporarily preserved pending review.
+
+Unauthorized-act treatment remains UNRESOLVED.
+
+### Completed and Pending Actions
+
+A finding of constitutional non-compliance MUST NOT automatically determine the treatment of every resulting action.
+
+The constitutional framework MUST determine:
+
+- treatment of completed actions;
+- treatment of pending actions;
+- treatment of irreversible actions;
+- treatment of actions relied upon by affected parties;
+- treatment of downstream decisions;
+- treatment of delegated actions;
+- and whether corrective or remedial measures differ according to the status of the action.
+
+Completed and pending-action rules remain UNRESOLVED.
+
+### Enforcement Limits
+
+Enforcement authority MUST remain subject to constitutional limitations.
+
+The framework MUST determine whether enforcement may be limited by:
+
+- higher constitutional authority;
+- jurisdiction;
+- subject matter;
+- proportionality or equivalent constitutional limitation where applicable;
+- protected rights or principles;
+- temporal restrictions;
+- procedural requirements;
+- evidentiary requirements;
+- existing constitutional determinations;
+- or other constitutionally protected constraints.
+
+Enforcement-limit rules remain UNRESOLVED.
+
+### No Enforcement by Technical Convenience
+
+Software MUST NOT independently:
+
+- declare an act constitutionally invalid;
+- create enforcement authority;
+- create remedial authority;
+- determine constitutional breach;
+- expand an enforcement mandate;
+- impose a constitutional remedy;
+- convert a technical error into constitutional non-compliance;
+- or convert an operational preference into constitutional enforcement.
+
+Software MAY operationally enforce constitutionally established rules where such enforcement is expressly authorized.
+
+Technical-enforcement rules remain UNRESOLVED.
+
+### Corrective and Restorative Action
+
+Where constitutional remediation is authorized, the framework MUST determine:
+
+- who may order corrective action;
+- what constitutes adequate correction;
+- whether restoration is required;
+- whether restoration may be partial;
+- treatment of affected authorities and mandates;
+- treatment of affected decisions;
+- treatment of records;
+- treatment of downstream consequences;
+- and when corrective action is constitutionally complete.
+
+Corrective-action rules remain UNRESOLVED.
+
+### Review and Challenge
+
+A constitutional compliance, non-compliance, enforcement, or remedial determination MUST be subject to whatever review and challenge mechanisms the constitutional framework establishes.
+
+The framework MUST determine:
+
+- who may challenge;
+- permissible grounds;
+- reviewing authority;
+- applicable procedure;
+- evidentiary requirements;
+- interim measures;
+- effect of a pending challenge;
+- treatment of enforcement during review;
+- and finality.
+
+Compliance-review rules remain UNRESOLVED.
+
+### Historical Integrity
+
+Constitutionally significant compliance and enforcement events MUST remain reconstructable through records identifying, where applicable:
+
+- the constitutional rule applied;
+- the authority assessed;
+- the relevant action;
+- evidence considered;
+- compliance or non-compliance determination;
+- determining authority;
+- jurisdiction;
+- enforcement action;
+- remedial action;
+- review or challenge;
+- final determination;
+- and resulting constitutional effects.
+
+Historical compliance requirements remain UNRESOLVED.
+
+### Fail-Closed Constitutional Compliance
+
+Where the applicable constitutional rule, compliance standard, determining authority, evidence, jurisdiction, enforcement authority, remedial authority, or review condition cannot be constitutionally established:
+
+**CONSTITUTIONAL COMPLIANCE AND ENFORCEMENT MUST FAIL CLOSED.**
+
+No governance mechanism MAY manufacture constitutional enforcement or remedial authority from administrative preference, operational urgency, software behavior, database state, technical failure, or convenience.
+
+### Required Determinations
+
+| Compliance Question | Determination |
+|---|---|
+| Constitutional compliance definition | UNRESOLVED |
+| Applicable constitutional source | UNRESOLVED |
+| Applicable constitutional hierarchy | UNRESOLVED |
+| Compliance standard | UNRESOLVED |
+| Authority subject to compliance | UNRESOLVED |
+| Compliance-determination authority | UNRESOLVED |
+| Non-compliance definition | UNRESOLVED |
+| Required evidence | UNRESOLVED |
+| Jurisdiction | UNRESOLVED |
+| Determination procedure | UNRESOLVED |
+| Enforcement authority | UNRESOLVED |
+| Enforcement powers | UNRESOLVED |
+| Enforcement limitations | UNRESOLVED |
+| Remedial authority | UNRESOLVED |
+| Permissible remedies | UNRESOLVED |
+| Unauthorized-act treatment | UNRESOLVED |
+| Completed-action treatment | UNRESOLVED |
+| Pending-action treatment | UNRESOLVED |
+| Corrective and restorative action | UNRESOLVED |
+| Review or challenge | UNRESOLVED |
+| Historical integrity | UNRESOLVED |
+| Temporal effect | UNRESOLVED |
+| Finality | UNRESOLVED |
+| Software representation | UNRESOLVED |
+| Executable authorization | NOT GRANTED |
+
+### Implementation Gate
+
+No governance mechanism MAY treat an action as constitutionally compliant, non-compliant, invalid, enforceable, or remedial unless the applicable constitutional source, hierarchy, compliance standard, determining authority, evidence, jurisdiction, procedure, enforcement authority, remedial authority, and review requirements have been explicitly established.
+
+No software mechanism MAY independently:
+
+- create constitutional compliance standards;
+- determine constitutional authority;
+- create constitutional enforcement authority;
+- create remedial authority;
+- declare constitutional invalidity;
+- expand enforcement powers;
+- impose constitutional remedies;
+- determine the constitutional consequences of a defective act;
+- establish retrospective constitutional consequences;
+- establish finality; or
+- manufacture constitutional authority from technical behavior.
+
+Software MAY represent or operationally enforce constitutionally established compliance requirements where such implementation is expressly authorized, but software representation and enforcement MUST remain subordinate to the applicable constitutional determination.
+
+A technical validation result MUST NOT be treated as constitutional compliance merely because software reports success.
+
+A software failure MUST NOT automatically be treated as constitutional non-compliance merely because an implementation did not execute as expected.
+
+Where constitutional compliance, non-compliance, enforcement, remediation, or review cannot be established:
+
+**CONSTITUTIONAL COMPLIANCE AND ENFORCEMENT MUST FAIL CLOSED.**
+
+Current status:
+- Compliance model: PROPOSED — EXPLICIT CONSTITUTIONAL COMPLIANCE DETERMINATION
+- Compliance standard: UNRESOLVED
+- Determining authority: UNRESOLVED
+- Non-compliance: UNRESOLVED
+- Evidence requirements: UNRESOLVED
+- Jurisdiction: UNRESOLVED
+- Enforcement authority: UNRESOLVED
+- Enforcement limitations: UNRESOLVED
+- Remedial authority: UNRESOLVED
+- Unauthorized-act treatment: UNRESOLVED
+- Completed and pending actions: UNRESOLVED
+- Corrective and restorative action: UNRESOLVED
+- Review or challenge: UNRESOLVED
+- Historical integrity: UNRESOLVED
+- Finality: UNRESOLVED
+- Executable authorization: NOT GRANTED
+
+**GOVERNANCE CONSTITUTIONAL COMPLIANCE, ENFORCEMENT AND REMEDIAL AUTHORITY: UNRESOLVED — IMPLEMENTATION NOT AUTHORIZED.**
