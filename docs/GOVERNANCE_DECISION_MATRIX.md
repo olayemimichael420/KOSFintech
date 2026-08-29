@@ -6898,3 +6898,294 @@ Current status:
 - Executable authorization: NOT GRANTED
 
 **GOVERNANCE CONSTITUTIONAL AMENDMENT, ALTERATION AND CONTINUITY: UNRESOLVED — IMPLEMENTATION NOT AUTHORIZED.**
+## 42. Governance Constitutional Continuity, Emergency Conditions and Preservation of Constitutional Order — Constitutional Determination
+
+### Deterministic Question
+
+What constitutional conditions determine how constitutional continuity, exceptional circumstances, emergency conditions, institutional disruption, incapacity, or threats to constitutional order are recognized, governed, limited, recorded, reviewed, and terminated without allowing exceptional conditions to become an independent source of unrestricted constitutional authority?
+
+Exceptional circumstances MUST NOT acquire constitutional authority merely because software, an administrator, an authenticated account, a database state, an API response, an operational practice, or an emergency procedure treats a circumstance as exceptional.
+
+### Proposed Constitutional Direction
+
+Constitutional continuity SHOULD be explicitly determinable by:
+
+- constitutional source;
+- constitutional continuity authority;
+- conditions constituting an exceptional circumstance;
+- authority competent to recognize the circumstance;
+- required evidence;
+- required declaration or determination procedure;
+- jurisdiction;
+- permissible emergency powers;
+- limitations on exceptional authority;
+- protected constitutional provisions or principles;
+- temporal limits;
+- required oversight;
+- review and challenge conditions;
+- reporting and record requirements;
+- restoration conditions;
+- termination of exceptional authority;
+- treatment of actions taken during the exceptional period;
+- historical preservation; and
+- finality or post-emergency review.
+
+Constitutional continuity MUST remain distinguishable from administrative convenience, technical failure handling, ordinary operational disruption, software exception handling, and unilateral emergency action.
+### Continuity Preconditions
+
+Constitutional continuity MUST NOT be treated as preserved, interrupted, suspended, or restored unless the applicable constitutional framework establishes:
+
+- the constitutional condition requiring continuity protection;
+- the authority competent to recognize a continuity threat;
+- the evidence required;
+- the applicable jurisdiction;
+- the required determination procedure;
+- the permissible response;
+- the limitations upon exceptional authority;
+- the effective time;
+- the review requirements; and
+- the conditions for restoration of ordinary constitutional operation.
+
+Continuity prerequisites remain UNRESOLVED.
+
+### Exceptional Circumstances
+
+The constitutional framework MUST determine what circumstances may constitute an exceptional condition, including where applicable:
+
+- incapacity of a constitutional authority;
+- institutional disruption;
+- inability to perform an essential constitutional function;
+- loss or compromise of constitutionally significant records;
+- inability to obtain required constitutional determination;
+- conflict between constitutionally recognized authorities;
+- serious threat to constitutional order; or
+- other constitutionally recognized circumstances.
+
+No circumstance MAY be treated as constitutionally exceptional solely because an administrator, software system, operational process, or subordinate authority declares it to be exceptional.
+
+Exceptional-circumstance rules remain UNRESOLVED.
+
+### Emergency Recognition Authority
+
+The constitutional framework MUST determine:
+
+- who may recognize an exceptional circumstance;
+- whether recognition may be delegated;
+- whether recognition may occur automatically;
+- what evidence is required;
+- whether independent confirmation is required;
+- whether recognition is itself subject to review;
+- the jurisdictional limits of recognition; and
+- whether recognition creates any authority beyond initiating constitutional continuity procedures.
+
+Emergency-recognition authority remains UNRESOLVED.
+
+### Exceptional Authority
+
+Where exceptional authority is constitutionally permitted, the framework MUST determine:
+
+- what powers may be exercised;
+- who may exercise them;
+- the constitutional source of those powers;
+- the purposes for which they may be exercised;
+- prohibited uses;
+- whether ordinary authority may be bypassed;
+- whether authority may be expanded;
+- whether authority may be transferred;
+- and whether exceptional authority may create permanent constitutional consequences.
+
+Exceptional-authority rules remain UNRESOLVED.
+
+### Non-Derogable Constitutional Protection
+
+The constitutional framework MUST determine whether particular constitutional authorities, principles, rights, records, procedures, or limitations remain protected during exceptional circumstances.
+
+No emergency condition MAY automatically suspend a constitutional protection merely because ordinary governance is disrupted.
+
+Non-derogable-protection rules remain UNRESOLVED.
+
+### Temporal Limitation
+
+Exceptional authority MUST NOT continue indefinitely merely because the condition that initiated it has not been administratively closed.
+
+The constitutional framework MUST determine:
+
+- maximum duration;
+- renewal requirements;
+- renewal authority;
+- required evidence for continuation;
+- periodic review;
+- expiry conditions;
+- and consequences of unauthorized continuation.
+
+Temporal emergency limits remain UNRESOLVED.
+
+### Oversight and Accountability
+
+The constitutional framework MUST determine:
+
+- who oversees exceptional authority;
+- what records must be produced;
+- reporting requirements;
+- independent review requirements;
+- responsibility for actions taken;
+- consequences of exceeding exceptional authority;
+- and whether oversight remains operative during the exceptional period.
+
+Emergency oversight rules remain UNRESOLVED.
+
+### No Emergency Software Authority
+
+Software MUST NOT independently:
+
+- declare a constitutional emergency;
+- create emergency authority;
+- expand emergency powers;
+- suspend constitutional limitations;
+- extend emergency duration;
+- determine that ordinary constitutional authority has ceased;
+- transfer constitutional authority;
+- or declare constitutional restoration.
+
+Software MAY support constitutionally authorized continuity procedures where such support is expressly authorized.
+
+Technical emergency-authority rules remain UNRESOLVED.
+
+### Restoration of Constitutional Order
+
+The constitutional framework MUST determine:
+
+- what constitutes restoration;
+- who determines that restoration has occurred;
+- required evidence;
+- required procedure;
+- whether restoration requires certification or ratification;
+- termination of exceptional authority;
+- return of ordinary authorities and mandates;
+- treatment of pending matters;
+- treatment of actions taken during the exceptional period;
+- and post-restoration review.
+
+Restoration rules remain UNRESOLVED.
+
+### Post-Emergency Review
+
+Actions taken under exceptional authority MUST be subject to whatever constitutional review the framework establishes, including where applicable:
+
+- review of authority;
+- review of evidence;
+- review of procedural compliance;
+- review of proportionality or permitted scope;
+- review of resulting decisions;
+- review of delegated actions;
+- review of constitutional consequences;
+- and treatment of defective actions.
+
+Post-emergency review requirements remain UNRESOLVED.
+
+### Historical Integrity
+
+Constitutionally significant continuity events MUST remain reconstructable through records identifying, where applicable:
+
+- the exceptional circumstance;
+- evidence supporting recognition;
+- recognizing authority;
+- applicable constitutional source;
+- commencement time;
+- powers exercised;
+- authorities exercising those powers;
+- oversight;
+- renewals;
+- challenges or reviews;
+- restoration;
+- termination;
+- and post-emergency consequences.
+
+Historical continuity requirements remain UNRESOLVED.
+
+### Fail-Closed Constitutional Continuity
+
+Where the existence of an exceptional circumstance, recognition authority, permissible exceptional power, limitation, duration, oversight, or restoration condition cannot be constitutionally established:
+
+**CONSTITUTIONAL CONTINUITY MUST FAIL CLOSED.**
+
+No governance mechanism MAY manufacture emergency authority from operational urgency, administrative preference, technical failure, software behavior, database state, or convenience.
+### Required Determinations
+
+| Continuity Question | Determination |
+|---|---|
+| Constitutional continuity definition | UNRESOLVED |
+| Continuity authority | UNRESOLVED |
+| Constitutional source | UNRESOLVED |
+| Exceptional circumstance definition | UNRESOLVED |
+| Recognition authority | UNRESOLVED |
+| Recognition procedure | UNRESOLVED |
+| Required evidence | UNRESOLVED |
+| Jurisdiction | UNRESOLVED |
+| Exceptional powers | UNRESOLVED |
+| Exceptional-power limitations | UNRESOLVED |
+| Non-derogable protections | UNRESOLVED |
+| Maximum duration | UNRESOLVED |
+| Renewal authority | UNRESOLVED |
+| Renewal requirements | UNRESOLVED |
+| Oversight | UNRESOLVED |
+| Accountability | UNRESOLVED |
+| Emergency record requirements | UNRESOLVED |
+| Restoration authority | UNRESOLVED |
+| Restoration procedure | UNRESOLVED |
+| Termination of exceptional authority | UNRESOLVED |
+| Existing-state treatment | UNRESOLVED |
+| Pending-matter treatment | UNRESOLVED |
+| Post-emergency review | UNRESOLVED |
+| Defective emergency action treatment | UNRESOLVED |
+| Historical integrity | UNRESOLVED |
+| Finality | UNRESOLVED |
+| Software representation | UNRESOLVED |
+| Executable authorization | NOT GRANTED |
+
+### Implementation Gate
+
+No governance mechanism MAY treat an operational disruption, administrative declaration, software exception, database condition, security event, institutional failure, or other circumstance as creating constitutional emergency authority unless the applicable constitutional framework has explicitly established the conditions, recognition authority, evidence, procedure, jurisdiction, permissible powers, limitations, temporal requirements, oversight, and restoration requirements.
+
+No software mechanism MAY independently:
+
+- declare a constitutional emergency;
+- recognize an exceptional constitutional condition;
+- create emergency authority;
+- expand exceptional powers;
+- suspend constitutional limitations;
+- extend exceptional authority;
+- transfer constitutional authority;
+- determine restoration;
+- terminate constitutional protections;
+- establish retrospective emergency authority;
+- establish finality; or
+- manufacture constitutional consequences.
+
+Software MAY represent or support constitutionally established continuity procedures where such representation or support is expressly authorized, but the software MUST remain subordinate to the constitutional framework.
+
+Exceptional circumstances MUST NOT become an independent source of unrestricted constitutional authority.
+
+Where constitutional continuity cannot be established:
+
+**CONSTITUTIONAL CONTINUITY MUST FAIL CLOSED.**
+
+Current status:
+- Continuity model: PROPOSED — EXPLICIT CONSTITUTIONAL CONTINUITY
+- Continuity authority: UNRESOLVED
+- Exceptional circumstance definition: UNRESOLVED
+- Recognition authority: UNRESOLVED
+- Recognition procedure: UNRESOLVED
+- Evidence requirements: UNRESOLVED
+- Exceptional powers: UNRESOLVED
+- Emergency limitations: UNRESOLVED
+- Non-derogable protections: UNRESOLVED
+- Temporal limits: UNRESOLVED
+- Oversight and accountability: UNRESOLVED
+- Restoration: UNRESOLVED
+- Post-emergency review: UNRESOLVED
+- Historical integrity: UNRESOLVED
+- Finality: UNRESOLVED
+- Executable authorization: NOT GRANTED
+
+**GOVERNANCE CONSTITUTIONAL CONTINUITY, EMERGENCY CONDITIONS AND PRESERVATION OF CONSTITUTIONAL ORDER: UNRESOLVED — IMPLEMENTATION NOT AUTHORIZED.**
