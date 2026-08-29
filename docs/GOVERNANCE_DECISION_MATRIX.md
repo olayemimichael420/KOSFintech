@@ -6595,3 +6595,306 @@ Current status:
 - Executable authorization: NOT GRANTED
 
 **GOVERNANCE CONSTITUTIONAL DETERMINATION, RATIFICATION, EFFECT AND AUTHORITY: UNRESOLVED — IMPLEMENTATION NOT AUTHORIZED.**
+## 41. Governance Constitutional Amendment, Alteration and Continuity of the Constitutional Framework — Constitutional Determination
+
+### Deterministic Question
+
+What constitutional conditions determine when, by whom, through what authority and procedure, and subject to what limitations, the constitutional framework governing Governance Authority, Governance Mandates, Governance Decisions, and constitutional effects may be amended, altered, supplemented, suspended, or otherwise changed?
+
+A constitutional rule MUST NOT be treated as amended, altered, supplemented, suspended, or replaced merely because software, an administrator, an authenticated account, a database state, an API response, an operational practice, or an administrative instruction represents or applies a different rule.
+
+### Proposed Constitutional Direction
+
+Constitutional amendment SHOULD be explicitly determinable by:
+
+- constitutional amendment authority;
+- constitutional source of amendment power;
+- eligible proposer;
+- eligible approving authority;
+- permissible subject matter;
+- amendment procedure;
+- required evidence;
+- required notice or publication;
+- required approval or ratification;
+- temporal effect;
+- limits on amendment power;
+- protected or unamendable provisions where applicable;
+- effect on existing authorities and mandates;
+- effect on existing determinations and decisions;
+- transitional provisions;
+- historical preservation;
+- review or challenge conditions; and
+- finality requirements.
+
+Constitutional amendment MUST remain distinguishable from interpretation, administrative policy, technical configuration, ordinary governance decisions, and software deployment.
+### Amendment Preconditions
+
+A constitutional framework MUST NOT be treated as amended, altered, supplemented, suspended, or replaced unless the applicable constitutional framework establishes:
+
+- the authority competent to propose the change;
+- the authority competent to approve or ratify the change;
+- the constitutional source of amendment power;
+- the permissible subject matter;
+- the required procedure;
+- the required evidence;
+- the required notice or publication;
+- the required approval or ratification;
+- the effective time; and
+- the constitutional effect of the amendment.
+
+Amendment prerequisites remain UNRESOLVED.
+
+### Amendment Authority
+
+The constitutional framework MUST determine:
+
+- who possesses constitutional amendment authority;
+- whether amendment authority may be delegated;
+- whether amendment authority may be transferred;
+- whether an authority may amend the provisions defining its own authority;
+- whether concurrent amendment authorities may exist;
+- whether amendment authority is jurisdictionally limited; and
+- what conditions terminate or suspend amendment authority.
+
+Amendment-authority rules remain UNRESOLVED.
+
+### Eligible Proposal
+
+The constitutional framework MUST determine:
+
+- who may propose an amendment;
+- whether proposals may originate from governance authorities;
+- whether proposals may originate from subordinate authorities;
+- whether proposals may originate from members or other constitutionally recognized actors;
+- whether multiple proposers are required;
+- required proposal form;
+- required supporting evidence; and
+- whether an amendment proposal has any constitutional effect before approval.
+
+Proposal rules remain UNRESOLVED.
+
+### Amendment Procedure
+
+The constitutional framework MUST determine:
+
+- required stages of amendment;
+- required notices;
+- required deliberation;
+- required approvals;
+- required certifications;
+- required evidence;
+- required voting or consent where applicable;
+- required recording;
+- required publication;
+- and conditions under which an incomplete procedure fails.
+
+Amendment-procedure rules remain UNRESOLVED.
+
+### Amendment Limits
+
+The constitutional framework MUST determine whether amendment power is limited by:
+
+- higher constitutional authority;
+- protected constitutional principles;
+- jurisdiction;
+- subject matter;
+- temporal restrictions;
+- existing constitutional determinations;
+- existing authority;
+- existing vested or recognized rights;
+- continuity requirements;
+- or other constitutionally protected constraints.
+
+Amendment-limit rules remain UNRESOLVED.
+
+### Self-Amendment
+
+Where an amendment would alter the provisions governing amendment authority itself, the constitutional framework MUST determine:
+
+- whether self-amendment is permitted;
+- who may authorize it;
+- whether additional approval is required;
+- whether enhanced procedural requirements apply;
+- whether certain amendment provisions are protected;
+- and whether self-amendment may alter the fundamental identity or hierarchy of the constitutional framework.
+
+Self-amendment rules remain UNRESOLVED.
+
+### Protected Provisions
+
+The constitutional framework SHOULD determine whether particular provisions are:
+
+- amendable;
+- amendable only through enhanced procedure;
+- temporarily protected;
+- permanently protected;
+- or otherwise subject to constitutionally determined amendment limitations.
+
+Protected-provision rules remain UNRESOLVED.
+
+### Effect on Existing Governance State
+
+An amendment MUST NOT automatically determine the treatment of existing:
+
+- Governance Authorities;
+- Governance Mandates;
+- Governance Decisions;
+- constitutional determinations;
+- delegated authorities;
+- successor authorities;
+- pending proceedings;
+- completed actions;
+- or historical records.
+
+The constitutional framework MUST determine whether such states are preserved, modified, terminated, reviewed, or otherwise affected.
+
+Existing-state treatment remains UNRESOLVED.
+
+### Transitional Effect
+
+Where an amendment changes a constitutional rule, the framework MUST determine:
+
+- the transition from the previous rule to the amended rule;
+- treatment of actions initiated under the previous rule;
+- treatment of pending matters;
+- treatment of existing authority;
+- treatment of existing mandates;
+- treatment of existing determinations;
+- treatment of conflicting transitional states;
+- and the effective time of each transitional consequence.
+
+Transitional rules remain UNRESOLVED.
+
+### No Technical Amendment
+
+The following MUST NOT independently amend the constitutional framework:
+
+- source-code changes;
+- database migrations;
+- configuration changes;
+- role changes;
+- API behavior;
+- deployment;
+- administrator instruction;
+- workflow modification;
+- automated inference;
+- or operational practice.
+
+Software MAY implement an authorized constitutional amendment after the amendment has acquired constitutional effect, but software implementation MUST NOT itself constitute amendment.
+
+Technical-amendment rules remain UNRESOLVED.
+
+### Historical Integrity
+
+The constitutional framework MUST determine how amendment history preserves:
+
+- the prior constitutional text or rule;
+- the amendment proposal;
+- the proposing authority;
+- evidence relied upon;
+- approval and ratification;
+- effective time;
+- transitional provisions;
+- superseded provisions;
+- resulting constitutional effects;
+- and subsequent amendments.
+
+Historical amendment requirements remain UNRESOLVED.
+
+### Amendment Review and Challenge
+
+The constitutional framework MUST determine:
+
+- whether an amendment may be challenged;
+- who may challenge it;
+- grounds for challenge;
+- reviewing authority;
+- applicable procedure;
+- interim measures;
+- effect of a pending challenge;
+- treatment of defective amendments;
+- and finality of the reviewing determination.
+
+Amendment-review rules remain UNRESOLVED.
+
+### Fail-Closed Constitutional Change
+
+Where amendment authority, procedure, evidence, approval, ratification, effective time, or constitutional effect cannot be established:
+
+**CONSTITUTIONAL AMENDMENT MUST FAIL CLOSED.**
+
+No governance mechanism MAY manufacture constitutional change from software behavior, administrative preference, operational custom, database state, deployment, or technical configuration.
+### Required Determinations
+
+| Amendment Question | Determination |
+|---|---|
+| Constitutional amendment definition | UNRESOLVED |
+| Amendment authority | UNRESOLVED |
+| Constitutional source of amendment power | UNRESOLVED |
+| Eligible proposer | UNRESOLVED |
+| Eligible approving authority | UNRESOLVED |
+| Permissible subject matter | UNRESOLVED |
+| Amendment procedure | UNRESOLVED |
+| Required evidence | UNRESOLVED |
+| Notice or publication | UNRESOLVED |
+| Approval requirement | UNRESOLVED |
+| Ratification requirement | UNRESOLVED |
+| Effective event | UNRESOLVED |
+| Effective time | UNRESOLVED |
+| Amendment limits | UNRESOLVED |
+| Self-amendment | UNRESOLVED |
+| Protected provisions | UNRESOLVED |
+| Effect on existing authority | UNRESOLVED |
+| Effect on existing mandates | UNRESOLVED |
+| Effect on existing determinations | UNRESOLVED |
+| Transitional effect | UNRESOLVED |
+| Historical integrity | UNRESOLVED |
+| Review or challenge | UNRESOLVED |
+| Defective amendment treatment | UNRESOLVED |
+| Supersession | UNRESOLVED |
+| Finality | UNRESOLVED |
+| Software representation | UNRESOLVED |
+| Executable authorization | NOT GRANTED |
+
+### Implementation Gate
+
+No governance mechanism MAY treat a proposal, administrative instruction, software change, database migration, deployment, operational practice, or technical configuration as a constitutional amendment unless the applicable constitutional amendment authority, source, procedure, evidence, approval, ratification, effective time, jurisdiction, and constitutional effect have been explicitly established.
+
+No software mechanism MAY independently:
+
+- amend the constitutional framework;
+- create amendment authority;
+- authorize self-amendment;
+- remove protected constitutional limitations;
+- establish ratification;
+- determine constitutional effectiveness;
+- alter existing constitutional authority;
+- create retrospective constitutional authority;
+- establish transitional constitutional effects;
+- establish amendment finality; or
+- manufacture constitutional consequences.
+
+Software MAY represent and implement a constitutionally effective amendment where such implementation is expressly authorized, but the software representation MUST remain subordinate to the constitutional amendment itself.
+
+Where constitutional amendment cannot be established:
+
+**CONSTITUTIONAL AMENDMENT MUST FAIL CLOSED.**
+
+Current status:
+- Amendment model: PROPOSED — EXPLICIT CONSTITUTIONAL AMENDMENT
+- Amendment authority: UNRESOLVED
+- Eligible proposer: UNRESOLVED
+- Amendment procedure: UNRESOLVED
+- Evidence requirements: UNRESOLVED
+- Approval and ratification: UNRESOLVED
+- Amendment limits: UNRESOLVED
+- Self-amendment: UNRESOLVED
+- Protected provisions: UNRESOLVED
+- Existing-state effect: UNRESOLVED
+- Transitional effect: UNRESOLVED
+- Historical integrity: UNRESOLVED
+- Review or challenge: UNRESOLVED
+- Finality: UNRESOLVED
+- Executable authorization: NOT GRANTED
+
+**GOVERNANCE CONSTITUTIONAL AMENDMENT, ALTERATION AND CONTINUITY: UNRESOLVED — IMPLEMENTATION NOT AUTHORIZED.**
