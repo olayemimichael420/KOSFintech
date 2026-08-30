@@ -443,7 +443,8 @@ def init_db() -> None:
                 status TEXT NOT NULL DEFAULT 'present',
                 remark TEXT,
                 FOREIGN KEY (student_id, tenant_id)
-                    REFERENCES students(id, tenant_id)
+                    REFERENCES students(id, tenant_id),
+                UNIQUE (tenant_id, student_id, attendance_date)
             )
             """
         )
