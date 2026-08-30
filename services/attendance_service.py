@@ -27,6 +27,12 @@ class AttendanceService:
             self.tenant_id,
         )
 
+    def list_by_student(self, student_id: int):
+        return self.repository.list_by_student(
+            self.tenant_id,
+            student_id,
+        )
+
     def get(self, attendance_id: int):
         return self.repository.get(
             self.tenant_id,
