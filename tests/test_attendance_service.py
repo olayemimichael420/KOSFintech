@@ -22,7 +22,7 @@ def test_attendance_service_records_valid_status():
         """
     )
 
-    service = AttendanceService(AttendanceRepository(connection))
+    service = AttendanceService(AttendanceRepository(connection), tenant_id="school-001")
 
     result = service.record(
         Attendance(
@@ -57,7 +57,7 @@ def test_attendance_service_rejects_invalid_status():
         """
     )
 
-    service = AttendanceService(AttendanceRepository(connection))
+    service = AttendanceService(AttendanceRepository(connection), tenant_id="school-001")
 
     try:
         service.record(
