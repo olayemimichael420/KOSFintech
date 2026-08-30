@@ -22,6 +22,11 @@ class AttendanceService:
 
         return self.repository.create(attendance)
 
+    def list(self):
+        return self.repository.list_by_tenant(
+            self.tenant_id,
+        )
+
     def get(self, attendance_id: int):
         return self.repository.get(
             self.tenant_id,
