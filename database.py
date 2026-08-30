@@ -511,7 +511,8 @@ def init_db() -> None:
                 code_expires TIMESTAMP,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (tenant_id) REFERENCES schools(tenant_id),
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
             )
             """
         )
