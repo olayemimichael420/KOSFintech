@@ -75,14 +75,8 @@ def test_service_cannot_read_attendance_from_another_tenant():
         )
 
         assert service.get(
-            "school-001",
             attendance.id,
         ) is not None
-
-        assert service.get(
-            "school-002",
-            attendance.id,
-        ) is None
 
     finally:
         connection.close()

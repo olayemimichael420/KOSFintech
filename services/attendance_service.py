@@ -22,5 +22,11 @@ class AttendanceService:
 
         return self.repository.create(attendance)
 
-    def get(self, tenant_id: str, attendance_id: int):
-        return self.repository.get(tenant_id, attendance_id)
+    def get(self, attendance_id: int):
+        if self.tenant_id is None:
+            raise ValueError("attendance tenant is required")
+
+        return self.repository.get(
+            self.tenant_id,
+            attendance_id,
+        )

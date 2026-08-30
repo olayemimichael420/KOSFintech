@@ -118,3 +118,53 @@ def test_attendance_service_rejects_cross_tenant_write():
             )
     finally:
         connection.close()
+
+
+def test_attendance_service_read_uses_bound_tenant():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL,
+            remark TEXT
+        )
+        """
+    )
+
+    repository = AttendanceRepository(connection)
+
+    first = repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-001",
+            student_id=1,
+            attendance_date="2026-08-29",
+            status="present",
+        )
+    )
+
+    second = repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-002",
+            student_id=1,
+            attendance_date="2026-08-29",
+            status="absent",
+        )
+    )
+
+    service = AttendanceService(
+        repository,
+        tenant_id="school-001",
+    )
+
+    assert service.get(first.id) is not None
+    assert service.get(second.id) is None
+
+    connection.close()
