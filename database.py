@@ -317,7 +317,8 @@ def init_db() -> None:
                 subject TEXT NOT NULL,
                 qualification TEXT,
                 status TEXT DEFAULT 'active',
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
             )
             """
         )
@@ -334,7 +335,8 @@ def init_db() -> None:
                 guardian_id INTEGER,
                 enrollment_date DATE,
                 status TEXT DEFAULT 'active',
-                FOREIGN KEY (user_id) REFERENCES users(id),
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
                 FOREIGN KEY (guardian_id) REFERENCES parents(id)
             )
             """
@@ -350,7 +352,8 @@ def init_db() -> None:
                 phone TEXT,
                 email TEXT,
                 status TEXT DEFAULT 'active',
-                FOREIGN KEY (user_id) REFERENCES users(id)
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
             )
             """
         )
