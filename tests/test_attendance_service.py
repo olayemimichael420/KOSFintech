@@ -221,3 +221,31 @@ def test_attendance_service_lists_only_bound_tenant_records():
     assert results[0].student_id == 1
 
     connection.close()
+
+def test_attendance_service_lists_empty_for_tenant_with_no_records():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL,
+            remark TEXT
+        )
+        """
+    )
+
+    service = AttendanceService(
+        AttendanceRepository(connection),
+        tenant_id="school-empty",
+    )
+
+    results = service.list()
+
+    assert results == []
+
+    connection.close()
