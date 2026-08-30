@@ -354,3 +354,95 @@ def test_attendance_service_lists_empty_for_student_with_no_records():
     assert results == []
 
     connection.close()
+
+def test_attendance_service_lists_only_bound_tenant_records_for_date():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL,
+            remark TEXT
+        )
+        """
+    )
+
+    repository = AttendanceRepository(connection)
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-001",
+            student_id=1,
+            attendance_date="2026-08-30",
+            status="present",
+        )
+    )
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-002",
+            student_id=2,
+            attendance_date="2026-08-30",
+            status="absent",
+        )
+    )
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-001",
+            student_id=3,
+            attendance_date="2026-08-29",
+            status="late",
+        )
+    )
+
+    service = AttendanceService(
+        repository,
+        tenant_id="school-001",
+    )
+
+    results = service.list_by_date("2026-08-30")
+
+    assert len(results) == 1
+    assert results[0].tenant_id == "school-001"
+    assert results[0].student_id == 1
+    assert results[0].attendance_date == "2026-08-30"
+
+    connection.close()
+
+
+def test_attendance_service_lists_empty_for_date_with_no_records():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL,
+            remark TEXT
+        )
+        """
+    )
+
+    service = AttendanceService(
+        AttendanceRepository(connection),
+        tenant_id="school-001",
+    )
+
+    results = service.list_by_date("2026-08-30")
+
+    assert results == []
+
+    connection.close()

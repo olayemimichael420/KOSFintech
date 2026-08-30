@@ -33,6 +33,12 @@ class AttendanceService:
             student_id,
         )
 
+    def list_by_date(self, attendance_date: str):
+        return self.repository.list_by_date(
+            self.tenant_id,
+            attendance_date,
+        )
+
     def get(self, attendance_id: int):
         return self.repository.get(
             self.tenant_id,

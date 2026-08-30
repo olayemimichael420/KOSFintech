@@ -202,3 +202,100 @@ def test_list_by_student_returns_empty_for_student_with_no_records():
     assert results == []
 
     connection.close()
+
+def test_list_by_date_returns_only_that_tenants_records_for_that_date():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL DEFAULT 'present',
+            remark TEXT
+        )
+        """
+    )
+
+    repository = AttendanceRepository(connection)
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-001",
+            student_id=2,
+            attendance_date="2026-08-30",
+            status="absent",
+        )
+    )
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-001",
+            student_id=1,
+            attendance_date="2026-08-30",
+            status="present",
+        )
+    )
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-001",
+            student_id=3,
+            attendance_date="2026-08-29",
+            status="late",
+        )
+    )
+
+    repository.create(
+        Attendance(
+            id=None,
+            tenant_id="school-002",
+            student_id=1,
+            attendance_date="2026-08-30",
+            status="excused",
+        )
+    )
+
+    results = repository.list_by_date("school-001", "2026-08-30")
+
+    assert len(results) == 2
+    assert all(item.tenant_id == "school-001" for item in results)
+    assert all(item.attendance_date == "2026-08-30" for item in results)
+    assert [item.student_id for item in results] == [1, 2]
+
+    connection.close()
+
+
+def test_list_by_date_returns_empty_when_date_has_no_records():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL,
+            remark TEXT
+        )
+        """
+    )
+
+    repository = AttendanceRepository(connection)
+
+    results = repository.list_by_date(
+        "school-001",
+        "2026-08-30",
+    )
+
+    assert results == []
+
+    connection.close()

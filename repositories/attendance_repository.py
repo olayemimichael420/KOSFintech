@@ -88,6 +88,36 @@ class AttendanceRepository:
             for row in rows
         ]
 
+    def list_by_date(self, tenant_id: str, attendance_date: str):
+        rows = self.connection.execute(
+            """
+            SELECT
+                id,
+                tenant_id,
+                student_id,
+                attendance_date,
+                status,
+                remark
+            FROM attendance
+            WHERE tenant_id = ?
+              AND attendance_date = ?
+            ORDER BY student_id, id
+            """,
+            (tenant_id, attendance_date),
+        ).fetchall()
+
+        return [
+            Attendance(
+                id=row["id"],
+                tenant_id=row["tenant_id"],
+                student_id=row["student_id"],
+                attendance_date=row["attendance_date"],
+                status=row["status"],
+                remark=row["remark"],
+            )
+            for row in rows
+        ]
+
     def get(
         self,
         tenant_id: str,
