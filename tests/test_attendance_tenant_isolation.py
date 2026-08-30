@@ -62,7 +62,7 @@ def test_service_cannot_read_attendance_from_another_tenant():
         create_schema(connection)
 
         repository = AttendanceRepository(connection)
-        service = AttendanceService(repository)
+        service = AttendanceService(repository, tenant_id="school-001")
 
         attendance = service.record(
             Attendance(

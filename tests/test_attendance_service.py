@@ -75,3 +75,46 @@ def test_attendance_service_rejects_invalid_status():
         raise AssertionError("invalid attendance status was accepted")
 
     connection.close()
+
+
+def test_attendance_service_rejects_cross_tenant_write():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+
+    connection.execute(
+        """
+        CREATE TABLE attendance (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            student_id INTEGER NOT NULL,
+            attendance_date DATE NOT NULL,
+            status TEXT NOT NULL,
+            remark TEXT
+        )
+        """
+    )
+
+    service = AttendanceService(
+        AttendanceRepository(connection),
+        tenant_id="school-001",
+    )
+
+    try:
+        try:
+            service.record(
+                Attendance(
+                    id=None,
+                    tenant_id="school-002",
+                    student_id=1,
+                    attendance_date="2026-08-29",
+                    status="present",
+                )
+            )
+        except ValueError as exc:
+            assert str(exc) == "attendance tenant mismatch"
+        else:
+            raise AssertionError(
+                "cross-tenant attendance write was accepted"
+            )
+    finally:
+        connection.close()
