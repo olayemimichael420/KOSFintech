@@ -46,6 +46,7 @@ def test_init_db_creates_core_schema(monkeypatch, tmp_path):
             "user_roles",
             "permissions",
             "role_permissions",
+            "attendance",
         }
 
         assert expected_tables.issubset(tables)

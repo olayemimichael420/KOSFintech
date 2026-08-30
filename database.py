@@ -435,6 +435,21 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS attendance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                student_id INTEGER NOT NULL,
+                attendance_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'present',
+                remark TEXT,
+                FOREIGN KEY (student_id, tenant_id)
+                    REFERENCES students(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS parent_schools (
                 tenant_id TEXT NOT NULL,
                 parent_id INTEGER NOT NULL,
