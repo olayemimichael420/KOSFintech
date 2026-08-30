@@ -520,3 +520,20 @@ def test_governance_audit_events_are_persisted(tmp_path):
         assert "governance_vote_cast" in event_types
     finally:
         connection.close()
+
+
+def test_governance_service_denies_execution_when_constitutional_authorization_is_not_granted(tmp_path):
+    connection, service, users = _setup(tmp_path)
+    try:
+        with pytest.raises(
+            ValueError,
+            match="governance action not yet constitutionally authorized",
+        ):
+            service.create_proposal(
+                tenant_id="tenant-001",
+                proposer_user_id=users[0],
+                title="Constitutional Gate Test",
+                description="Governance must remain fail-closed.",
+            )
+    finally:
+        connection.close()

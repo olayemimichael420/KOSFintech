@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 
 from audit import audit_event
+from policies.governance_policy import GovernanceAction, evaluate
 from models.governance_proposal import (
     GovernanceProposal,
     GovernanceProposalStatus,
@@ -49,7 +50,8 @@ class GovernanceService:
         if not description or not description.strip():
             raise ValueError("proposal description is required")
 
-        self._require_active_user(
+        self._require_governance_action(
+            GovernanceAction.CREATE_PROPOSAL,
             tenant_id,
             proposer_user_id,
         )
@@ -103,7 +105,8 @@ class GovernanceService:
             proposal_id,
         )
 
-        self._require_active_user(
+        self._require_governance_action(
+            GovernanceAction.OPEN_PROPOSAL,
             tenant_id,
             actor_user_id,
         )
@@ -178,7 +181,8 @@ class GovernanceService:
             proposal_id,
         )
 
-        self._require_active_user(
+        self._require_governance_action(
+            GovernanceAction.CAST_VOTE,
             tenant_id,
             voter_user_id,
         )
@@ -267,6 +271,40 @@ class GovernanceService:
             action="cancel_governance_proposal",
         )
 
+    def _require_governance_action(
+        self,
+        action: GovernanceAction,
+        tenant_id: str,
+        user_id: int,
+    ) -> None:
+        user = self.proposal_repository.connection.execute(
+            """
+            SELECT tenant_id, status
+            FROM users
+            WHERE id = ?
+            """,
+            (user_id,),
+        ).fetchone()
+
+        is_active_user = (
+            user is not None
+            and user["status"] == "active"
+        )
+
+        same_tenant = (
+            user is not None
+            and user["tenant_id"] == tenant_id
+        )
+
+        allowed, reason = evaluate(
+            action=action,
+            is_active_user=is_active_user,
+            same_tenant=same_tenant,
+        )
+
+        if not allowed:
+            raise ValueError(reason)
+
     def _finish_proposal(
         self,
         tenant_id,
@@ -281,7 +319,10 @@ class GovernanceService:
             proposal_id,
         )
 
-        self._require_active_user(
+        self._require_governance_action(
+            GovernanceAction.CLOSE_PROPOSAL
+            if status == GovernanceProposalStatus.CLOSED
+            else GovernanceAction.CANCEL_PROPOSAL,
             tenant_id,
             actor_user_id,
         )
