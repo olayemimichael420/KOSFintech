@@ -248,3 +248,276 @@ Current determination:
 - Reversibility rules: UNRESOLVED
 - Terminal-state rules: UNRESOLVED
 - Implementation authorization: NOT GRANTED
+
+## Section 41 — Governance Constitutional Amendment, Alteration and Continuity of the Constitutional Framework
+
+### Constitutional Question
+
+What constitutional conditions determine when, by whom, through what authority and procedure, and subject to what limitations, the constitutional framework governing Governance Authority, Governance Mandates, Governance Decisions, and constitutional effects may be amended, altered, supplemented, suspended, or otherwise changed?
+
+### Current Constitutional Determination
+
+The existence of a proposed amendment, administrative instruction, software implementation, database state, API behavior, operational practice, authenticated account, application role, or other technical representation MUST NOT independently constitute constitutional amendment.
+
+A constitutional amendment MUST remain distinguishable from:
+
+- constitutional interpretation;
+- administrative policy;
+- ordinary governance decision;
+- technical configuration;
+- source-code modification;
+- database migration;
+- software deployment;
+- workflow modification; or
+- operational practice.
+
+### Amendment Authority
+
+The competent authority possessing constitutional amendment power remains:
+
+**UNRESOLVED.**
+
+The constitutional source establishing amendment authority remains:
+
+**UNRESOLVED.**
+
+Whether amendment authority may be delegated, transferred, shared, limited, suspended, or terminated remains:
+
+**UNRESOLVED.**
+
+### Eligible Proposal
+
+The authority or actors eligible to propose constitutional amendment remain:
+
+**UNRESOLVED.**
+
+Whether subordinate governance authorities, institutional authorities, members, or other actors may originate constitutional amendments remains:
+
+**UNRESOLVED.**
+
+A proposal to amend the constitutional framework MUST NOT itself be treated as an amendment.
+
+### Amendment Procedure
+
+The required constitutional amendment procedure remains:
+
+**UNRESOLVED.**
+
+This includes, without limitation:
+
+- required proposal form;
+- required deliberation;
+- required notice;
+- required evidence;
+- required approval;
+- required ratification;
+- required certification;
+- required recording;
+- required publication;
+- and conditions under which an incomplete procedure fails.
+
+### Amendment Limits
+
+The limits upon constitutional amendment authority remain:
+
+**UNRESOLVED.**
+
+This includes whether amendment authority is constrained by:
+
+- higher constitutional authority;
+- protected constitutional principles;
+- constitutional hierarchy;
+- jurisdiction;
+- subject matter;
+- temporal restrictions;
+- existing constitutional determinations;
+- existing authorities or mandates;
+- continuity requirements;
+- or protected provisions.
+
+### Self-Amendment
+
+Whether the constitutional framework may amend provisions governing its own amendment authority remains:
+
+**UNRESOLVED.**
+
+No software mechanism, administrator, application role, database state, or operational process may independently establish self-amendment authority.
+
+### Protected Provisions
+
+Whether particular constitutional provisions are:
+
+- freely amendable;
+- amendable only through enhanced procedure;
+- temporarily protected;
+- permanently protected; or
+- otherwise constitutionally protected
+
+remains:
+
+**UNRESOLVED.**
+
+### Existing Governance State
+
+The constitutional treatment of existing:
+
+- Governance Authorities;
+- Governance Mandates;
+- Governance Decisions;
+- constitutional determinations;
+- delegated authorities;
+- successor authorities;
+- pending proceedings;
+- completed actions; and
+- historical records
+
+following any future authorized amendment remains:
+
+**UNRESOLVED.**
+
+No existing governance state is automatically altered merely because a proposed constitutional amendment is recorded or technically implemented.
+
+### Transitional Effect
+
+The constitutional rules governing transition from an existing constitutional rule to a future amended rule remain:
+
+**UNRESOLVED.**
+
+This includes treatment of:
+
+- actions initiated under the previous rule;
+- pending matters;
+- existing authority;
+- existing mandates;
+- existing determinations;
+- conflicting transitional states; and
+- the effective time of transitional consequences.
+
+### No Technical Amendment
+
+The following MUST NOT independently constitute constitutional amendment:
+
+- source-code changes;
+- database migrations;
+- configuration changes;
+- role changes;
+- API behavior;
+- deployment;
+- administrator instruction;
+- workflow modification;
+- automated inference; or
+- operational practice.
+
+Software MAY implement a constitutionally authorized amendment after that amendment has acquired constitutional effect.
+
+Software implementation MUST NOT itself constitute constitutional amendment.
+
+### Historical Integrity
+
+Any future constitutionally significant amendment MUST be capable of historical reconstruction where applicable, including:
+
+- prior constitutional rule;
+- amendment proposal;
+- proposing authority;
+- evidence relied upon;
+- approval and ratification;
+- effective time;
+- transitional provisions;
+- superseded provisions;
+- resulting constitutional effects; and
+- subsequent amendments.
+
+The constitutional requirements governing such historical preservation remain:
+
+**UNRESOLVED.**
+
+### Review and Challenge
+
+Whether a constitutional amendment may be challenged, and the applicable:
+
+- standing;
+- grounds;
+- reviewing authority;
+- procedure;
+- interim measures;
+- treatment of defective amendments; and
+- finality
+
+remain:
+
+**UNRESOLVED.**
+
+### Fail-Closed Constitutional Change
+
+Where constitutional amendment authority, constitutional source, procedure, evidence, approval, ratification, effective time, jurisdiction, limits, or constitutional effect cannot be established:
+
+**CONSTITUTIONAL AMENDMENT MUST FAIL CLOSED.**
+
+No governance mechanism may manufacture constitutional amendment authority from software behavior, administrative preference, database state, technical configuration, deployment, operational custom, or continued reliance.
+
+### Determination Status
+
+- Constitutional amendment definition: **UNRESOLVED**
+- Amendment authority: **UNRESOLVED**
+- Constitutional source of amendment power: **UNRESOLVED**
+- Eligible proposer: **UNRESOLVED**
+- Eligible approving authority: **UNRESOLVED**
+- Permissible subject matter: **UNRESOLVED**
+- Amendment procedure: **UNRESOLVED**
+- Required evidence: **UNRESOLVED**
+- Notice or publication: **UNRESOLVED**
+- Approval requirement: **UNRESOLVED**
+- Ratification requirement: **UNRESOLVED**
+- Effective event: **UNRESOLVED**
+- Effective time: **UNRESOLVED**
+- Amendment limits: **UNRESOLVED**
+- Self-amendment: **UNRESOLVED**
+- Protected provisions: **UNRESOLVED**
+- Existing governance-state effect: **UNRESOLVED**
+- Transitional effect: **UNRESOLVED**
+- Historical integrity: **UNRESOLVED**
+- Review or challenge: **UNRESOLVED**
+- Defective amendment treatment: **UNRESOLVED**
+- Supersession: **UNRESOLVED**
+- Finality: **UNRESOLVED**
+- Software representation: **UNRESOLVED**
+- Executable authorization: **NOT GRANTED**
+
+### Implementation Boundary
+
+Section 41 establishes no executable constitutional amendment capability.
+
+No software mechanism MAY:
+
+- create constitutional amendment authority;
+- determine who possesses amendment authority;
+- approve or ratify a constitutional amendment;
+- determine constitutional effectiveness;
+- establish protected or unamendable provisions;
+- authorize self-amendment;
+- create transitional constitutional authority;
+- establish supersession;
+- establish constitutional finality; or
+- manufacture constitutional consequences.
+
+Until the applicable constitutional questions are expressly determined and the resulting determination authorizes architectural implementation:
+
+**EXECUTABLE CONSTITUTIONAL AMENDMENT AUTHORIZATION: NOT GRANTED.**
+
+### Constitutional Determination Frontier
+
+Section 41 is therefore recorded as a **proposed constitutional determination concerning amendment, alteration and continuity of the Governance constitutional framework**.
+
+It does not itself amend the constitutional framework.
+
+It does not itself grant amendment authority.
+
+It does not itself authorize software implementation.
+
+It does not establish ratification.
+
+It does not establish constitutional effectiveness.
+
+It does not establish constitutional finality.
+
+The unresolved matters remain subject to future constitutional determination.
