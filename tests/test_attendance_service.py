@@ -1,4 +1,5 @@
 import sqlite3
+import pytest
 
 from models.attendance import Attendance
 from repositories.attendance_repository import AttendanceRepository
@@ -446,3 +447,151 @@ def test_attendance_service_lists_empty_for_date_with_no_records():
     assert results == []
 
     connection.close()
+
+
+
+def test_attendance_service_allows_user_with_write_permission(tmp_path):
+    import database
+    from models.role import Role
+    from models.permission import Permission
+    from models.user_role import UserRoleLink
+    from models.role_permission import RolePermissionLink
+    from repositories.role_repository import RoleRepository
+    from repositories.permission_repository import PermissionRepository
+    from repositories.user_role_repository import UserRoleRepository
+    from repositories.role_permission_repository import RolePermissionRepository
+
+    connection = database.get_connection()
+    try:
+        tenant_id = "school-auth-positive"
+
+        cursor = connection.execute(
+            """
+            INSERT INTO users
+                (tenant_id, name, email, role, status)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (tenant_id, "Teacher", "teacher-positive@test", "member", "active"),
+        )
+        user_id = cursor.lastrowid
+
+        student_cursor = connection.execute(
+            """
+            INSERT INTO students
+                (tenant_id, user_id, name, class_name, status)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (
+                tenant_id,
+                user_id,
+                "Student One",
+                "Primary",
+                "active",
+            ),
+        )
+        student_id = student_cursor.lastrowid
+
+        role = RoleRepository(connection).create(
+            Role(None, tenant_id, "teacher", "Teacher")
+        )
+
+        permission = PermissionRepository(connection).create(
+            Permission(
+                None,
+                tenant_id,
+                "attendance.write",
+                "Record attendance",
+            )
+        )
+
+        UserRoleRepository(connection).create(
+            UserRoleLink(tenant_id, user_id, role.id)
+        )
+
+        RolePermissionRepository(connection).create(
+            RolePermissionLink(
+                tenant_id,
+                role.id,
+                permission.id,
+            )
+        )
+
+        service = AttendanceService(
+            repository=AttendanceRepository(connection),
+            tenant_id=tenant_id,
+            connection=connection,
+            user_id=user_id,
+        )
+
+        result = service.record(
+            Attendance(
+                id=None,
+                tenant_id=tenant_id,
+                student_id=student_id,
+                attendance_date="2026-08-31",
+                status="present",
+            )
+        )
+
+        assert result.id is not None
+        assert result.tenant_id == tenant_id
+        assert result.status == "present"
+
+    finally:
+        connection.close()
+
+def test_attendance_service_requires_write_permission(tmp_path):
+    import database
+    from models.role import Role
+    from models.permission import Permission
+    from models.user_role import UserRoleLink
+    from models.role_permission import RolePermissionLink
+    from repositories.role_repository import RoleRepository
+    from repositories.permission_repository import PermissionRepository
+    from repositories.user_role_repository import UserRoleRepository
+    from repositories.role_permission_repository import RolePermissionRepository
+
+    connection = database.get_connection()
+    try:
+        tenant_id = "school-auth"
+        cursor = connection.execute(
+            """
+            INSERT INTO users
+                (tenant_id, name, email, role, status)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (tenant_id, "Teacher", "teacher@test", "member", "active"),
+        )
+        user_id = cursor.lastrowid
+
+        role = RoleRepository(connection).create(
+            Role(None, tenant_id, "teacher", "Teacher")
+        )
+
+        permission = PermissionRepository(connection).create(
+            Permission(None, tenant_id, "attendance.write", "Record attendance")
+        )
+
+        UserRoleRepository(connection).create(
+            UserRoleLink(tenant_id, user_id, role.id)
+        )
+
+        service = AttendanceService(
+            repository=AttendanceRepository(connection),
+            tenant_id=tenant_id,
+            connection=connection,
+            user_id=user_id,
+        )
+
+        with pytest.raises(PermissionError, match="attendance.write"):
+            service.record(
+                Attendance(
+                    id=None,
+                    tenant_id=tenant_id,
+                    student_id=1,
+                    attendance_date="2026-08-31",
+                    status="present",
+                )
+            )
+    finally:
+        connection.close()
