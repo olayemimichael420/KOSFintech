@@ -1,4 +1,5 @@
 from services.application_service_factory import ApplicationServiceFactory
+from services.attendance_service import AttendanceService
 
 
 class ApplicationServices:
@@ -65,3 +66,11 @@ class ApplicationServices:
     @property
     def reputation_profile(self):
         return self._reputation_profile
+
+    def attendance(self, tenant_id: str, user_id=None):
+        return AttendanceService(
+            repository=self.factory.build_attendance_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )

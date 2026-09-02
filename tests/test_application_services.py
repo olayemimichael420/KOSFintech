@@ -3,6 +3,7 @@ import pytest
 
 from services.application_service_factory import ApplicationServiceFactory
 from services.application_services import ApplicationServices
+from services.attendance_service import AttendanceService
 from services.service_act_service import ServiceActService
 from services.verification_service import VerificationService
 from services.verification_workflow_service import VerificationWorkflowService
@@ -153,3 +154,20 @@ def test_application_services_factory_returns_same_instances(connection):
         factory.build_reputation_profile_service()
         is factory.build_reputation_profile_service()
     )
+
+
+def test_application_services_builds_context_bound_attendance_service(connection):
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    attendance = services.attendance(
+        tenant_id="school-001",
+        user_id=1,
+    )
+
+    assert isinstance(attendance, AttendanceService)
+    assert attendance.tenant_id == "school-001"
+    assert attendance.user_id == 1
+    assert attendance.repository is services.factory.build_attendance_repository()
+    assert attendance.connection is connection
