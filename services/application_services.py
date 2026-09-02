@@ -1,5 +1,6 @@
 from services.application_service_factory import ApplicationServiceFactory
 from services.attendance_service import AttendanceService
+from services.student_service import StudentService
 
 
 class ApplicationServices:
@@ -70,6 +71,14 @@ class ApplicationServices:
     def attendance(self, tenant_id: str, user_id=None):
         return AttendanceService(
             repository=self.factory.build_attendance_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def student(self, tenant_id: str, user_id=None):
+        return StudentService(
+            repository=self.factory.build_student_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,

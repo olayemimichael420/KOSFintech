@@ -4,6 +4,7 @@ from repositories.talent_point_repository import TalentPointRepository
 from repositories.dispute_repository import DisputeRepository
 from repositories.reputation_repository import ReputationRepository
 from repositories.attendance_repository import AttendanceRepository
+from repositories.student_repository import StudentRepository
 
 from services.service_act_service import ServiceActService
 from services.verification_service import VerificationService
@@ -44,6 +45,7 @@ class ApplicationServiceFactory:
         self._dispute_repository = DisputeRepository(connection)
         self._reputation_repository = ReputationRepository(connection)
         self._attendance_repository = AttendanceRepository(connection)
+        self._student_repository = StudentRepository(connection)
 
         # ---------------------------------------------------------------
         # Core service graph
@@ -124,6 +126,9 @@ class ApplicationServiceFactory:
 
     def build_attendance_repository(self):
         return self._attendance_repository
+
+    def build_student_repository(self):
+        return self._student_repository
 
     # -------------------------------------------------------------------
     # Service access
