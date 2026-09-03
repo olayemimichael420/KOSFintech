@@ -189,3 +189,61 @@ def test_application_services_builds_context_bound_student_service(connection):
     assert student.user_id == 1
     assert student.repository is services.factory.build_student_repository()
     assert student.connection is connection
+
+
+def test_application_services_builds_context_bound_teacher_service(connection):
+    from services.teacher_service import TeacherService
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    teacher = services.teacher(
+        tenant_id="school-001",
+        user_id=1,
+    )
+
+    assert isinstance(teacher, TeacherService)
+    assert teacher.tenant_id == "school-001"
+    assert teacher.user_id == 1
+    assert teacher.repository is services.factory.build_teacher_repository()
+    assert teacher.connection is connection
+
+
+
+def test_application_services_builds_context_bound_parent_service(connection):
+    from services.parent_service import ParentService
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    parent = services.parent(
+        tenant_id="school-001",
+        user_id=1,
+    )
+
+    assert isinstance(parent, ParentService)
+    assert parent.tenant_id == "school-001"
+    assert parent.user_id == 1
+    assert parent.repository is services.factory.build_parent_repository()
+    assert parent.connection is connection
+
+
+def test_application_services_builds_context_bound_parent_student_service(connection):
+    from services.parent_student_service import ParentStudentService
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    parent_student = services.parent_student(
+        tenant_id="school-001",
+        user_id=1,
+    )
+
+    assert isinstance(parent_student, ParentStudentService)
+    assert parent_student.tenant_id == "school-001"
+    assert parent_student.user_id == 1
+    assert parent_student.repository is services.factory.build_parent_student_repository()
+    assert parent_student.connection is connection

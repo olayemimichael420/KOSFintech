@@ -5,6 +5,9 @@ from repositories.dispute_repository import DisputeRepository
 from repositories.reputation_repository import ReputationRepository
 from repositories.attendance_repository import AttendanceRepository
 from repositories.student_repository import StudentRepository
+from repositories.teacher_repository import TeacherRepository
+from repositories.parent_repository import ParentRepository
+from repositories.parent_student_repository import ParentStudentRepository
 
 from services.service_act_service import ServiceActService
 from services.verification_service import VerificationService
@@ -46,6 +49,9 @@ class ApplicationServiceFactory:
         self._reputation_repository = ReputationRepository(connection)
         self._attendance_repository = AttendanceRepository(connection)
         self._student_repository = StudentRepository(connection)
+        self._teacher_repository = TeacherRepository(connection)
+        self._parent_repository = ParentRepository(connection)
+        self._parent_student_repository = ParentStudentRepository(connection)
 
         # ---------------------------------------------------------------
         # Core service graph
@@ -129,6 +135,15 @@ class ApplicationServiceFactory:
 
     def build_student_repository(self):
         return self._student_repository
+
+    def build_teacher_repository(self):
+        return self._teacher_repository
+
+    def build_parent_repository(self):
+        return self._parent_repository
+
+    def build_parent_student_repository(self):
+        return self._parent_student_repository
 
     # -------------------------------------------------------------------
     # Service access

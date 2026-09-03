@@ -1,6 +1,9 @@
 from services.application_service_factory import ApplicationServiceFactory
 from services.attendance_service import AttendanceService
 from services.student_service import StudentService
+from services.teacher_service import TeacherService
+from services.parent_service import ParentService
+from services.parent_student_service import ParentStudentService
 
 
 class ApplicationServices:
@@ -79,6 +82,30 @@ class ApplicationServices:
     def student(self, tenant_id: str, user_id=None):
         return StudentService(
             repository=self.factory.build_student_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teacher(self, tenant_id: str, user_id=None):
+        return TeacherService(
+            repository=self.factory.build_teacher_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def parent(self, tenant_id: str, user_id=None):
+        return ParentService(
+            repository=self.factory.build_parent_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def parent_student(self, tenant_id: str, user_id=None):
+        return ParentStudentService(
+            repository=self.factory.build_parent_student_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,
