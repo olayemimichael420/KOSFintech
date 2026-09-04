@@ -55,7 +55,17 @@ def _setup(tmp_path, monkeypatch):
         ("tenant-001",),
     )
 
-    permission_id = verifier_permission.lastrowid
+    verification_permission_id = verifier_permission.lastrowid
+
+    service_act_permission = connection.execute(
+        """
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'service_act.write', 'active')
+        """,
+        ("tenant-001",),
+    )
+
+    service_act_permission_id = service_act_permission.lastrowid
 
     role_cursor = connection.execute(
         """
@@ -76,8 +86,47 @@ def _setup(tmp_path, monkeypatch):
         )
         VALUES (?, ?, ?)
         """,
-        ("tenant-001", role_id, permission_id),
+        ("tenant-001", role_id, verification_permission_id),
     )
+
+    service_act_role_cursor = connection.execute(
+        """
+        INSERT INTO roles (tenant_id, name, status)
+        VALUES (?, 'service_act_actor', 'active')
+        """,
+        ("tenant-001",),
+    )
+
+    service_act_role_id = service_act_role_cursor.lastrowid
+
+    connection.execute(
+        """
+        INSERT INTO role_permissions (
+            tenant_id,
+            role_id,
+            permission_id
+        )
+        VALUES (?, ?, ?)
+        """,
+        (
+            "tenant-001",
+            service_act_role_id,
+            service_act_permission_id,
+        ),
+    )
+
+    for name in ("Provider", "Recipient"):
+        connection.execute(
+            """
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            """,
+            (
+                "tenant-001",
+                ids[name],
+                service_act_role_id,
+            ),
+        )
 
     for user_id in ids.values():
         connection.execute(
@@ -105,11 +154,12 @@ def _setup(tmp_path, monkeypatch):
         )
     )
 
-    service_act_service = ServiceActService(
-        service_act_repository
-    )
-
     permission_service = PermissionResolutionService(connection)
+
+    service_act_service = ServiceActService(
+        service_act_repository,
+        permission_service,
+    )
 
     verification_service = VerificationService(
         verification_repository,
@@ -147,18 +197,21 @@ def _submit_to_submitted(setup):
         "tenant-001",
         act.id,
         ServiceActStatus.ACCEPTED,
+        actor_id=setup["ids"]["Recipient"],
     )
 
     act = service.transition(
         "tenant-001",
         act.id,
         ServiceActStatus.IN_PROGRESS,
+        actor_id=setup["ids"]["Provider"],
     )
 
     act = service.transition(
         "tenant-001",
         act.id,
         ServiceActStatus.SUBMITTED,
+        actor_id=setup["ids"]["Provider"],
     )
 
     return act

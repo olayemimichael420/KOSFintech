@@ -6,6 +6,7 @@ import pytest
 from models.service_act import ServiceAct
 from repositories.service_act_repository import ServiceActRepository
 from services.service_act_service import ServiceActService
+from services.permission_resolution_service import PermissionResolutionService
 
 
 def _setup_fresh_db(tmp_path, monkeypatch):
@@ -207,7 +208,74 @@ def test_service_cannot_transition_act_from_another_tenant(
             )
         )
 
-        service = ServiceActService(repository)
+        tenant_b_actor = _create_user(
+            connection,
+            "tenant-b",
+            "Tenant B Actor",
+        )
+
+        connection.execute(
+            """
+            INSERT INTO permissions (tenant_id, name, status)
+            VALUES (?, 'service_act.write', 'active')
+            """,
+            ("tenant-b",),
+        )
+        permission_id = connection.execute(
+            """
+            SELECT id
+            FROM permissions
+            WHERE tenant_id = ?
+              AND name = 'service_act.write'
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            ("tenant-b",),
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO roles (tenant_id, name, status)
+            VALUES (?, ?, 'active')
+            """,
+            ("tenant-b", f"service-act-{tenant_b_actor}"),
+        )
+        role_id = connection.execute(
+            """
+            SELECT id
+            FROM roles
+            WHERE tenant_id = ?
+              AND name = ?
+            """,
+            ("tenant-b", f"service-act-{tenant_b_actor}"),
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            """,
+            ("tenant-b", tenant_b_actor, role_id),
+        )
+
+        connection.execute(
+            """
+            INSERT INTO role_permissions (
+                tenant_id,
+                role_id,
+                permission_id
+            )
+            VALUES (?, ?, ?)
+            """,
+            ("tenant-b", role_id, permission_id),
+        )
+        connection.commit()
+
+        permission_service = PermissionResolutionService(connection)
+        service = ServiceActService(
+            repository,
+            permission_service,
+        )
 
         with pytest.raises(
             ValueError,
@@ -217,6 +285,7 @@ def test_service_cannot_transition_act_from_another_tenant(
                 "tenant-b",
                 act.id,
                 "accepted",
+                actor_id=tenant_b_actor,
             )
     finally:
         connection.close()

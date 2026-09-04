@@ -22,7 +22,7 @@ class FakeServiceActService:
             connection=TransactionConnection()
         )
 
-    def transition(
+    def _transition_internal(
         self,
         tenant_id,
         service_act_id,
@@ -230,7 +230,7 @@ class TransactionServiceActService:
         self.repository = TransactionRepository()
         self.calls = []
 
-    def transition(
+    def _transition_internal(
         self,
         tenant_id,
         service_act_id,

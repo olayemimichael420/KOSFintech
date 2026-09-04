@@ -72,7 +72,8 @@ class ApplicationServiceFactory:
         # ---------------------------------------------------------------
 
         self._service_act_service = ServiceActService(
-            self._service_act_repository
+            self._service_act_repository,
+            self._permission_resolution_service,
         )
 
         self._verification_service = VerificationService(

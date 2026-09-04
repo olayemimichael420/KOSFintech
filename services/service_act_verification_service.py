@@ -40,12 +40,11 @@ class ServiceActVerificationService:
             connection.execute("BEGIN")
 
             if outcome == VerificationOutcome.APPROVED:
-                updated = self.service_act_service.transition(
+                updated = self.service_act_service._transition_internal(
                     tenant_id,
                     service_act_id,
                     ServiceActStatus.COMPLETED,
                     commit=False,
-                    actor_id=actor_id,
                 )
 
                 audit_event(
@@ -64,7 +63,7 @@ class ServiceActVerificationService:
                 return updated
 
             if outcome == VerificationOutcome.REJECTED:
-                updated = self.service_act_service.transition(
+                updated = self.service_act_service._transition_internal(
                     tenant_id,
                     service_act_id,
                     ServiceActStatus.CANCELLED,
@@ -72,7 +71,6 @@ class ServiceActVerificationService:
                         "Service Act rejected by verification."
                     ),
                     commit=False,
-                    actor_id=actor_id,
                 )
 
                 audit_event(
