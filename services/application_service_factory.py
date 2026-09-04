@@ -8,6 +8,8 @@ from repositories.student_repository import StudentRepository
 from repositories.teacher_repository import TeacherRepository
 from repositories.parent_repository import ParentRepository
 from repositories.parent_student_repository import ParentStudentRepository
+from repositories.external_identity_repository import ExternalIdentityRepository
+from repositories.user_repository import UserRepository
 
 from services.service_act_service import ServiceActService
 from services.verification_service import VerificationService
@@ -19,6 +21,8 @@ from services.talent_point_transfer_service import TalentPointTransferService
 from services.dispute_service import DisputeService
 from services.reputation_service import ReputationService
 from services.reputation_profile_service import ReputationProfileService
+from services.external_identity_service import ExternalIdentityService
+from services.permission_resolution_service import PermissionResolutionService
 
 
 class ApplicationServiceFactory:
@@ -52,6 +56,8 @@ class ApplicationServiceFactory:
         self._teacher_repository = TeacherRepository(connection)
         self._parent_repository = ParentRepository(connection)
         self._parent_student_repository = ParentStudentRepository(connection)
+        self._external_identity_repository = ExternalIdentityRepository(connection)
+        self._user_repository = UserRepository(connection)
 
         # ---------------------------------------------------------------
         # Core service graph
@@ -111,6 +117,16 @@ class ApplicationServiceFactory:
             repository=self._reputation_repository,
         )
 
+        self._permission_resolution_service = PermissionResolutionService(
+            connection
+        )
+
+        self._external_identity_service = ExternalIdentityService(
+            external_identity_repository=self._external_identity_repository,
+            user_repository=self._user_repository,
+            permission_service=self._permission_resolution_service,
+        )
+
     # -------------------------------------------------------------------
     # Repository access
     # -------------------------------------------------------------------
@@ -145,6 +161,12 @@ class ApplicationServiceFactory:
     def build_parent_student_repository(self):
         return self._parent_student_repository
 
+    def build_external_identity_repository(self):
+        return self._external_identity_repository
+
+    def build_user_repository(self):
+        return self._user_repository
+
     # -------------------------------------------------------------------
     # Service access
     # -------------------------------------------------------------------
@@ -178,3 +200,6 @@ class ApplicationServiceFactory:
 
     def build_reputation_profile_service(self):
         return self._reputation_profile_service
+
+    def build_external_identity_service(self):
+        return self._external_identity_service

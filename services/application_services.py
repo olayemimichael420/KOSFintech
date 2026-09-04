@@ -4,6 +4,7 @@ from services.student_service import StudentService
 from services.teacher_service import TeacherService
 from services.parent_service import ParentService
 from services.parent_student_service import ParentStudentService
+from services.external_identity_service import ExternalIdentityService
 
 
 class ApplicationServices:
@@ -110,3 +111,7 @@ class ApplicationServices:
             connection=self.factory.connection,
             user_id=user_id,
         )
+
+    @property
+    def external_identity(self):
+        return self.factory.build_external_identity_service()
