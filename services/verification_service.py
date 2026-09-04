@@ -1,6 +1,7 @@
 from audit import audit_event
 from models.service_act import ServiceActStatus
 from models.verification import Verification, VerificationDecision
+from services.permission_resolution_service import PermissionResolutionService
 
 
 class VerificationService:
@@ -8,9 +9,15 @@ class VerificationService:
 
     MAX_VERIFIERS = 3
 
-    def __init__(self, repository, service_act_repository):
+    def __init__(
+        self,
+        repository,
+        service_act_repository,
+        permission_service: PermissionResolutionService,
+    ):
         self.repository = repository
         self.service_act_repository = service_act_repository
+        self.permission_service = permission_service
 
     def verify(
         self,
@@ -19,7 +26,22 @@ class VerificationService:
         verifier_user_id: int,
         decision: VerificationDecision,
         reason: str | None = None,
+        actor_user_id: int | None = None,
     ) -> Verification:
+        if actor_user_id is None:
+            raise PermissionError("verification actor is required")
+
+        if not self.permission_service.has_permission(
+            user_id=actor_user_id,
+            permission_name="verification.write",
+            tenant_id=tenant_id,
+        ):
+            raise PermissionError("verification permission denied")
+
+        if actor_user_id != verifier_user_id:
+            raise PermissionError(
+                "verification actor must be the verifier"
+            )
 
         act = self.service_act_repository.get(
             tenant_id,
@@ -89,7 +111,7 @@ class VerificationService:
 
             audit_event(
                 event_type="verification_submitted",
-                actor_id=verifier_user_id,
+                actor_id=actor_user_id,
                 tenant_id=tenant_id,
                 action="submit_verification",
                 metadata={
@@ -107,4 +129,3 @@ class VerificationService:
         except Exception:
             connection.rollback()
             raise
-

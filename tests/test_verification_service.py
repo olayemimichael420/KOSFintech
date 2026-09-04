@@ -6,6 +6,7 @@ from models.service_act import ServiceAct, ServiceActStatus
 from models.verification import VerificationDecision
 from repositories.service_act_repository import ServiceActRepository
 from repositories.verification_repository import VerificationRepository
+from services.permission_resolution_service import PermissionResolutionService
 from services.verification_service import VerificationService
 
 
@@ -30,6 +31,85 @@ def _setup(tmp_path, monkeypatch):
             """,
             (tenant_id, name, role),
         )
+
+    verifier_id = connection.execute(
+        """
+        SELECT id
+        FROM users
+        WHERE tenant_id = ? AND name = ?
+        """,
+        ("tenant-001", "Verifier"),
+    ).fetchone()["id"]
+
+    connection.execute(
+        """
+        INSERT INTO roles (tenant_id, name, status)
+        VALUES (?, 'verification_actor', 'active')
+        """,
+        ("tenant-001",),
+    )
+
+    role_id = connection.execute(
+        """
+        SELECT id
+        FROM roles
+        WHERE tenant_id = ? AND name = ?
+        """,
+        ("tenant-001", "verification_actor"),
+    ).fetchone()["id"]
+
+    connection.execute(
+        """
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'verification.write', 'active')
+        """,
+        ("tenant-001",),
+    )
+
+    permission_id = connection.execute(
+        """
+        SELECT id
+        FROM permissions
+        WHERE tenant_id = ?
+          AND name = 'verification.write'
+        ORDER BY id DESC
+        LIMIT 1
+        """,
+        ("tenant-001",),
+    ).fetchone()["id"]
+
+    # All three users are authorization-capable actors for this fixture.
+    # Domain eligibility is tested separately by VerificationService.
+    for user_id in (
+        connection.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE tenant_id = ?
+            ORDER BY id
+            """,
+            ("tenant-001",),
+        ).fetchall()
+    ):
+        connection.execute(
+            """
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            """,
+            ("tenant-001", user_id["id"], role_id),
+        )
+
+    connection.execute(
+        """
+        INSERT INTO role_permissions (
+            tenant_id,
+            role_id,
+            permission_id
+        )
+        VALUES (?, ?, ?)
+        """,
+        ("tenant-001", role_id, permission_id),
+    )
 
     connection.commit()
 
@@ -60,9 +140,12 @@ def _setup(tmp_path, monkeypatch):
 
     verification_repository = VerificationRepository(connection)
 
+    permission_service = PermissionResolutionService(connection)
+
     service = VerificationService(
         verification_repository,
         ServiceActRepository(connection),
+        permission_service,
     )
 
     return connection, act, ids[2], service
@@ -80,11 +163,58 @@ def test_approval_succeeds(tmp_path, monkeypatch):
             act.id,
             verifier_id,
             VerificationDecision.APPROVED,
+            actor_user_id=verifier_id,
         )
 
         assert verification.id is not None
         assert verification.decision == VerificationDecision.APPROVED
         assert verification.reason is None
+    finally:
+        connection.close()
+
+
+def test_verification_requires_actor(tmp_path, monkeypatch):
+    connection, act, verifier_id, service = _setup(
+        tmp_path,
+        monkeypatch,
+    )
+
+    try:
+        with pytest.raises(
+            PermissionError,
+            match="verification actor is required",
+        ):
+            service.verify(
+                "tenant-001",
+                act.id,
+                verifier_id,
+                VerificationDecision.APPROVED,
+            )
+    finally:
+        connection.close()
+
+
+def test_verification_actor_cannot_impersonate_verifier(
+    tmp_path,
+    monkeypatch,
+):
+    connection, act, verifier_id, service = _setup(
+        tmp_path,
+        monkeypatch,
+    )
+
+    try:
+        with pytest.raises(
+            PermissionError,
+            match="must be the verifier",
+        ):
+            service.verify(
+                "tenant-001",
+                act.id,
+                verifier_id,
+                VerificationDecision.APPROVED,
+                actor_user_id=act.provider_user_id,
+            )
     finally:
         connection.close()
 
@@ -102,6 +232,7 @@ def test_rejection_requires_reason(tmp_path, monkeypatch):
                 act.id,
                 verifier_id,
                 VerificationDecision.REJECTED,
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -120,6 +251,7 @@ def test_rejection_with_reason_succeeds(tmp_path, monkeypatch):
             verifier_id,
             VerificationDecision.REJECTED,
             reason="Service was not completed as described.",
+            actor_user_id=verifier_id,
         )
 
         assert verification.decision == VerificationDecision.REJECTED
@@ -143,6 +275,7 @@ def test_missing_service_act_fails(tmp_path, monkeypatch):
                 999999,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -160,6 +293,7 @@ def test_same_verifier_cannot_verify_twice(tmp_path, monkeypatch):
             act.id,
             verifier_id,
             VerificationDecision.APPROVED,
+            actor_user_id=verifier_id,
         )
 
         with pytest.raises(
@@ -172,6 +306,7 @@ def test_same_verifier_cannot_verify_twice(tmp_path, monkeypatch):
                 verifier_id,
                 VerificationDecision.REJECTED,
                 reason="Second decision",
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -187,12 +322,13 @@ def test_wrong_tenant_cannot_verify_existing_act(
     )
 
     try:
-        with pytest.raises(ValueError, match="service act not found"):
+        with pytest.raises(PermissionError, match="verification permission denied"):
             service.verify(
                 "tenant-002",
                 act.id,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -221,6 +357,7 @@ def test_verification_emits_audit_event(
                 act.id,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
 
         records = [
@@ -271,6 +408,7 @@ def test_verification_requires_submitted_service_act(tmp_path, monkeypatch):
                 act.id,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -287,6 +425,7 @@ def test_provider_cannot_verify_own_service_act(tmp_path, monkeypatch):
                 act.id,
                 provider_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=provider_id,
             )
     finally:
         connection.close()
@@ -303,6 +442,7 @@ def test_recipient_cannot_verify_own_service_act(tmp_path, monkeypatch):
                 act.id,
                 recipient_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=recipient_id,
             )
     finally:
         connection.close()
@@ -336,6 +476,72 @@ def test_fourth_verifier_is_rejected(tmp_path, monkeypatch):
             )
             ids[name] = cursor.lastrowid
 
+        # Grant verification.write to every potential verifier.
+        for name in (
+            "Verifier One",
+            "Verifier Two",
+            "Verifier Three",
+            "Verifier Four",
+        ):
+            user_id = ids[name]
+
+            connection.execute(
+                """
+                INSERT INTO roles (tenant_id, name, status)
+                VALUES (?, ?, 'active')
+                """,
+                ("tenant-001", f"verification-{user_id}"),
+            )
+
+            role_id = connection.execute(
+                """
+                SELECT id
+                FROM roles
+                WHERE tenant_id = ? AND name = ?
+                """,
+                ("tenant-001", f"verification-{user_id}"),
+            ).fetchone()["id"]
+
+            connection.execute(
+                """
+                INSERT INTO permissions (tenant_id, name, status)
+                VALUES (?, 'verification.write', 'active')
+                """,
+                ("tenant-001",),
+            )
+
+            permission_id = connection.execute(
+                """
+                SELECT id
+                FROM permissions
+                WHERE tenant_id = ?
+                  AND name = 'verification.write'
+                ORDER BY id DESC
+                LIMIT 1
+                """,
+                ("tenant-001",),
+            ).fetchone()["id"]
+
+            connection.execute(
+                """
+                INSERT INTO user_roles (tenant_id, user_id, role_id)
+                VALUES (?, ?, ?)
+                """,
+                ("tenant-001", user_id, role_id),
+            )
+
+            connection.execute(
+                """
+                INSERT INTO role_permissions (
+                    tenant_id,
+                    role_id,
+                    permission_id
+                )
+                VALUES (?, ?, ?)
+                """,
+                ("tenant-001", role_id, permission_id),
+            )
+
         connection.commit()
 
         act = ServiceActRepository(connection).create(
@@ -351,9 +557,12 @@ def test_fourth_verifier_is_rejected(tmp_path, monkeypatch):
         )
 
         repository = VerificationRepository(connection)
+        permission_service = PermissionResolutionService(connection)
+
         service = VerificationService(
             repository,
             ServiceActRepository(connection),
+            permission_service,
         )
 
         for verifier in (
@@ -366,6 +575,7 @@ def test_fourth_verifier_is_rejected(tmp_path, monkeypatch):
                 act.id,
                 ids[verifier],
                 VerificationDecision.APPROVED,
+                actor_user_id=ids[verifier],
             )
 
         with pytest.raises(ValueError, match="maximum"):
@@ -374,6 +584,7 @@ def test_fourth_verifier_is_rejected(tmp_path, monkeypatch):
                 act.id,
                 ids["Verifier Four"],
                 VerificationDecision.APPROVED,
+                actor_user_id=ids["Verifier Four"],
             )
 
     finally:
@@ -407,6 +618,7 @@ def test_completed_service_act_cannot_accept_verification(
                 act.id,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -441,6 +653,7 @@ def test_cancelled_service_act_cannot_accept_verification(
                 act.id,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
     finally:
         connection.close()
@@ -473,6 +686,7 @@ def test_verification_rolls_back_when_audit_persistence_fails(
                 act.id,
                 verifier_id,
                 VerificationDecision.APPROVED,
+                actor_user_id=verifier_id,
             )
 
         verification_count = connection.execute(
@@ -511,6 +725,7 @@ def test_verification_persists_audit_event_atomically(
             act.id,
             verifier_id,
             VerificationDecision.APPROVED,
+            actor_user_id=verifier_id,
         )
 
         audit_rows = connection.execute(

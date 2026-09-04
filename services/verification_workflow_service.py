@@ -39,22 +39,22 @@ class VerificationWorkflowService:
             (verification, service_act)
         """
 
+        if actor_id is None:
+            raise PermissionError("verification actor is required")
+
         verification = self.verification_service.verify(
             tenant_id=tenant_id,
             service_act_id=service_act_id,
             verifier_user_id=verifier_user_id,
             decision=decision,
             reason=reason,
+            actor_user_id=actor_id,
         )
 
         service_act = self.service_act_verification_service.finalize(
             tenant_id=tenant_id,
             service_act_id=service_act_id,
-            actor_id=(
-                actor_id
-                if actor_id is not None
-                else verifier_user_id
-            ),
+            actor_id=actor_id,
         )
 
         return verification, service_act

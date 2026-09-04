@@ -78,6 +78,7 @@ class ApplicationServiceFactory:
         self._verification_service = VerificationService(
             repository=self._verification_repository,
             service_act_repository=self._service_act_repository,
+            permission_service=self._permission_resolution_service,
         )
 
         self._verification_decision_service = VerificationDecisionService(

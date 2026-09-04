@@ -20,6 +20,7 @@ class FakeVerificationService:
         verifier_user_id,
         decision,
         reason=None,
+        actor_user_id=None,
     ):
         self.calls.append(
             (
@@ -28,6 +29,7 @@ class FakeVerificationService:
                 verifier_user_id,
                 decision,
                 reason,
+                actor_user_id,
             )
         )
 
@@ -85,6 +87,7 @@ def test_workflow_records_verification_and_finalizes():
         service_act_id=7,
         verifier_user_id=11,
         decision=VerificationDecision.APPROVED,
+        actor_id=11,
     )
 
     assert verification.id == 100
@@ -97,6 +100,7 @@ def test_workflow_records_verification_and_finalizes():
             11,
             VerificationDecision.APPROVED,
             None,
+            11,
         )
     ]
 
@@ -107,6 +111,8 @@ def test_workflow_records_verification_and_finalizes():
             11,
         )
     ]
+
+    assert verification_service.calls[0][-1] == 11
 
 
 def test_workflow_passes_rejection_reason():
@@ -132,13 +138,15 @@ def test_workflow_passes_rejection_reason():
         verifier_user_id=12,
         decision=VerificationDecision.REJECTED,
         reason="Insufficient evidence.",
+        actor_id=12,
     )
 
     assert verification.reason == "Insufficient evidence."
     assert updated_act.status == ServiceActStatus.SUBMITTED
 
-    assert verification_service.calls[0][-1] == (
-        "Insufficient evidence."
+    assert verification_service.calls[0][-2:] == (
+        "Insufficient evidence.",
+        12,
     )
 
 
@@ -164,16 +172,46 @@ def test_workflow_uses_explicit_actor_id():
         service_act_id=7,
         verifier_user_id=11,
         decision=VerificationDecision.APPROVED,
-        actor_id=99,
+        actor_id=11,
     )
 
     assert finalization_service.calls == [
         (
             "tenant-001",
             7,
-            99,
+            11,
         )
     ]
+
+
+def test_workflow_requires_actor_id():
+    verification_service = FakeVerificationService()
+
+    finalization_service = FakeServiceActVerificationService(
+        SimpleNamespace(
+            id=7,
+            status=ServiceActStatus.SUBMITTED,
+        )
+    )
+
+    workflow = VerificationWorkflowService(
+        verification_service,
+        finalization_service,
+    )
+
+    with pytest.raises(
+        PermissionError,
+        match="verification actor is required",
+    ):
+        workflow.verify(
+            tenant_id="tenant-001",
+            service_act_id=7,
+            verifier_user_id=11,
+            decision=VerificationDecision.APPROVED,
+        )
+
+    assert verification_service.calls == []
+    assert finalization_service.calls == []
 
 
 def test_verification_failure_prevents_finalization():
@@ -199,6 +237,7 @@ def test_verification_failure_prevents_finalization():
             service_act_id=7,
             verifier_user_id=11,
             decision=VerificationDecision.APPROVED,
+            actor_id=11,
         )
 
     assert finalization_service.calls == []
@@ -226,6 +265,7 @@ def test_pending_result_is_returned_without_forcing_completion():
         service_act_id=7,
         verifier_user_id=11,
         decision=VerificationDecision.APPROVED,
+        actor_id=11,
     )
 
     assert verification.decision == VerificationDecision.APPROVED

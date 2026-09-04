@@ -15,6 +15,9 @@ from services.verification_decision_service import (
     VerificationDecisionService,
 )
 from services.verification_service import VerificationService
+from services.permission_resolution_service import (
+    PermissionResolutionService,
+)
 
 
 def _setup(tmp_path, monkeypatch):
@@ -44,6 +47,47 @@ def _setup(tmp_path, monkeypatch):
         )
         ids[name] = cursor.lastrowid
 
+    verifier_permission = connection.execute(
+        """
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'verification.write', 'active')
+        """,
+        ("tenant-001",),
+    )
+
+    permission_id = verifier_permission.lastrowid
+
+    role_cursor = connection.execute(
+        """
+        INSERT INTO roles (tenant_id, name, status)
+        VALUES (?, 'verification_actor', 'active')
+        """,
+        ("tenant-001",),
+    )
+
+    role_id = role_cursor.lastrowid
+
+    connection.execute(
+        """
+        INSERT INTO role_permissions (
+            tenant_id,
+            role_id,
+            permission_id
+        )
+        VALUES (?, ?, ?)
+        """,
+        ("tenant-001", role_id, permission_id),
+    )
+
+    for user_id in ids.values():
+        connection.execute(
+            """
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            """,
+            ("tenant-001", user_id, role_id),
+        )
+
     connection.commit()
 
     service_act_repository = ServiceActRepository(connection)
@@ -65,9 +109,12 @@ def _setup(tmp_path, monkeypatch):
         service_act_repository
     )
 
+    permission_service = PermissionResolutionService(connection)
+
     verification_service = VerificationService(
         verification_repository,
         service_act_repository,
+        permission_service,
     )
 
     decision_service = VerificationDecisionService(
@@ -136,6 +183,7 @@ def test_two_approvals_complete_real_service_act(
             act.id,
             ids["Verifier One"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier One"],
         )
 
         assert first.decision == VerificationDecision.APPROVED
@@ -153,6 +201,7 @@ def test_two_approvals_complete_real_service_act(
             act.id,
             ids["Verifier Two"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier Two"],
         )
 
         assert second.decision == VerificationDecision.APPROVED
@@ -206,6 +255,7 @@ def test_two_rejections_cancel_real_service_act(
             ids["Verifier One"],
             VerificationDecision.REJECTED,
             reason="The service was not completed.",
+            actor_user_id=ids["Verifier One"],
         )
 
         assert (
@@ -222,6 +272,7 @@ def test_two_rejections_cancel_real_service_act(
             ids["Verifier Two"],
             VerificationDecision.REJECTED,
             reason="The service was not completed.",
+            actor_user_id=ids["Verifier Two"],
         )
 
         assert (
@@ -280,6 +331,7 @@ def test_one_approval_and_one_rejection_remains_pending(
             act.id,
             ids["Verifier One"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier One"],
         )
 
         verification_service.verify(
@@ -288,6 +340,7 @@ def test_one_approval_and_one_rejection_remains_pending(
             ids["Verifier Two"],
             VerificationDecision.REJECTED,
             reason="Insufficient completion evidence.",
+            actor_user_id=ids["Verifier Two"],
         )
 
         assert (
@@ -330,6 +383,7 @@ def test_third_verifier_can_resolve_two_to_one_vote(
             act.id,
             ids["Verifier One"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier One"],
         )
 
         verification_service.verify(
@@ -338,6 +392,7 @@ def test_third_verifier_can_resolve_two_to_one_vote(
             ids["Verifier Two"],
             VerificationDecision.REJECTED,
             reason="Evidence was initially insufficient.",
+            actor_user_id=ids["Verifier Two"],
         )
 
         assert (
@@ -353,6 +408,7 @@ def test_third_verifier_can_resolve_two_to_one_vote(
             act.id,
             ids["Verifier Three"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier Three"],
         )
 
         assert (
@@ -395,6 +451,7 @@ def test_submitted_act_cannot_be_completed_twice(
             act.id,
             ids["Verifier One"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier One"],
         )
 
         verification_service.verify(
@@ -402,6 +459,7 @@ def test_submitted_act_cannot_be_completed_twice(
             act.id,
             ids["Verifier Two"],
             VerificationDecision.APPROVED,
+            actor_user_id=ids["Verifier Two"],
         )
 
         completed = finalization_service.finalize(
@@ -454,6 +512,7 @@ def test_workflow_two_approvals_auto_completes_service_act(
             act.id,
             ids["Verifier One"],
             VerificationDecision.APPROVED,
+            actor_id=ids["Verifier One"],
         )
 
         assert first_verification.decision == (
@@ -466,6 +525,7 @@ def test_workflow_two_approvals_auto_completes_service_act(
             act.id,
             ids["Verifier Two"],
             VerificationDecision.APPROVED,
+            actor_id=ids["Verifier Two"],
         )
 
         assert second_verification.decision == (
@@ -512,6 +572,7 @@ def test_workflow_two_rejections_auto_cancels_service_act(
             ids["Verifier One"],
             VerificationDecision.REJECTED,
             reason="Service evidence was insufficient.",
+            actor_id=ids["Verifier One"],
         )
 
         assert first_act.status == ServiceActStatus.SUBMITTED
@@ -522,6 +583,7 @@ def test_workflow_two_rejections_auto_cancels_service_act(
             ids["Verifier Two"],
             VerificationDecision.REJECTED,
             reason="Service evidence was insufficient.",
+            actor_id=ids["Verifier Two"],
         )
 
         assert cancelled.status == ServiceActStatus.CANCELLED
@@ -567,6 +629,7 @@ def test_workflow_split_vote_waits_for_third_verifier(
             act.id,
             ids["Verifier One"],
             VerificationDecision.APPROVED,
+            actor_id=ids["Verifier One"],
         )
 
         assert first_act.status == ServiceActStatus.SUBMITTED
@@ -577,6 +640,7 @@ def test_workflow_split_vote_waits_for_third_verifier(
             ids["Verifier Two"],
             VerificationDecision.REJECTED,
             reason="Insufficient evidence.",
+            actor_id=ids["Verifier Two"],
         )
 
         assert second_act.status == ServiceActStatus.SUBMITTED
@@ -586,6 +650,7 @@ def test_workflow_split_vote_waits_for_third_verifier(
             act.id,
             ids["Verifier Three"],
             VerificationDecision.APPROVED,
+            actor_id=ids["Verifier Three"],
         )
 
         assert completed.status == ServiceActStatus.COMPLETED
