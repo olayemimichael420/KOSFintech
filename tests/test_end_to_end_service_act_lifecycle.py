@@ -70,9 +70,132 @@ def _create_users(
 
         user_ids.append(cursor.lastrowid)
 
-    connection.commit()
+    # Grant the Service Act lifecycle permission to the provider and recipient.
+    # The ServiceActService authorization boundary requires an active
+    # tenant-scoped application permission for externally initiated transitions.
+    permission_cursor = connection.execute(
+        """
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'service_act.write', 'active')
+        """,
+        (tenant_id,),
+    )
+    permission_id = permission_cursor.lastrowid
 
+    for user_id, role_name in (
+        (user_ids[0], "e2e-service-act-provider"),
+        (user_ids[1], "e2e-service-act-recipient"),
+    ):
+        role_cursor = connection.execute(
+            """
+            INSERT INTO roles (tenant_id, name, status)
+            VALUES (?, ?, 'active')
+            """,
+            (tenant_id, role_name),
+        )
+        role_id = role_cursor.lastrowid
+
+        connection.execute(
+            """
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            """,
+            (tenant_id, user_id, role_id),
+        )
+
+        connection.execute(
+            """
+            INSERT INTO role_permissions (tenant_id, role_id, permission_id)
+            VALUES (?, ?, ?)
+            """,
+            (tenant_id, role_id, permission_id),
+        )
+
+    # Grant verification.write only to the two independent E2E verifiers.
+    permission_cursor = connection.execute(
+        '''
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'verification.write', 'active')
+        ''',
+        (tenant_id,),
+    )
+    permission_id = permission_cursor.lastrowid
+
+    for user_id, role_name in (
+        (user_ids[2], "e2e-verification-verifier-1"),
+        (user_ids[3], "e2e-verification-verifier-2"),
+    ):
+        role_cursor = connection.execute(
+            '''
+            INSERT INTO roles (tenant_id, name, status)
+            VALUES (?, ?, 'active')
+            ''',
+            (tenant_id, role_name),
+        )
+        role_id = role_cursor.lastrowid
+
+        connection.execute(
+            '''
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            ''',
+            (tenant_id, user_id, role_id),
+        )
+
+        connection.execute(
+            '''
+            INSERT INTO role_permissions (
+                tenant_id,
+                role_id,
+                permission_id
+            )
+            VALUES (?, ?, ?)
+            ''',
+            (tenant_id, role_id, permission_id),
+        )
+
+    # Grant talent_point.issue to the provider for E2E TP issuance.
+    permission_cursor = connection.execute(
+        '''
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'talent_point.issue', 'active')
+        ''',
+        (tenant_id,),
+    )
+    permission_id = permission_cursor.lastrowid
+
+    role_cursor = connection.execute(
+        '''
+        INSERT INTO roles (tenant_id, name, status)
+        VALUES (?, 'e2e-talent-point-issuer', 'active')
+        ''',
+        (tenant_id,),
+    )
+    role_id = role_cursor.lastrowid
+
+    connection.execute(
+        '''
+        INSERT INTO user_roles (tenant_id, user_id, role_id)
+        VALUES (?, ?, ?)
+        ''',
+        (tenant_id, user_ids[0], role_id),
+    )
+
+    connection.execute(
+        '''
+        INSERT INTO role_permissions (
+            tenant_id,
+            role_id,
+            permission_id
+        )
+        VALUES (?, ?, ?)
+        ''',
+        (tenant_id, role_id, permission_id),
+    )
+
+    connection.commit()
     return tuple(user_ids)
+
 
 def _create_service_act(connection, tenant_id, provider_id, recipient_id):
     cursor = connection.execute(
@@ -159,6 +282,7 @@ def test_complete_service_act_lifecycle(connection):
         tenant_id,
         service_act_id,
         ServiceActStatus.ACCEPTED,
+        actor_id=recipient_id,
     )
 
     assert act.status == ServiceActStatus.ACCEPTED
@@ -170,6 +294,7 @@ def test_complete_service_act_lifecycle(connection):
         tenant_id,
         service_act_id,
         ServiceActStatus.IN_PROGRESS,
+        actor_id=provider_id,
     )
 
     assert act.status == ServiceActStatus.IN_PROGRESS
@@ -181,6 +306,7 @@ def test_complete_service_act_lifecycle(connection):
         tenant_id,
         service_act_id,
         ServiceActStatus.SUBMITTED,
+        actor_id=provider_id,
     )
 
     assert act.status == ServiceActStatus.SUBMITTED
@@ -193,6 +319,7 @@ def test_complete_service_act_lifecycle(connection):
         service_act_id=service_act_id,
         verifier_user_id=verifier_1,
         decision=VerificationDecision.APPROVED,
+        actor_user_id=verifier_1,
     )
 
     assert verification_1.decision == VerificationDecision.APPROVED
@@ -205,6 +332,7 @@ def test_complete_service_act_lifecycle(connection):
         service_act_id=service_act_id,
         verifier_user_id=verifier_2,
         decision=VerificationDecision.APPROVED,
+        actor_user_id=verifier_2,
     )
 
     assert verification_2.decision == VerificationDecision.APPROVED
@@ -228,6 +356,7 @@ def test_complete_service_act_lifecycle(connection):
         service_act=act,
         amount=100,
         reference="E2E-TEST",
+        actor_user_id=provider_id,
     )
 
     assert transaction.amount == 100

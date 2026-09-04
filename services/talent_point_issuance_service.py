@@ -4,6 +4,7 @@ from audit import audit_event
 from models.service_act import ServiceActStatus
 from models.talent_point import TalentPointTransaction
 from services.talent_point_policy import TalentPointPolicy
+from services.permission_resolution_service import PermissionResolutionService
 
 
 class TalentPointIssuanceService:
@@ -22,8 +23,13 @@ class TalentPointIssuanceService:
     - Successful issuance emits a structured audit event.
     """
 
-    def __init__(self, repository):
+    def __init__(
+        self,
+        repository,
+        permission_service: PermissionResolutionService,
+    ):
         self.repository = repository
+        self.permission_service = permission_service
 
     def issue_for_service_act(
         self,
@@ -31,16 +37,34 @@ class TalentPointIssuanceService:
         service_act,
         amount: int,
         reference: str | None = None,
+        actor_user_id: int | None = None,
     ) -> TalentPointTransaction:
 
         # ---------------------------------------------------------
-        # 1. Tenant integrity
+        # 1. Authorization
+        # ---------------------------------------------------------
+        if actor_user_id is None:
+            raise PermissionError(
+                "talent point issuance actor is required"
+            )
+
+        if not self.permission_service.has_permission(
+            user_id=actor_user_id,
+            permission_name="talent_point.issue",
+            tenant_id=tenant_id,
+        ):
+            raise PermissionError(
+                "talent point issuance permission denied"
+            )
+
+        # ---------------------------------------------------------
+        # 2. Tenant integrity
         # ---------------------------------------------------------
         if service_act.tenant_id != tenant_id:
             raise ValueError("tenant mismatch")
 
         # ---------------------------------------------------------
-        # 2. Service Act must be completed
+        # 3. Service Act must be completed
         # ---------------------------------------------------------
         if service_act.status != ServiceActStatus.COMPLETED:
             raise ValueError(
@@ -48,12 +72,12 @@ class TalentPointIssuanceService:
             )
 
         # ---------------------------------------------------------
-        # 3. Validate TP amount
+        # 4. Validate TP amount
         # ---------------------------------------------------------
         TalentPointPolicy.validate_amount(amount)
 
         # ---------------------------------------------------------
-        # 4. Prevent duplicate issuance
+        # 5. Prevent duplicate issuance
         # ---------------------------------------------------------
         if self.repository.issuance_exists_for_service_act(
             tenant_id,
@@ -64,7 +88,7 @@ class TalentPointIssuanceService:
             )
 
         # ---------------------------------------------------------
-        # 5. Determine current UTC day
+        # 6. Determine current UTC day
         # ---------------------------------------------------------
         now = datetime.now(timezone.utc)
         start_of_day = now.replace(
@@ -75,7 +99,7 @@ class TalentPointIssuanceService:
         )
 
         # ---------------------------------------------------------
-        # 6. Enforce total supply cap
+        # 7. Enforce total supply cap
         # ---------------------------------------------------------
         current_total_issued = self.repository.get_total_issued(
             tenant_id,
@@ -87,7 +111,7 @@ class TalentPointIssuanceService:
         )
 
         # ---------------------------------------------------------
-        # 7. Enforce daily minting cap
+        # 8. Enforce daily minting cap
         # ---------------------------------------------------------
         current_daily_issued = self.repository.get_issued_since(
             tenant_id,
@@ -100,7 +124,7 @@ class TalentPointIssuanceService:
         )
 
         # ---------------------------------------------------------
-        # 8. Create immutable issuance ledger transaction
+        # 9. Create immutable issuance ledger transaction
         # ---------------------------------------------------------
         transaction = TalentPointTransaction(
             id=None,
@@ -121,11 +145,11 @@ class TalentPointIssuanceService:
             transaction = self.repository.create(transaction)
 
             # ---------------------------------------------------------
-            # 9. Emit audit event using the SAME transaction
+            # 10. Emit audit event using the SAME transaction
             # ---------------------------------------------------------
             audit_event(
                 event_type="talent_point_issuance",
-                actor_id=transaction.user_id,
+                actor_id=actor_user_id,
                 tenant_id=transaction.tenant_id,
                 action="issue_talent_points",
                 metadata={

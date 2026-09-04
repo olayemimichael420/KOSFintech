@@ -104,7 +104,8 @@ class ApplicationServiceFactory:
 
         self._talent_point_issuance_service = (
             TalentPointIssuanceService(
-                self._talent_point_repository
+                repository=self._talent_point_repository,
+                permission_service=self._permission_resolution_service,
             )
         )
         self._talent_point_transfer_service = (

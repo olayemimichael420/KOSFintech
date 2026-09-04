@@ -6,6 +6,7 @@ from models.talent_point import TalentPointTransaction
 from repositories.service_act_repository import ServiceActRepository
 from repositories.talent_point_repository import TalentPointRepository
 from services.talent_point_issuance_service import TalentPointIssuanceService
+from services.permission_resolution_service import PermissionResolutionService
 
 
 def _setup_db(tmp_path, monkeypatch):
@@ -21,7 +22,12 @@ def _setup_db(tmp_path, monkeypatch):
     return database.get_connection()
 
 
-def _create_user(connection, tenant_id, name):
+def _create_user(
+    connection,
+    tenant_id,
+    name,
+    grant_issuance_permission=True,
+):
     cursor = connection.execute(
         """
         INSERT INTO users (tenant_id, name, role)
@@ -29,9 +35,71 @@ def _create_user(connection, tenant_id, name):
         """,
         (tenant_id, name, "member"),
     )
+    user_id = cursor.lastrowid
+
+    if grant_issuance_permission:
+        role_name = f"tp-issuance-{user_id}"
+
+        connection.execute(
+            """
+            INSERT INTO roles (tenant_id, name, status)
+            VALUES (?, ?, 'active')
+            """,
+            (tenant_id, role_name),
+        )
+
+        role_id = connection.execute(
+            """
+            SELECT id
+            FROM roles
+            WHERE tenant_id = ?
+              AND name = ?
+            """,
+            (tenant_id, role_name),
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO permissions (tenant_id, name, status)
+            VALUES (?, 'talent_point.issue', 'active')
+            """,
+            (tenant_id,),
+        )
+
+        permission_id = connection.execute(
+            """
+            SELECT id
+            FROM permissions
+            WHERE tenant_id = ?
+              AND name = 'talent_point.issue'
+            ORDER BY id DESC
+            LIMIT 1
+            """,
+            (tenant_id,),
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO user_roles (tenant_id, user_id, role_id)
+            VALUES (?, ?, ?)
+            """,
+            (tenant_id, user_id, role_id),
+        )
+
+        connection.execute(
+            """
+            INSERT INTO role_permissions (
+                tenant_id,
+                role_id,
+                permission_id
+            )
+            VALUES (?, ?, ?)
+            """,
+            (tenant_id, role_id, permission_id),
+        )
 
     connection.commit()
-    return cursor.lastrowid
+    return user_id
 
 
 def _create_act(
@@ -105,7 +173,8 @@ def test_completed_service_act_can_receive_tp(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         transaction = service.issue_for_service_act(
@@ -113,6 +182,7 @@ def test_completed_service_act_can_receive_tp(
             service_act=act,
             amount=100,
             reference="service-act-reward",
+            actor_user_id=provider,
         )
 
         assert transaction.id is not None
@@ -154,7 +224,8 @@ def test_incomplete_service_act_cannot_receive_tp(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -165,6 +236,7 @@ def test_incomplete_service_act_cannot_receive_tp(
                 "tenant-1",
                 act,
                 100,
+                actor_user_id=provider,
             )
 
     finally:
@@ -199,7 +271,8 @@ def test_cancelled_service_act_cannot_receive_tp(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -210,6 +283,7 @@ def test_cancelled_service_act_cannot_receive_tp(
                 "tenant-1",
                 act,
                 100,
+                actor_user_id=provider,
             )
 
     finally:
@@ -243,13 +317,15 @@ def test_duplicate_issuance_is_rejected(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         service.issue_for_service_act(
             "tenant-1",
             act,
             100,
+            actor_user_id=provider,
         )
 
         with pytest.raises(
@@ -260,6 +336,7 @@ def test_duplicate_issuance_is_rejected(
                 "tenant-1",
                 act,
                 100,
+                actor_user_id=provider,
             )
 
     finally:
@@ -293,7 +370,8 @@ def test_invalid_zero_amount_is_rejected(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -304,6 +382,7 @@ def test_invalid_zero_amount_is_rejected(
                 "tenant-1",
                 act,
                 0,
+                actor_user_id=provider,
             )
 
     finally:
@@ -337,7 +416,8 @@ def test_invalid_negative_amount_is_rejected(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -348,6 +428,7 @@ def test_invalid_negative_amount_is_rejected(
                 "tenant-1",
                 act,
                 -100,
+                actor_user_id=provider,
             )
 
     finally:
@@ -398,7 +479,10 @@ def test_daily_cap_is_enforced(
                 )
             )
 
-        service = TalentPointIssuanceService(repository)
+        service = TalentPointIssuanceService(
+            repository=repository,
+            permission_service=PermissionResolutionService(connection),
+        )
 
         with pytest.raises(
             ValueError,
@@ -408,6 +492,7 @@ def test_daily_cap_is_enforced(
                 "tenant-1",
                 acts[5],
                 1,
+                actor_user_id=provider,
             )
 
     finally:
@@ -455,7 +540,10 @@ def test_total_supply_cap_is_enforced(
             )
         )
 
-        service = TalentPointIssuanceService(repository)
+        service = TalentPointIssuanceService(
+            repository=repository,
+            permission_service=PermissionResolutionService(connection),
+        )
 
         with pytest.raises(
             ValueError,
@@ -465,6 +553,7 @@ def test_total_supply_cap_is_enforced(
                 "tenant-1",
                 acts[1],
                 101,
+                actor_user_id=provider,
             )
 
     finally:
@@ -497,8 +586,15 @@ def test_tenant_mismatch_is_rejected(
             recipient,
         )
 
+        tenant_2_actor = _create_user(
+            connection,
+            "tenant-2",
+            "Tenant 2 Actor",
+        )
+
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -509,6 +605,7 @@ def test_tenant_mismatch_is_rejected(
                 "tenant-2",
                 act,
                 100,
+                actor_user_id=tenant_2_actor,
             )
 
     finally:
@@ -541,7 +638,8 @@ def test_tp_issuance_emits_audit_event(tmp_path, monkeypatch, caplog):
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with caplog.at_level(
@@ -553,6 +651,7 @@ def test_tp_issuance_emits_audit_event(tmp_path, monkeypatch, caplog):
                 service_act=act,
                 amount=100,
                 reference="service-act-reward",
+                actor_user_id=provider,
             )
 
         audit_records = [
@@ -609,7 +708,8 @@ def test_tp_issuance_rolls_back_when_audit_persistence_fails(
         )
 
         service = TalentPointIssuanceService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         def failing_audit_event(*args, **kwargs):
@@ -629,6 +729,7 @@ def test_tp_issuance_rolls_back_when_audit_persistence_fails(
                 service_act=act,
                 amount=100,
                 reference="atomicity-test",
+                actor_user_id=provider,
             )
 
         tp_count = connection.execute(

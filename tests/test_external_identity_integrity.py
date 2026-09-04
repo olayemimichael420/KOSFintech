@@ -27,8 +27,8 @@ def _create_user(connection, tenant_id, name="Test User"):
     return cursor.lastrowid
 
 
-def test_external_identity_can_reference_canonical_user():
-    connection = database.get_connection()
+def test_external_identity_can_reference_canonical_user(db_connection):
+    connection = db_connection
     try:
         database.init_db()
 
@@ -64,8 +64,8 @@ def test_external_identity_can_reference_canonical_user():
         connection.close()
 
 
-def test_external_identity_rejects_duplicate_provider_subject():
-    connection = database.get_connection()
+def test_external_identity_rejects_duplicate_provider_subject(db_connection):
+    connection = db_connection
     try:
         database.init_db()
 
@@ -108,8 +108,8 @@ def test_external_identity_rejects_duplicate_provider_subject():
         connection.close()
 
 
-def test_external_identity_rejects_cross_tenant_user_binding():
-    connection = database.get_connection()
+def test_external_identity_rejects_cross_tenant_user_binding(db_connection):
+    connection = db_connection
     try:
         database.init_db()
 
