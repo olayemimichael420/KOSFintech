@@ -1,6 +1,7 @@
 from audit import audit_event
 from models.talent_point import TalentPointTransaction
 from services.talent_point_policy import TalentPointPolicy
+from services.permission_resolution_service import PermissionResolutionService
 
 
 class TalentPointTransferService:
@@ -22,12 +23,18 @@ class TalentPointTransferService:
     - Failed audit persistence rolls back the entire transfer.
     """
 
-    def __init__(self, repository):
+    def __init__(
+        self,
+        repository,
+        permission_service: PermissionResolutionService,
+    ):
         self.repository = repository
+        self.permission_service = permission_service
 
     def transfer(
         self,
         tenant_id: str,
+        actor_user_id: int,
         sender_user_id: int,
         recipient_user_id: int,
         amount: int,
@@ -38,7 +45,20 @@ class TalentPointTransferService:
     ]:
 
         # ---------------------------------------------------------
-        # 1. Validate amount
+        # 1. Authorize authenticated actor
+        # ---------------------------------------------------------
+        if not self.permission_service.has_permission(
+            user_id=actor_user_id,
+            permission_name="talent_point.transfer",
+            tenant_id=tenant_id,
+        ):
+            raise PermissionError("talent point transfer permission denied")
+
+        if actor_user_id != sender_user_id:
+            raise PermissionError("transfer actor must be the sender")
+
+        # ---------------------------------------------------------
+        # 2. Validate amount
         # ---------------------------------------------------------
         TalentPointPolicy.validate_amount(amount)
 
@@ -129,7 +149,7 @@ class TalentPointTransferService:
             # -----------------------------------------------------
             audit_event(
                 event_type="talent_point_transfer",
-                actor_id=sender_user_id,
+                actor_id=actor_user_id,
                 tenant_id=tenant_id,
                 action="transfer_talent_points",
                 metadata={

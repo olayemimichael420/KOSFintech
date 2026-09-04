@@ -5,6 +5,7 @@ import database
 from models.talent_point import TalentPointTransaction
 from repositories.talent_point_repository import TalentPointRepository
 from services.talent_point_transfer_service import TalentPointTransferService
+from services.permission_resolution_service import PermissionResolutionService
 
 
 def _setup_db(tmp_path, monkeypatch):
@@ -28,8 +29,66 @@ def _create_user(connection, tenant_id, name):
         """,
         (tenant_id, name, "member"),
     )
+    user_id = cursor.lastrowid
+
+    connection.execute(
+        """
+        INSERT INTO roles (tenant_id, name, status)
+        VALUES (?, ?, 'active')
+        """,
+        (tenant_id, f"tp-transfer-{user_id}"),
+    )
+    role_id = connection.execute(
+        """
+        SELECT id
+        FROM roles
+        WHERE tenant_id = ?
+          AND name = ?
+        """,
+        (tenant_id, f"tp-transfer-{user_id}"),
+    ).fetchone()["id"]
+
+    connection.execute(
+        """
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'talent_point.transfer', 'active')
+        """,
+        (tenant_id,),
+    )
+    permission_id = connection.execute(
+        """
+        SELECT id
+        FROM permissions
+        WHERE tenant_id = ?
+          AND name = 'talent_point.transfer'
+        ORDER BY id DESC
+        LIMIT 1
+        """,
+        (tenant_id,),
+    ).fetchone()["id"]
+
+    connection.execute(
+        """
+        INSERT INTO user_roles (tenant_id, user_id, role_id)
+        VALUES (?, ?, ?)
+        """,
+        (tenant_id, user_id, role_id),
+    )
+
+    connection.execute(
+        """
+        INSERT INTO role_permissions (
+            tenant_id,
+            role_id,
+            permission_id
+        )
+        VALUES (?, ?, ?)
+        """,
+        (tenant_id, role_id, permission_id),
+    )
+
     connection.commit()
-    return cursor.lastrowid
+    return user_id
 
 
 def _create_issuance(
@@ -73,11 +132,13 @@ def test_successful_transfer_creates_debit_and_credit_without_service_act(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         debit, credit = service.transfer(
             tenant_id="tenant-1",
+            actor_user_id=sender,
             sender_user_id=sender,
             recipient_user_id=recipient,
             amount=100,
@@ -121,14 +182,16 @@ def test_transfer_updates_sender_and_recipient_balances(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         service.transfer(
-            "tenant-1",
-            sender,
-            recipient,
-            150,
+            tenant_id="tenant-1",
+            actor_user_id=sender,
+            sender_user_id=sender,
+            recipient_user_id=recipient,
+            amount=150,
         )
 
         repository = TalentPointRepository(connection)
@@ -165,15 +228,19 @@ def test_transfer_does_not_increase_total_issued(
         )
 
         repository = TalentPointRepository(connection)
-        service = TalentPointTransferService(repository)
+        service = TalentPointTransferService(
+            repository=repository,
+            permission_service=PermissionResolutionService(connection),
+        )
 
         assert repository.get_total_issued("tenant-1") == 500
 
         service.transfer(
-            "tenant-1",
-            sender,
-            recipient,
-            200,
+            tenant_id="tenant-1",
+            actor_user_id=sender,
+            sender_user_id=sender,
+            recipient_user_id=recipient,
+            amount=200,
         )
 
         assert repository.get_total_issued("tenant-1") == 500
@@ -200,14 +267,16 @@ def test_transfer_creates_exactly_two_transfer_entries(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         service.transfer(
-            "tenant-1",
-            sender,
-            recipient,
-            100,
+            tenant_id="tenant-1",
+            actor_user_id=sender,
+            sender_user_id=sender,
+            recipient_user_id=recipient,
+            amount=100,
         )
 
         rows = connection.execute(
@@ -264,15 +333,17 @@ def test_invalid_transfer_amount_is_rejected(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(ValueError):
             service.transfer(
-                "tenant-1",
-                sender,
-                recipient,
-                amount,
+                tenant_id="tenant-1",
+                actor_user_id=sender,
+                sender_user_id=sender,
+                recipient_user_id=recipient,
+                amount=amount,
             )
 
     finally:
@@ -297,7 +368,8 @@ def test_non_integer_transfer_amount_is_rejected(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -305,10 +377,11 @@ def test_non_integer_transfer_amount_is_rejected(
             match="integer",
         ):
             service.transfer(
-                "tenant-1",
-                sender,
-                recipient,
-                10.5,
+                tenant_id="tenant-1",
+                actor_user_id=sender,
+                sender_user_id=sender,
+                recipient_user_id=recipient,
+                amount=10.5,
             )
 
     finally:
@@ -332,7 +405,8 @@ def test_self_transfer_is_rejected(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -340,10 +414,11 @@ def test_self_transfer_is_rejected(
             match="different users",
         ):
             service.transfer(
-                "tenant-1",
-                sender,
-                sender,
-                100,
+                tenant_id="tenant-1",
+                actor_user_id=sender,
+                sender_user_id=sender,
+                recipient_user_id=sender,
+                amount=100,
             )
 
     finally:
@@ -368,7 +443,8 @@ def test_insufficient_balance_is_rejected(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -376,10 +452,11 @@ def test_insufficient_balance_is_rejected(
             match="insufficient",
         ):
             service.transfer(
-                "tenant-1",
-                sender,
-                recipient,
-                100,
+                tenant_id="tenant-1",
+                actor_user_id=sender,
+                sender_user_id=sender,
+                recipient_user_id=recipient,
+                amount=100,
             )
 
     finally:
@@ -400,18 +477,20 @@ def test_sender_must_exist_in_tenant(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
-            ValueError,
-            match="sender user not found",
+            PermissionError,
+            match="talent point transfer permission denied",
         ):
             service.transfer(
-                "tenant-1",
-                999999,
-                recipient,
-                100,
+                tenant_id="tenant-1",
+                actor_user_id=999999,
+                sender_user_id=999999,
+                recipient_user_id=recipient,
+                amount=100,
             )
 
     finally:
@@ -439,7 +518,8 @@ def test_recipient_must_exist_in_tenant(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -447,10 +527,11 @@ def test_recipient_must_exist_in_tenant(
             match="recipient user not found",
         ):
             service.transfer(
-                "tenant-1",
-                sender,
-                999999,
-                100,
+                tenant_id="tenant-1",
+                actor_user_id=sender,
+                sender_user_id=sender,
+                recipient_user_id=999999,
+                amount=100,
             )
 
     finally:
@@ -484,18 +565,20 @@ def test_cross_tenant_sender_is_rejected(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
-            ValueError,
-            match="sender user not found",
+            PermissionError,
+            match="talent point transfer permission denied",
         ):
             service.transfer(
-                "tenant-1",
-                tenant_2_sender,
-                tenant_1_recipient,
-                100,
+                tenant_id="tenant-1",
+                actor_user_id=tenant_2_sender,
+                sender_user_id=tenant_2_sender,
+                recipient_user_id=tenant_1_recipient,
+                amount=100,
             )
 
     finally:
@@ -529,7 +612,8 @@ def test_cross_tenant_recipient_is_rejected(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         with pytest.raises(
@@ -537,10 +621,11 @@ def test_cross_tenant_recipient_is_rejected(
             match="recipient user not found",
         ):
             service.transfer(
-                "tenant-1",
-                tenant_1_sender,
-                tenant_2_recipient,
-                100,
+                tenant_id="tenant-1",
+                actor_user_id=tenant_1_sender,
+                sender_user_id=tenant_1_sender,
+                recipient_user_id=tenant_2_recipient,
+                amount=100,
             )
 
     finally:
@@ -588,14 +673,16 @@ def test_transfer_is_tenant_isolated(
         )
 
         service = TalentPointTransferService(
-            TalentPointRepository(connection)
+            repository=TalentPointRepository(connection),
+            permission_service=PermissionResolutionService(connection),
         )
 
         service.transfer(
-            "tenant-1",
-            tenant_1_sender,
-            tenant_1_recipient,
-            100,
+            tenant_id="tenant-1",
+            actor_user_id=tenant_1_sender,
+            sender_user_id=tenant_1_sender,
+            recipient_user_id=tenant_1_recipient,
+            amount=100,
         )
 
         repository = TalentPointRepository(connection)
@@ -645,14 +732,18 @@ def test_failed_transfer_leaves_ledger_unchanged(
         )
 
         repository = TalentPointRepository(connection)
-        service = TalentPointTransferService(repository)
+        service = TalentPointTransferService(
+            repository=repository,
+            permission_service=PermissionResolutionService(connection),
+        )
 
         with pytest.raises(ValueError):
             service.transfer(
-                "tenant-1",
-                sender,
-                recipient,
-                1000,
+                tenant_id="tenant-1",
+                actor_user_id=sender,
+                sender_user_id=sender,
+                recipient_user_id=recipient,
+                amount=1000,
             )
 
         transfer_rows = connection.execute(
@@ -679,3 +770,28 @@ def test_failed_transfer_leaves_ledger_unchanged(
 
     finally:
         connection.close()
+
+
+def test_transfer_actor_must_be_sender(tmp_path, monkeypatch):
+    connection = _setup_db(tmp_path, monkeypatch)
+
+    sender = _create_user(connection, "tenant-1", "Sender")
+    actor = _create_user(connection, "tenant-1", "Actor")
+    recipient = _create_user(connection, "tenant-1", "Recipient")
+
+    service = TalentPointTransferService(
+        repository=TalentPointRepository(connection),
+        permission_service=PermissionResolutionService(connection),
+    )
+
+    with pytest.raises(
+        PermissionError,
+        match="transfer actor must be the sender",
+    ):
+        service.transfer(
+            tenant_id="tenant-1",
+            actor_user_id=actor,
+            sender_user_id=sender,
+            recipient_user_id=recipient,
+            amount=100,
+        )

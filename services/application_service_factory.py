@@ -60,6 +60,14 @@ class ApplicationServiceFactory:
         self._user_repository = UserRepository(connection)
 
         # ---------------------------------------------------------------
+        # Core authorization service
+        # ---------------------------------------------------------------
+
+        self._permission_resolution_service = PermissionResolutionService(
+            connection
+        )
+
+        # ---------------------------------------------------------------
         # Core service graph
         # ---------------------------------------------------------------
 
@@ -99,7 +107,8 @@ class ApplicationServiceFactory:
         )
         self._talent_point_transfer_service = (
             TalentPointTransferService(
-                self._talent_point_repository
+                repository=self._talent_point_repository,
+                permission_service=self._permission_resolution_service,
             )
         )
 
@@ -117,9 +126,6 @@ class ApplicationServiceFactory:
             repository=self._reputation_repository,
         )
 
-        self._permission_resolution_service = PermissionResolutionService(
-            connection
-        )
 
         self._external_identity_service = ExternalIdentityService(
             external_identity_repository=self._external_identity_repository,
