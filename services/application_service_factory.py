@@ -8,6 +8,8 @@ from repositories.student_repository import StudentRepository
 from repositories.teacher_repository import TeacherRepository
 from repositories.parent_repository import ParentRepository
 from repositories.parent_student_repository import ParentStudentRepository
+from repositories.teacher_student_repository import TeacherStudentRepository
+from repositories.school_student_repository import SchoolStudentRepository
 from repositories.external_identity_repository import ExternalIdentityRepository
 from repositories.telegram_channel_binding_repository import TelegramChannelBindingRepository
 from repositories.user_repository import UserRepository
@@ -63,6 +65,8 @@ class ApplicationServiceFactory:
         self._teacher_repository = TeacherRepository(connection)
         self._parent_repository = ParentRepository(connection)
         self._parent_student_repository = ParentStudentRepository(connection)
+        self._teacher_student_repository = TeacherStudentRepository(connection)
+        self._school_student_repository = SchoolStudentRepository(connection)
         self._external_identity_repository = ExternalIdentityRepository(connection)
         self._telegram_channel_binding_repository = TelegramChannelBindingRepository(connection)
         self._user_repository = UserRepository(connection)
@@ -160,6 +164,7 @@ class ApplicationServiceFactory:
             self._telegram_channel_binding_repository
         )
 
+
         self._telegram_identity_service = TelegramIdentityService(
             external_identity_service=self._external_identity_service,
             authentication_service=self._authentication_service,
@@ -198,6 +203,12 @@ class ApplicationServiceFactory:
 
     def build_parent_student_repository(self):
         return self._parent_student_repository
+
+    def build_teacher_student_repository(self):
+        return self._teacher_student_repository
+
+    def build_school_student_repository(self):
+        return self._school_student_repository
 
     def build_external_identity_repository(self):
         return self._external_identity_repository

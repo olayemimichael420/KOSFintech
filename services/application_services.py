@@ -4,6 +4,8 @@ from services.student_service import StudentService
 from services.teacher_service import TeacherService
 from services.parent_service import ParentService
 from services.parent_student_service import ParentStudentService
+from services.teacher_student_service import TeacherStudentService
+from services.school_student_service import SchoolStudentService
 from services.external_identity_service import ExternalIdentityService
 from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
@@ -147,6 +149,22 @@ class ApplicationServices:
     def parent_student(self, tenant_id: str, user_id=None):
         return ParentStudentService(
             repository=self.factory.build_parent_student_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teacher_student(self, tenant_id: str, user_id=None):
+        return TeacherStudentService(
+            repository=self.factory.build_teacher_student_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def school_student(self, tenant_id: str, user_id=None):
+        return SchoolStudentService(
+            repository=self.factory.build_school_student_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,
