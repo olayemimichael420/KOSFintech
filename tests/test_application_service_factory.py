@@ -4,6 +4,7 @@ import pytest
 from repositories.service_act_repository import ServiceActRepository
 from repositories.verification_repository import VerificationRepository
 from services.application_service_factory import ApplicationServiceFactory
+from services.authentication_service import AuthenticationService
 from services.service_act_service import ServiceActService
 from services.service_act_verification_service import ServiceActVerificationService
 from services.verification_decision_service import VerificationDecisionService
@@ -106,3 +107,11 @@ def test_factory_builds_verification_workflow_service(connection):
         service.service_act_verification_service,
         ServiceActVerificationService,
     )
+
+
+def test_factory_builds_authentication_service(connection):
+    factory = ApplicationServiceFactory(connection)
+    service = factory.build_authentication_service()
+
+    assert isinstance(service, AuthenticationService)
+    assert service.connection is connection

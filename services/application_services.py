@@ -5,6 +5,10 @@ from services.teacher_service import TeacherService
 from services.parent_service import ParentService
 from services.parent_student_service import ParentStudentService
 from services.external_identity_service import ExternalIdentityService
+from services.authentication_service import AuthenticationService
+from services.authorization_context_service import AuthorizationContextService
+from services.authorization_service import AuthorizationService
+from services.telegram_identity_service import TelegramIdentityService
 
 
 class ApplicationServices:
@@ -39,6 +43,11 @@ class ApplicationServices:
         self._reputation_profile = (
             factory.build_reputation_profile_service()
         )
+        self._authentication = factory.build_authentication_service()
+        self._authorization_context = (
+            factory.build_authorization_context_service()
+        )
+        self._authorization = factory.build_authorization_service()
 
     @property
     def verification_workflow(self):
@@ -71,6 +80,21 @@ class ApplicationServices:
     @property
     def reputation_profile(self):
         return self._reputation_profile
+    @property
+    def authentication(self):
+        return self._authentication
+
+    @property
+    def telegram_identity(self) -> TelegramIdentityService:
+        return self.factory.build_telegram_identity_service()
+
+    @property
+    def authorization_context(self) -> AuthorizationContextService:
+        return self._authorization_context
+
+    @property
+    def authorization(self) -> AuthorizationService:
+        return self._authorization
 
     def attendance(self, tenant_id: str, user_id=None):
         return AttendanceService(

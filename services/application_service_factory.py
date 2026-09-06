@@ -23,6 +23,10 @@ from services.reputation_service import ReputationService
 from services.reputation_profile_service import ReputationProfileService
 from services.external_identity_service import ExternalIdentityService
 from services.permission_resolution_service import PermissionResolutionService
+from services.authentication_service import AuthenticationService
+from services.authorization_context_service import AuthorizationContextService
+from services.authorization_service import AuthorizationService
+from services.telegram_identity_service import TelegramIdentityService
 
 
 class ApplicationServiceFactory:
@@ -64,6 +68,15 @@ class ApplicationServiceFactory:
         # ---------------------------------------------------------------
 
         self._permission_resolution_service = PermissionResolutionService(
+            connection
+        )
+        self._authentication_service = AuthenticationService(
+            connection
+        )
+        self._authorization_context_service = AuthorizationContextService(
+            connection
+        )
+        self._authorization_service = AuthorizationService(
             connection
         )
 
@@ -134,6 +147,11 @@ class ApplicationServiceFactory:
             external_identity_repository=self._external_identity_repository,
             user_repository=self._user_repository,
             permission_service=self._permission_resolution_service,
+        )
+
+        self._telegram_identity_service = TelegramIdentityService(
+            external_identity_service=self._external_identity_service,
+            authentication_service=self._authentication_service,
         )
 
     # -------------------------------------------------------------------
@@ -212,3 +230,15 @@ class ApplicationServiceFactory:
 
     def build_external_identity_service(self):
         return self._external_identity_service
+
+    def build_authentication_service(self):
+        return self._authentication_service
+
+    def build_telegram_identity_service(self):
+        return self._telegram_identity_service
+
+    def build_authorization_context_service(self):
+        return self._authorization_context_service
+
+    def build_authorization_service(self):
+        return self._authorization_service

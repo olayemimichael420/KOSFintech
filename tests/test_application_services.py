@@ -2,6 +2,7 @@ import database
 import pytest
 
 from services.application_service_factory import ApplicationServiceFactory
+from services.authentication_service import AuthenticationService
 from services.application_services import ApplicationServices
 from services.attendance_service import AttendanceService
 from services.student_service import StudentService
@@ -247,3 +248,12 @@ def test_application_services_builds_context_bound_parent_student_service(connec
     assert parent_student.user_id == 1
     assert parent_student.repository is services.factory.build_parent_student_repository()
     assert parent_student.connection is connection
+
+
+def test_application_services_exposes_shared_authentication_service(connection):
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assert isinstance(services.authentication, AuthenticationService)
+    assert services.authentication is factory.build_authentication_service()
+    assert services.authentication.connection is connection

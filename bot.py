@@ -30,6 +30,17 @@ logging.basicConfig(
 logger = logging.getLogger("kosfintech")
 
 
+def get_authenticated_identity(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Resolve a Telegram update to a canonical authenticated identity."""
+
+    services = context.application.bot_data["services"]
+
+    return services.telegram_identity.authenticate_update(update)
+
+
 async def start(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
