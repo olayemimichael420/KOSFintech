@@ -41,6 +41,23 @@ def get_authenticated_identity(
     return services.telegram_identity.authenticate_update(update)
 
 
+def get_telegram_binding(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Resolve the current Telegram chat to its KOSFintech binding."""
+
+    chat = getattr(update, "effective_chat", None)
+    if chat is None:
+        return None
+
+    services = context.application.bot_data["services"]
+
+    return services.telegram_channel_binding.resolve_chat(
+        str(chat.id)
+    )
+
+
 async def start(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,

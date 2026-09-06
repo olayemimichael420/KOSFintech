@@ -8,7 +8,9 @@ from services.external_identity_service import ExternalIdentityService
 from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
+from services.administration_context_service import AdministrationContextService
 from services.telegram_identity_service import TelegramIdentityService
+from services.telegram_channel_binding_service import TelegramChannelBindingService
 
 
 class ApplicationServices:
@@ -48,6 +50,12 @@ class ApplicationServices:
             factory.build_authorization_context_service()
         )
         self._authorization = factory.build_authorization_service()
+        self._administration_context = (
+            factory.build_administration_context_service()
+        )
+        self._telegram_channel_binding = (
+            factory.build_telegram_channel_binding_service()
+        )
 
     @property
     def verification_workflow(self):
@@ -89,12 +97,20 @@ class ApplicationServices:
         return self.factory.build_telegram_identity_service()
 
     @property
+    def telegram_channel_binding(self) -> TelegramChannelBindingService:
+        return self._telegram_channel_binding
+
+    @property
     def authorization_context(self) -> AuthorizationContextService:
         return self._authorization_context
 
     @property
     def authorization(self) -> AuthorizationService:
         return self._authorization
+
+    @property
+    def administration_context(self) -> AdministrationContextService:
+        return self._administration_context
 
     def attendance(self, tenant_id: str, user_id=None):
         return AttendanceService(

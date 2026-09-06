@@ -296,6 +296,34 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS telegram_channel_bindings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                provider TEXT NOT NULL,
+                chat_id TEXT NOT NULL,
+                tenant_id TEXT NOT NULL,
+                administration_id INTEGER NOT NULL,
+                binding_type TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (administration_id, tenant_id)
+                    REFERENCES administrations(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_telegram_channel_bindings_provider_chat
+            ON telegram_channel_bindings(provider, chat_id)
+            """
+
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS schools (
                 tenant_id TEXT PRIMARY KEY,
                 name TEXT NOT NULL,

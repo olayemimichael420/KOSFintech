@@ -9,6 +9,7 @@ from repositories.teacher_repository import TeacherRepository
 from repositories.parent_repository import ParentRepository
 from repositories.parent_student_repository import ParentStudentRepository
 from repositories.external_identity_repository import ExternalIdentityRepository
+from repositories.telegram_channel_binding_repository import TelegramChannelBindingRepository
 from repositories.user_repository import UserRepository
 
 from services.service_act_service import ServiceActService
@@ -26,7 +27,9 @@ from services.permission_resolution_service import PermissionResolutionService
 from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
+from services.administration_context_service import AdministrationContextService
 from services.telegram_identity_service import TelegramIdentityService
+from services.telegram_channel_binding_service import TelegramChannelBindingService
 
 
 class ApplicationServiceFactory:
@@ -61,6 +64,7 @@ class ApplicationServiceFactory:
         self._parent_repository = ParentRepository(connection)
         self._parent_student_repository = ParentStudentRepository(connection)
         self._external_identity_repository = ExternalIdentityRepository(connection)
+        self._telegram_channel_binding_repository = TelegramChannelBindingRepository(connection)
         self._user_repository = UserRepository(connection)
 
         # ---------------------------------------------------------------
@@ -77,6 +81,9 @@ class ApplicationServiceFactory:
             connection
         )
         self._authorization_service = AuthorizationService(
+            connection
+        )
+        self._administration_context_service = AdministrationContextService(
             connection
         )
 
@@ -147,6 +154,10 @@ class ApplicationServiceFactory:
             external_identity_repository=self._external_identity_repository,
             user_repository=self._user_repository,
             permission_service=self._permission_resolution_service,
+        )
+
+        self._telegram_channel_binding_service = TelegramChannelBindingService(
+            self._telegram_channel_binding_repository
         )
 
         self._telegram_identity_service = TelegramIdentityService(
@@ -237,8 +248,14 @@ class ApplicationServiceFactory:
     def build_telegram_identity_service(self):
         return self._telegram_identity_service
 
+    def build_telegram_channel_binding_service(self):
+        return self._telegram_channel_binding_service
+
     def build_authorization_context_service(self):
         return self._authorization_context_service
 
     def build_authorization_service(self):
         return self._authorization_service
+
+    def build_administration_context_service(self):
+        return self._administration_context_service
