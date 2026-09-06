@@ -58,6 +58,29 @@ def get_telegram_binding(
     )
 
 
+def get_administration_context(
+    update: Update,
+    context: ContextTypes.DEFAULT_TYPE,
+):
+    """Compose authenticated Telegram identity and administration context."""
+
+    identity = get_authenticated_identity(update, context)
+    if identity is None:
+        return None
+
+    binding = get_telegram_binding(update, context)
+    if binding is None:
+        return None
+
+    services = context.application.bot_data["services"]
+
+    return services.administration_context.resolve(
+        user_id=identity.user_id,
+        administration_id=binding.administration_id,
+        tenant_id=binding.tenant_id,
+    )
+
+
 async def start(
     update: Update,
     context: ContextTypes.DEFAULT_TYPE,
