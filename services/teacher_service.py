@@ -36,6 +36,11 @@ class TeacherService:
 
         return self.repository.create(teacher)
 
+    def list(self):
+        self._require_permission(self.READ_PERMISSION)
+
+        return self.repository.list(self.tenant_id)
+
     def get(self, teacher_id: int):
         self._require_permission(self.READ_PERMISSION)
         return self.repository.get(self.tenant_id, teacher_id)

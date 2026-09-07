@@ -342,3 +342,56 @@ def test_teacher_service_denies_missing_write_permission():
 
     finally:
         connection.close()
+
+
+
+def test_teacher_service_list_is_bound_to_tenant():
+    class Repository:
+        def list(self, tenant_id):
+            return [tenant_id]
+
+    service = TeacherService(
+        repository=Repository(),
+        tenant_id="school-001",
+        connection=None,
+    )
+
+    assert service.list() == ["school-001"]
+
+
+
+def test_teacher_service_list_is_bound_to_tenant():
+    class Repository:
+        def list(self, tenant_id):
+            return [tenant_id]
+
+    service = TeacherService(
+        repository=Repository(),
+        tenant_id="school-001",
+        connection=None,
+    )
+
+    assert service.list() == ["school-001"]
+
+
+
+def test_teacher_service_list_denies_missing_read_permission():
+    class Repository:
+        def list(self, tenant_id):
+            return []
+
+    service = TeacherService(
+        repository=Repository(),
+        tenant_id="school-001",
+        connection=None,
+    )
+
+    service.permission_service = type(
+        "PermissionService",
+        (),
+        {"has_permission": lambda *args, **kwargs: False},
+    )()
+    service.user_id = 1
+
+    with pytest.raises(PermissionError, match="missing permission: teacher.read"):
+        service.list()

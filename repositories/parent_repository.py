@@ -33,6 +33,32 @@ class ParentRepository:
 
         return parent
 
+    def list(self, tenant_id: str):
+        rows = self.connection.execute(
+            """
+            SELECT
+                id, tenant_id, user_id, name, phone,
+                email, status
+            FROM parents
+            WHERE tenant_id = ?
+            ORDER BY id
+            """,
+            (tenant_id,),
+        ).fetchall()
+
+        return [
+            Parent(
+                id=row["id"],
+                tenant_id=row["tenant_id"],
+                user_id=row["user_id"],
+                name=row["name"],
+                phone=row["phone"],
+                email=row["email"],
+                status=row["status"],
+            )
+            for row in rows
+        ]
+
     def get(self, tenant_id: str, parent_id: int):
         row = self.connection.execute(
             """

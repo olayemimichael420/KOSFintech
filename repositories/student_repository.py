@@ -36,6 +36,34 @@ class StudentRepository:
         student.id = cursor.lastrowid
         return student
 
+    def list(self, tenant_id: str):
+        rows = self.connection.execute(
+            """
+            SELECT
+                id, tenant_id, user_id, name, class_name,
+                age, guardian_id, enrollment_date, status
+            FROM students
+            WHERE tenant_id = ?
+            ORDER BY id
+            """,
+            (tenant_id,),
+        ).fetchall()
+
+        return [
+            Student(
+                id=row["id"],
+                tenant_id=row["tenant_id"],
+                user_id=row["user_id"],
+                name=row["name"],
+                class_name=row["class_name"],
+                age=row["age"],
+                guardian_id=row["guardian_id"],
+                enrollment_date=row["enrollment_date"],
+                status=row["status"],
+            )
+            for row in rows
+        ]
+
     def get(self, tenant_id: str, student_id: int):
         row = self.connection.execute(
             """

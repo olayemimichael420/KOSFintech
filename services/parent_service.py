@@ -36,6 +36,11 @@ class ParentService:
 
         return self.repository.create(parent)
 
+    def list(self):
+        self._require_permission(self.READ_PERMISSION)
+
+        return self.repository.list(self.tenant_id)
+
     def get(self, parent_id: int):
         self._require_permission(self.READ_PERMISSION)
         return self.repository.get(self.tenant_id, parent_id)

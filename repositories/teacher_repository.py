@@ -32,6 +32,32 @@ class TeacherRepository:
         teacher.id = cursor.lastrowid
         return teacher
 
+    def list(self, tenant_id: str):
+        rows = self.connection.execute(
+            """
+            SELECT
+                id, tenant_id, user_id, name, subject,
+                qualification, status
+            FROM teachers
+            WHERE tenant_id = ?
+            ORDER BY id
+            """,
+            (tenant_id,),
+        ).fetchall()
+
+        return [
+            Teacher(
+                id=row["id"],
+                tenant_id=row["tenant_id"],
+                user_id=row["user_id"],
+                name=row["name"],
+                subject=row["subject"],
+                qualification=row["qualification"],
+                status=row["status"],
+            )
+            for row in rows
+        ]
+
     def get(self, tenant_id: str, teacher_id: int):
         row = self.connection.execute(
             """

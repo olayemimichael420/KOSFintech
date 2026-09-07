@@ -14,12 +14,54 @@ from telegram.ext import (
     Application,
     CommandHandler,
     ContextTypes,
+    ConversationHandler,
+    MessageHandler,
+    filters,
 )
 
 import database
 from config import settings
 from services.application_service_factory import ApplicationServiceFactory
 from services.application_services import ApplicationServices
+from handlers.students import students
+from handlers.teachers import teachers
+from handlers.parents import parents
+from handlers.student_create import addstudent, student_name, student_class, NAME, CLASS_NAME
+from handlers.attendance_create import (
+    attendance,
+    attendance_student_id,
+    attendance_date,
+    attendance_status,
+    attendance_remark,
+    cancel_attendance,
+    STUDENT_ID,
+    ATTENDANCE_DATE,
+    STATUS,
+    REMARK,
+)
+from handlers.attendance_today import attendance_today
+from handlers.school_student_create import (
+    linkstudent,
+    school_student_id,
+    cancel_linkstudent,
+    STUDENT_ID as SCHOOL_STUDENT_ID,
+)
+from handlers.teacher_student_create import (
+    linkteacherstudent,
+    teacher_student_teacher_id,
+    teacher_student_student_id,
+    cancel_linkteacherstudent,
+    TEACHER_ID as TEACHER_STUDENT_TEACHER_ID,
+    STUDENT_ID as TEACHER_STUDENT_STUDENT_ID,
+)
+from handlers.parent_student_create import (
+    linkparentstudent,
+    parent_student_parent_id,
+    parent_student_student_id,
+    cancel_linkparentstudent,
+    PARENT_ID as PARENT_STUDENT_PARENT_ID,
+    STUDENT_ID as PARENT_STUDENT_STUDENT_ID,
+)
 
 
 logging.basicConfig(
@@ -130,6 +172,7 @@ def build_application() -> Application:
     service_factory = ApplicationServiceFactory(connection)
     application.bot_data["service_factory"] = service_factory
     application.bot_data["services"] = ApplicationServices(service_factory)
+    application.bot_data["get_administration_context"] = get_administration_context
 
     application.add_handler(
         CommandHandler("start", start)
@@ -137,6 +180,138 @@ def build_application() -> Application:
 
     application.add_handler(
         CommandHandler("health", health)
+    )
+
+    application.add_handler(
+        CommandHandler("students", students)
+    )
+
+    application.add_handler(
+        CommandHandler("teachers", teachers)
+    )
+
+    application.add_handler(
+        CommandHandler("parents", parents)
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[CommandHandler("addstudent", addstudent)],
+            states={
+                NAME: [
+                    MessageHandler(filters.TEXT & ~filters.COMMAND, student_name)
+                ],
+                CLASS_NAME: [
+                    MessageHandler(filters.TEXT & ~filters.COMMAND, student_class)
+                ],
+            },
+            fallbacks=[],
+        )
+    )
+    application.add_handler(
+        CommandHandler("attendance_today", attendance_today)
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[CommandHandler("linkstudent", linkstudent)],
+            states={
+                SCHOOL_STUDENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        school_student_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler("cancel", cancel_linkstudent),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("linkteacherstudent", linkteacherstudent)
+            ],
+            states={
+                TEACHER_STUDENT_TEACHER_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teacher_student_teacher_id,
+                    )
+                ],
+                TEACHER_STUDENT_STUDENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teacher_student_student_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler("cancel", cancel_linkteacherstudent),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("linkparentstudent", linkparentstudent)
+            ],
+            states={
+                PARENT_STUDENT_PARENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        parent_student_parent_id,
+                    )
+                ],
+                PARENT_STUDENT_STUDENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        parent_student_student_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler("cancel", cancel_linkparentstudent),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[CommandHandler("attendance", attendance)],
+            states={
+                STUDENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        attendance_student_id,
+                    )
+                ],
+                ATTENDANCE_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        attendance_date,
+                    )
+                ],
+                STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        attendance_status,
+                    )
+                ],
+                REMARK: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        attendance_remark,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler("cancel", cancel_attendance),
+            ],
+        )
     )
 
     return application

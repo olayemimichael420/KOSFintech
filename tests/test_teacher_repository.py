@@ -49,3 +49,39 @@ def test_create_and_get_teacher():
     assert result.status == "active"
 
     connection.close()
+
+def test_teacher_repository_list_is_tenant_scoped():
+    connection = sqlite3.connect(":memory:")
+    connection.row_factory = sqlite3.Row
+    connection.execute("""
+        CREATE TABLE teachers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            user_id INTEGER,
+            name TEXT NOT NULL,
+            subject TEXT NOT NULL,
+            qualification TEXT,
+            status TEXT DEFAULT 'active'
+        )
+    """)
+
+    repository = TeacherRepository(connection)
+
+    repository.create(Teacher(
+        id=None, tenant_id="school-001", user_id=None,
+        name="Teacher A", subject="Mathematics",
+        qualification="B.Ed",
+    ))
+    repository.create(Teacher(
+        id=None, tenant_id="school-002", user_id=None,
+        name="Teacher B", subject="English",
+        qualification="B.A",
+    ))
+
+    result = repository.list("school-001")
+
+    assert len(result) == 1
+    assert result[0].name == "Teacher A"
+    assert result[0].tenant_id == "school-001"
+
+    connection.close()
