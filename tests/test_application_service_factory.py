@@ -2,10 +2,12 @@ import database
 import pytest
 
 from repositories.service_act_repository import ServiceActRepository
+from repositories.service_request_repository import ServiceRequestRepository
 from repositories.verification_repository import VerificationRepository
 from services.application_service_factory import ApplicationServiceFactory
 from services.authentication_service import AuthenticationService
 from services.service_act_service import ServiceActService
+from services.service_request_service import ServiceRequestService
 from services.service_act_verification_service import ServiceActVerificationService
 from services.verification_decision_service import VerificationDecisionService
 from services.verification_service import VerificationService
@@ -36,6 +38,14 @@ def test_factory_builds_service_act_repository(connection):
     assert repository.connection is connection
 
 
+def test_factory_builds_service_request_repository(connection):
+    factory = ApplicationServiceFactory(connection)
+    repository = factory.build_service_request_repository()
+
+    assert isinstance(repository, ServiceRequestRepository)
+    assert repository.connection is connection
+
+
 def test_factory_builds_verification_repository(connection):
     factory = ApplicationServiceFactory(connection)
 
@@ -52,6 +62,15 @@ def test_factory_builds_service_act_service(connection):
 
     assert isinstance(service, ServiceActService)
     assert isinstance(service.repository, ServiceActRepository)
+    assert service.repository.connection is connection
+
+
+def test_factory_builds_service_request_service(connection):
+    factory = ApplicationServiceFactory(connection)
+    service = factory.build_service_request_service()
+
+    assert isinstance(service, ServiceRequestService)
+    assert isinstance(service.repository, ServiceRequestRepository)
     assert service.repository.connection is connection
 
 

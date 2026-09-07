@@ -709,6 +709,47 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS service_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                requester_user_id INTEGER NOT NULL,
+                recipient_user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'requested'
+                    CHECK(
+                        status IN (
+                            'requested',
+                            'authorized',
+                            'cancelled'
+                        )
+                    ),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                authorized_at TIMESTAMP,
+                cancelled_at TIMESTAMP,
+                cancellation_reason TEXT,
+
+                FOREIGN KEY (requester_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                FOREIGN KEY (recipient_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                CHECK(requester_user_id != recipient_user_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_service_requests_id_tenant
+            ON service_requests(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE INDEX IF NOT EXISTS ix_service_acts_tenant_status
             ON service_acts(tenant_id, status)
             """

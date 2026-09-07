@@ -36,6 +36,7 @@ class ApplicationServices:
         )
         self._verification = factory.build_verification_service()
         self._service_act = factory.build_service_act_service()
+        self._service_request = factory.build_service_request_service()
         self._talent_point_issuance = (
             factory.build_talent_point_issuance_service()
         )
@@ -70,6 +71,9 @@ class ApplicationServices:
     @property
     def service_act(self):
         return self._service_act
+    @property
+    def service_request(self):
+        return self._service_request
 
     @property
     def talent_point_issuance(self):

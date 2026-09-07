@@ -7,6 +7,7 @@ from services.application_services import ApplicationServices
 from services.attendance_service import AttendanceService
 from services.student_service import StudentService
 from services.service_act_service import ServiceActService
+from services.service_request_service import ServiceRequestService
 from services.verification_service import VerificationService
 from services.verification_workflow_service import VerificationWorkflowService
 
@@ -55,6 +56,17 @@ def test_application_services_exposes_service_act(connection):
     assert isinstance(
         services.service_act,
         ServiceActService,
+    )
+
+
+def test_application_services_exposes_service_request(connection):
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    assert isinstance(
+        services.service_request,
+        ServiceRequestService,
     )
 
 

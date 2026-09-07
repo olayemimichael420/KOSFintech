@@ -1,4 +1,5 @@
 from repositories.service_act_repository import ServiceActRepository
+from repositories.service_request_repository import ServiceRequestRepository
 from repositories.verification_repository import VerificationRepository
 from repositories.talent_point_repository import TalentPointRepository
 from repositories.dispute_repository import DisputeRepository
@@ -15,6 +16,7 @@ from repositories.telegram_channel_binding_repository import TelegramChannelBind
 from repositories.user_repository import UserRepository
 
 from services.service_act_service import ServiceActService
+from services.service_request_service import ServiceRequestService
 from services.verification_service import VerificationService
 from services.verification_decision_service import VerificationDecisionService
 from services.service_act_verification_service import ServiceActVerificationService
@@ -56,6 +58,7 @@ class ApplicationServiceFactory:
         # ---------------------------------------------------------------
 
         self._service_act_repository = ServiceActRepository(connection)
+        self._service_request_repository = ServiceRequestRepository(connection)
         self._verification_repository = VerificationRepository(connection)
         self._talent_point_repository = TalentPointRepository(connection)
         self._dispute_repository = DisputeRepository(connection)
@@ -99,6 +102,11 @@ class ApplicationServiceFactory:
             self._service_act_repository,
             self._permission_resolution_service,
         )
+        self._service_request_service = ServiceRequestService(
+            self._service_request_repository,
+            self._permission_resolution_service,
+        )
+
 
         self._verification_service = VerificationService(
             repository=self._verification_repository,
@@ -176,6 +184,9 @@ class ApplicationServiceFactory:
 
     def build_service_act_repository(self):
         return self._service_act_repository
+    def build_service_request_repository(self):
+        return self._service_request_repository
+
 
     def build_verification_repository(self):
         return self._verification_repository
@@ -228,6 +239,9 @@ class ApplicationServiceFactory:
 
     def build_service_act_service(self):
         return self._service_act_service
+    def build_service_request_service(self):
+        return self._service_request_service
+
 
     def build_verification_service(self):
         return self._verification_service
