@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 
-from models.service_act import ServiceActStatus
+from audit import audit_event
+from models.service_act import ServiceAct, ServiceActStatus
+from models.service_request import ServiceRequestStatus
 from services.permission_resolution_service import PermissionResolutionService
 
 
@@ -37,6 +39,81 @@ class ServiceActService:
     ):
         self.repository = repository
         self.permission_service = permission_service
+
+    def create(
+        self,
+        request,
+        provider_user_id: int,
+        actor_id: int | None = None,
+        commit: bool = True,
+    ):
+        """Create a Service Act from an authorized Service Request."""
+        if actor_id is None:
+            raise PermissionError("service act actor is required")
+
+        if not self.permission_service.has_permission(
+            user_id=actor_id,
+            permission_name=self.WRITE_PERMISSION,
+            tenant_id=request.tenant_id,
+        ):
+            raise PermissionError("service act permission denied")
+
+        if request.status != ServiceRequestStatus.AUTHORIZED:
+            raise ValueError("service request must be authorized")
+
+        if provider_user_id == request.recipient_user_id:
+            raise ValueError(
+                "service act provider and recipient must differ"
+            )
+
+        act = ServiceAct(
+            id=None,
+            tenant_id=request.tenant_id,
+            provider_user_id=provider_user_id,
+            recipient_user_id=request.recipient_user_id,
+            title=request.title,
+            description=request.description,
+            status=ServiceActStatus.CREATED,
+        )
+
+        connection = self.repository.connection
+
+        if commit:
+            try:
+                connection.execute("BEGIN")
+                created = self.repository.create(act, commit=False)
+                audit_event(
+                    event_type="service_act_created",
+                    actor_id=actor_id,
+                    tenant_id=request.tenant_id,
+                    action="create_service_act",
+                    metadata={
+                        "service_act_id": created.id,
+                        "service_request_id": request.id,
+                        "provider_user_id": provider_user_id,
+                    },
+                    connection=connection,
+                )
+                connection.commit()
+                return created
+            except Exception:
+                connection.rollback()
+                raise
+
+        created = self.repository.create(act, commit=False)
+        audit_event(
+            event_type="service_act_created",
+            actor_id=actor_id,
+            tenant_id=request.tenant_id,
+            action="create_service_act",
+            metadata={
+                "service_act_id": created.id,
+                "service_request_id": request.id,
+                "provider_user_id": provider_user_id,
+            },
+            connection=connection,
+        )
+        return created
 
     def transition(
         self,

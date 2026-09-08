@@ -2,6 +2,8 @@ import database
 import pytest
 
 from models.service_act import ServiceAct, ServiceActStatus
+from models.service_request import ServiceRequest, ServiceRequestStatus
+from repositories.service_request_repository import ServiceRequestRepository
 from repositories.service_act_repository import ServiceActRepository
 from services.permission_resolution_service import PermissionResolutionService
 from services.service_act_service import ServiceActService
@@ -123,6 +125,153 @@ def _service(connection, repository):
         repository,
         permission_service,
     )
+
+
+def _create_authorized_request(connection, recipient):
+    requester = _create_user(connection, "tenant-a", "Requester")
+    repository = ServiceRequestRepository(connection)
+    request = repository.create(
+        ServiceRequest(
+            id=None,
+            tenant_id="tenant-a",
+            requester_user_id=requester,
+            recipient_user_id=recipient,
+            title="Tutoring",
+            description="Mathematics tutoring.",
+            status=ServiceRequestStatus.AUTHORIZED,
+        )
+    )
+    return request, requester
+
+
+def test_create_service_act_from_authorized_request(tmp_path, monkeypatch):
+    connection = _setup_fresh_db(tmp_path, monkeypatch)
+    recipient = _create_user(connection, "tenant-a", "Recipient")
+    provider = _create_user(connection, "tenant-a", "Provider")
+    request, _ = _create_authorized_request(connection, recipient)
+    repository = ServiceActRepository(connection)
+    service = _service(connection, repository)
+
+    created = service.create(
+        request,
+        provider_user_id=provider,
+        actor_id=provider,
+    )
+
+    assert created.id is not None
+    assert created.tenant_id == "tenant-a"
+    assert created.provider_user_id == provider
+    assert created.recipient_user_id == recipient
+    assert created.title == request.title
+    assert created.description == request.description
+    assert created.status == ServiceActStatus.CREATED
+
+
+def test_create_service_act_requires_authorized_request(tmp_path, monkeypatch):
+    connection = _setup_fresh_db(tmp_path, monkeypatch)
+    recipient = _create_user(connection, "tenant-a", "Recipient")
+    provider = _create_user(connection, "tenant-a", "Provider")
+    requester = _create_user(connection, "tenant-a", "Requester")
+    request = ServiceRequest(
+        id=None,
+        tenant_id="tenant-a",
+        requester_user_id=requester,
+        recipient_user_id=recipient,
+        title="Tutoring",
+        description="Mathematics tutoring.",
+    )
+    repository = ServiceActRepository(connection)
+    service = _service(connection, repository)
+
+    with pytest.raises(ValueError, match="must be authorized"):
+        service.create(
+            request,
+            provider_user_id=provider,
+            actor_id=provider,
+        )
+
+
+def test_create_service_act_requires_actor(tmp_path, monkeypatch):
+    connection = _setup_fresh_db(tmp_path, monkeypatch)
+    recipient = _create_user(connection, "tenant-a", "Recipient")
+    provider = _create_user(connection, "tenant-a", "Provider")
+    request, _ = _create_authorized_request(connection, recipient)
+    repository = ServiceActRepository(connection)
+    service = _service(connection, repository)
+
+    with pytest.raises(PermissionError, match="actor is required"):
+        service.create(
+            request,
+            provider_user_id=provider,
+        )
+
+
+def test_create_service_act_requires_write_permission(tmp_path, monkeypatch):
+    connection = _setup_fresh_db(tmp_path, monkeypatch)
+    recipient = _create_user(connection, "tenant-a", "Recipient")
+    provider = _create_user(
+        connection,
+        "tenant-a",
+        "Provider",
+        with_permission=False,
+    )
+    request, _ = _create_authorized_request(connection, recipient)
+    repository = ServiceActRepository(connection)
+    service = _service(connection, repository)
+
+    with pytest.raises(PermissionError, match="permission denied"):
+        service.create(
+            request,
+            provider_user_id=provider,
+            actor_id=provider,
+        )
+
+
+def test_create_service_act_provider_must_differ_from_recipient(
+    tmp_path,
+    monkeypatch,
+):
+    connection = _setup_fresh_db(tmp_path, monkeypatch)
+    recipient = _create_user(connection, "tenant-a", "Recipient")
+    request, _ = _create_authorized_request(connection, recipient)
+    repository = ServiceActRepository(connection)
+    service = _service(connection, repository)
+
+    with pytest.raises(ValueError, match="provider and recipient must differ"):
+        service.create(
+            request,
+            provider_user_id=recipient,
+            actor_id=recipient,
+        )
+
+
+def test_create_service_act_rolls_back_when_audit_fails(
+    tmp_path,
+    monkeypatch,
+):
+    connection = _setup_fresh_db(tmp_path, monkeypatch)
+    recipient = _create_user(connection, "tenant-a", "Recipient")
+    provider = _create_user(connection, "tenant-a", "Provider")
+    request, _ = _create_authorized_request(connection, recipient)
+    repository = ServiceActRepository(connection)
+    service = _service(connection, repository)
+
+    def fail_audit(**kwargs):
+        raise RuntimeError("audit failure")
+
+    monkeypatch.setattr(
+        "services.service_act_service.audit_event",
+        fail_audit,
+    )
+
+    with pytest.raises(RuntimeError, match="audit failure"):
+        service.create(
+            request,
+            provider_user_id=provider,
+            actor_id=provider,
+        )
+
+    assert repository.list_by_tenant("tenant-a") == []
 
 
 def test_complete_service_act_through_valid_lifecycle(
