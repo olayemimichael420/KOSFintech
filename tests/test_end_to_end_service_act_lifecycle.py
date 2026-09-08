@@ -2,6 +2,7 @@ import database
 import pytest
 
 from models.service_act import ServiceActStatus
+from models.service_request import ServiceRequest, ServiceRequestStatus
 from models.verification import VerificationDecision
 from models.dispute import (
     DisputeResolution,
@@ -193,34 +194,72 @@ def _create_users(
         (tenant_id, role_id, permission_id),
     )
 
+    # Grant service_request.write only to the provider/requester.
+    permission_cursor = connection.execute(
+        '''
+        INSERT INTO permissions (tenant_id, name, status)
+        VALUES (?, 'service_request.write', 'active')
+        ''',
+        (tenant_id,),
+    )
+    permission_id = permission_cursor.lastrowid
+
+    role_cursor = connection.execute(
+        '''
+        INSERT INTO roles (tenant_id, name, status)
+        VALUES (?, 'e2e-service-request-requester', 'active')
+        ''',
+        (tenant_id,),
+    )
+    role_id = role_cursor.lastrowid
+
+    connection.execute(
+        '''
+        INSERT INTO user_roles (tenant_id, user_id, role_id)
+        VALUES (?, ?, ?)
+        ''',
+        (tenant_id, user_ids[0], role_id),
+    )
+
+    connection.execute(
+        '''
+        INSERT INTO role_permissions (tenant_id, role_id, permission_id)
+        VALUES (?, ?, ?)
+        ''',
+        (tenant_id, role_id, permission_id),
+    )
+
     connection.commit()
     return tuple(user_ids)
 
 
-def _create_service_act(connection, tenant_id, provider_id, recipient_id):
-    cursor = connection.execute(
-        """
-        INSERT INTO service_acts (
-            tenant_id,
-            provider_user_id,
-            recipient_user_id,
-            title,
-            description,
-            status
-        )
-        VALUES (?, ?, ?, ?, ?, ?)
-        """,
-        (
-            tenant_id,
-            provider_id,
-            recipient_id,
-            "E2E Test Service",
-            "End-to-end lifecycle integration test",
-            ServiceActStatus.CREATED.value,
+def _create_service_act(services, tenant_id, provider_id, recipient_id):
+    request = services.service_request.create(
+        ServiceRequest(
+            id=None,
+            tenant_id=tenant_id,
+            requester_user_id=provider_id,
+            recipient_user_id=recipient_id,
+            title="E2E Test Service",
+            description="End-to-end lifecycle integration test",
         ),
+        actor_id=provider_id,
     )
-    connection.commit()
-    return cursor.lastrowid
+
+    request = services.service_request.transition(
+        tenant_id,
+        request.id,
+        ServiceRequestStatus.AUTHORIZED,
+        actor_id=provider_id,
+    )
+
+    act = services.service_act.create(
+        request,
+        provider_user_id=provider_id,
+        actor_id=provider_id,
+    )
+
+    return request, act
 
 
 def test_complete_service_act_lifecycle(connection):
@@ -258,19 +297,18 @@ def test_complete_service_act_lifecycle(connection):
     dispute_actor = recipient_id
 
     # ---------------------------------------------------------
-    # 2. CREATE SERVICE ACT
+    # 2. AUTHORIZE SERVICE REQUEST + CREATE SERVICE ACT
     # ---------------------------------------------------------
-    service_act_id = _create_service_act(
-        connection,
+    service_request, act = _create_service_act(
+        services,
         tenant_id,
         provider_id,
         recipient_id,
     )
 
-    act = services.service_act.repository.get(
-        tenant_id,
-        service_act_id,
-    )
+    assert service_request.status == ServiceRequestStatus.AUTHORIZED
+
+    service_act_id = act.id
 
     assert act is not None
     assert act.status == ServiceActStatus.CREATED
@@ -483,10 +521,11 @@ def test_complete_service_act_lifecycle(connection):
         ),
     ).fetchall()
 
-    assert len(audit_rows) == 8
+    assert len(audit_rows) == 9
 
     audit_event_types = [row["event_type"] for row in audit_rows]
 
+    assert "service_act_created" in audit_event_types
     assert audit_event_types.count("verification_submitted") == 2
     assert "service_act_completed_by_verification" in audit_event_types
     assert "talent_point_issuance" in audit_event_types
@@ -499,6 +538,12 @@ def test_complete_service_act_lifecycle(connection):
     assert all(row["tenant_id"] == tenant_id for row in audit_rows)
 
     # Verify the principal audit actors.
+    assert any(
+        row["event_type"] == "service_act_created"
+        and row["actor_id"] == provider_id
+        for row in audit_rows
+    )
+
     assert any(
         row["event_type"] == "verification_submitted"
         and row["actor_id"] == verifier_1
