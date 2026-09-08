@@ -291,3 +291,216 @@ def test_judicial_schema(tmp_path, monkeypatch):
 
     finally:
         connection.close()
+
+
+def test_j5b_judicial_schema_creates_proceedings_actions_decisions_and_preserves_tenant_isolation(
+    tmp_path,
+    monkeypatch,
+):
+    db_path = tmp_path / "judicial_j5b.db"
+    monkeypatch.setattr(database, "get_db_path", lambda: db_path)
+
+    database.init_db()
+    connection = database.get_connection()
+
+    try:
+        expected_tables = {
+            "judicial_proceedings",
+            "judicial_actions",
+            "judicial_decisions",
+        }
+
+        tables = {
+            row["name"]
+            for row in connection.execute(
+                """
+                SELECT name
+                FROM sqlite_master
+                WHERE type = 'table'
+                  AND name IN (
+                    'judicial_proceedings',
+                    'judicial_actions',
+                    'judicial_decisions'
+                  )
+                """
+            ).fetchall()
+        }
+
+        assert tables == expected_tables
+
+        expected_fks = {
+            "judicial_proceedings": {
+                "disputes",
+                "judicial_jurisdictions",
+                "judicial_authorities",
+            },
+            "judicial_actions": {
+                "judicial_proceedings",
+                "judicial_authorities",
+            },
+            "judicial_decisions": {
+                "judicial_proceedings",
+                "judicial_authorities",
+            },
+        }
+
+        for table, expected in expected_fks.items():
+            actual = {
+                row["table"]
+                for row in connection.execute(
+                    f"PRAGMA foreign_key_list({table})"
+                ).fetchall()
+            }
+            assert actual == expected
+
+        expected_indexes = {
+            "judicial_proceedings": {
+                "ix_judicial_proceedings_tenant_status",
+                "ix_judicial_proceedings_tenant_dispute",
+                "ix_judicial_proceedings_tenant_jurisdiction",
+            },
+            "judicial_actions": {
+                "ix_judicial_actions_tenant_proceeding",
+                "ix_judicial_actions_tenant_authority",
+            },
+            "judicial_decisions": {
+                "ix_judicial_decisions_tenant_proceeding",
+                "ix_judicial_decisions_tenant_authority",
+            },
+        }
+
+        for table, expected in expected_indexes.items():
+            actual = {
+                row["name"]
+                for row in connection.execute(
+                    f"PRAGMA index_list({table})"
+                ).fetchall()
+            }
+            assert expected.issubset(actual)
+
+        connection.execute(
+            """
+            INSERT INTO users (tenant_id, name, role, status)
+            VALUES ('tenant-a', 'User A', 'member', 'active')
+            """
+        )
+        user_a = connection.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE tenant_id = 'tenant-a'
+              AND name = 'User A'
+            """
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO users (tenant_id, name, role, status)
+            VALUES ('tenant-a', 'User B', 'member', 'active')
+            """
+        )
+        user_b = connection.execute(
+            """
+            SELECT id
+            FROM users
+            WHERE tenant_id = 'tenant-a'
+              AND name = 'User B'
+            """
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO judicial_jurisdictions (
+                tenant_id,
+                jurisdiction_type,
+                jurisdiction_scope,
+                judicial_level,
+                case_types
+            )
+            VALUES (
+                'tenant-a',
+                'resource',
+                'scope-a',
+                'level-1',
+                'dispute'
+            )
+            """
+        )
+        jurisdiction_a = connection.execute(
+            """
+            SELECT id
+            FROM judicial_jurisdictions
+            WHERE tenant_id = 'tenant-a'
+            """
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO service_acts (
+                tenant_id,
+                provider_user_id,
+                recipient_user_id,
+                title,
+                description
+            )
+            VALUES ('tenant-a', ?, ?, 'Act A', 'Test act')
+            """,
+            (user_a, user_b),
+        )
+        service_act_a = connection.execute(
+            """
+            SELECT id
+            FROM service_acts
+            WHERE tenant_id = 'tenant-a'
+            """
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO disputes (
+                tenant_id,
+                service_act_id,
+                initiator_user_id,
+                initiator_role,
+                reason
+            )
+            VALUES ('tenant-a', ?, ?, 'provider', 'Test dispute')
+            """,
+            (service_act_a, user_a),
+        )
+        dispute_a = connection.execute(
+            """
+            SELECT id
+            FROM disputes
+            WHERE tenant_id = 'tenant-a'
+            """
+        ).fetchone()["id"]
+
+        connection.execute(
+            """
+            INSERT INTO judicial_proceedings (
+                tenant_id,
+                dispute_id,
+                jurisdiction_id,
+                proceeding_type
+            )
+            VALUES ('tenant-a', ?, ?, 'dispute_adjudication')
+            """,
+            (dispute_a, jurisdiction_a),
+        )
+
+        with pytest.raises(sqlite3.IntegrityError):
+            connection.execute(
+                """
+                INSERT INTO judicial_proceedings (
+                    tenant_id,
+                    dispute_id,
+                    jurisdiction_id,
+                    proceeding_type
+                )
+                VALUES ('tenant-b', ?, ?, 'dispute_adjudication')
+                """,
+                (dispute_a, jurisdiction_a),
+            )
+    finally:
+        connection.close()
