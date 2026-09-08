@@ -662,6 +662,180 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS judicial_jurisdictions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                jurisdiction_type TEXT NOT NULL,
+                jurisdiction_scope TEXT NOT NULL,
+                judicial_level TEXT NOT NULL,
+                case_types TEXT NOT NULL,
+                parent_jurisdiction_id INTEGER,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                UNIQUE(id, tenant_id),
+
+                FOREIGN KEY (parent_jurisdiction_id, tenant_id)
+                    REFERENCES judicial_jurisdictions(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_jurisdictions_tenant_status
+            ON judicial_jurisdictions(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS judicial_appointments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                candidate_user_id INTEGER NOT NULL,
+                jurisdiction_id INTEGER NOT NULL,
+                judicial_level TEXT NOT NULL,
+                appointment_source TEXT NOT NULL,
+                appointment_basis TEXT NOT NULL,
+                qualification_record TEXT NOT NULL,
+                appointed_by INTEGER NOT NULL,
+                appointed_at TIMESTAMP,
+                term_start TIMESTAMP,
+                term_end TIMESTAMP,
+                status TEXT NOT NULL DEFAULT 'appointed',
+
+                UNIQUE(id, tenant_id),
+
+                FOREIGN KEY (candidate_user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                FOREIGN KEY (jurisdiction_id, tenant_id)
+                    REFERENCES judicial_jurisdictions(id, tenant_id),
+
+                FOREIGN KEY (appointed_by, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_appointments_tenant_status
+            ON judicial_appointments(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_appointments_candidate
+            ON judicial_appointments(tenant_id, candidate_user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS judicial_conferrals (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                appointment_id INTEGER NOT NULL,
+                authority_id INTEGER NOT NULL,
+                conferring_authority TEXT NOT NULL,
+                conferral_instrument TEXT NOT NULL,
+                conferral_date TIMESTAMP,
+                effective_from TIMESTAMP,
+                effective_until TIMESTAMP,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                UNIQUE(id, tenant_id),
+
+                FOREIGN KEY (appointment_id, tenant_id)
+                    REFERENCES judicial_appointments(id, tenant_id),
+
+                FOREIGN KEY (authority_id, tenant_id)
+                    REFERENCES judicial_authorities(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_conferrals_tenant_status
+            ON judicial_conferrals(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS judicial_authorities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+                authority_type TEXT NOT NULL,
+                jurisdiction_id INTEGER NOT NULL,
+                judicial_level TEXT NOT NULL,
+                appointment_id INTEGER NOT NULL,
+                conferral_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'proposed'
+                    CHECK(
+                        status IN (
+                            'proposed',
+                            'vetted',
+                            'appointed',
+                            'active',
+                            'suspended',
+                            'inactive',
+                            'revoked',
+                            'expired'
+                        )
+                    ),
+                effective_from TIMESTAMP,
+                effective_until TIMESTAMP,
+
+                UNIQUE(id, tenant_id),
+
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id),
+
+                FOREIGN KEY (jurisdiction_id, tenant_id)
+                    REFERENCES judicial_jurisdictions(id, tenant_id),
+
+                FOREIGN KEY (appointment_id, tenant_id)
+                    REFERENCES judicial_appointments(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_authorities_tenant_status
+            ON judicial_authorities(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_authorities_user
+            ON judicial_authorities(tenant_id, user_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_authorities_jurisdiction
+            ON judicial_authorities(tenant_id, jurisdiction_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS service_acts (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
