@@ -32,6 +32,7 @@ from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
 from services.administration_context_service import AdministrationContextService
+from services.rbac_provisioning_service import RBACProvisioningService
 from services.telegram_identity_service import TelegramIdentityService
 from services.telegram_channel_binding_service import TelegramChannelBindingService
 
@@ -92,6 +93,10 @@ class ApplicationServiceFactory:
         )
         self._administration_context_service = AdministrationContextService(
             connection
+        )
+        self._rbac_provisioning_service = RBACProvisioningService(
+            connection=connection,
+            authorization_service=self._authorization_service,
         )
 
         # ---------------------------------------------------------------
@@ -284,3 +289,6 @@ class ApplicationServiceFactory:
 
     def build_administration_context_service(self):
         return self._administration_context_service
+
+    def build_rbac_provisioning_service(self):
+        return self._rbac_provisioning_service
