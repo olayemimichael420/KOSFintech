@@ -961,6 +961,82 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS judicial_reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                proceeding_id INTEGER NOT NULL,
+                decision_id INTEGER NOT NULL,
+                originating_judicial_authority_id INTEGER NOT NULL,
+                jurisdiction_id INTEGER NOT NULL,
+                review_type TEXT NOT NULL
+                    CHECK(review_type IN (
+                        'review',
+                        'appeal'
+                    )),
+                initiated_by INTEGER NOT NULL,
+                grounds TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'proposed'
+                    CHECK(status IN (
+                        'proposed'
+                    )),
+                recorded_at TIMESTAMP,
+                UNIQUE(id, tenant_id),
+                FOREIGN KEY (proceeding_id, tenant_id)
+                    REFERENCES judicial_proceedings(id, tenant_id),
+                FOREIGN KEY (decision_id, tenant_id)
+                    REFERENCES judicial_decisions(id, tenant_id),
+                FOREIGN KEY (originating_judicial_authority_id, tenant_id)
+                    REFERENCES judicial_authorities(id, tenant_id),
+                FOREIGN KEY (jurisdiction_id, tenant_id)
+                    REFERENCES judicial_jurisdictions(id, tenant_id),
+                FOREIGN KEY (initiated_by, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_reviews_tenant_proceeding
+            ON judicial_reviews(tenant_id, proceeding_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_reviews_tenant_decision
+            ON judicial_reviews(tenant_id, decision_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_reviews_tenant_authority
+            ON judicial_reviews(tenant_id, originating_judicial_authority_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_reviews_tenant_jurisdiction
+            ON judicial_reviews(tenant_id, jurisdiction_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE INDEX IF NOT EXISTS
+            ix_judicial_reviews_tenant_status
+            ON judicial_reviews(tenant_id, status)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS judicial_recusals (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
