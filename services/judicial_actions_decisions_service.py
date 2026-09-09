@@ -7,6 +7,9 @@ from models.judicial_proceeding import JudicialProceeding, JudicialProceedingSta
 from services.judicial_authorization_service import (
     JudicialAuthorizationService,
 )
+from services.judicial_recusal_enforcement_service import (
+    JudicialRecusalEnforcementService,
+)
 
 
 class JudicialActionsDecisionsService:
@@ -21,6 +24,9 @@ class JudicialActionsDecisionsService:
     def __init__(self, connection):
         self.connection = connection
         self.authorization_service = JudicialAuthorizationService(connection)
+        self.recusal_enforcement_service = (
+            JudicialRecusalEnforcementService(connection)
+        )
 
     def record_action(
         self,
@@ -42,6 +48,13 @@ class JudicialActionsDecisionsService:
         self._require_same_tenant(
             proceeding.tenant_id,
             authority["tenant_id"],
+        )
+
+        self.recusal_enforcement_service.require_not_recused(
+            tenant_id=proceeding.tenant_id,
+            judicial_authority_id=authority["id"],
+            jurisdiction_id=proceeding.jurisdiction_id,
+            proceeding_id=proceeding.id,
         )
 
         now = datetime.now(timezone.utc).isoformat()
@@ -117,6 +130,13 @@ class JudicialActionsDecisionsService:
         self._require_same_tenant(
             proceeding.tenant_id,
             authority["tenant_id"],
+        )
+
+        self.recusal_enforcement_service.require_not_recused(
+            tenant_id=proceeding.tenant_id,
+            judicial_authority_id=authority["id"],
+            jurisdiction_id=proceeding.jurisdiction_id,
+            proceeding_id=proceeding.id,
         )
 
         now = datetime.now(timezone.utc).isoformat()
