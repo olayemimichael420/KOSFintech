@@ -90,6 +90,33 @@ In particular:
 
 Accordingly, **M2-D does not by itself resolve §11 of the Governance Decision Matrix or §41.3 Source of Amendment Power**.
 
+### M2-E — Constitutional Amendment Power of the Declared Visioneer / Rulership Holder
+
+The provenance review specifically examined the recovered mandate material and the repository's Nine-Step / power-conferral references for an explicit grant of constitutional power to amend, alter, supplement, suspend, replace, or otherwise change the constitutional framework.
+
+The recovered material establishes the declared Visioneer / Rulership identity and describes functions including mandate guardianship, constitutional convening, final sign-off, and delegation / oversight.
+
+However, no recovered repository instrument expressly establishes that the Visioneer / Rulership holder possesses the constitutional **power of amendment itself**.
+
+Accordingly:
+
+- **Declared mandate = ESTABLISHED BY DECLARED PROVENANCE**
+- **Declared Visioneer / Rulership holder = ESTABLISHED BY DECLARED CHARTER PROVENANCE**
+- **Rulership functions described by the charter = DECLARED PROVENANCE EVIDENCE**
+- **Constitutional amendment power held by the Visioneer = NOT ESTABLISHED / UNRESOLVED**
+- **Source of constitutional amendment power = UNRESOLVED**
+- **Constitutional amendment authority = UNRESOLVED**
+- **Self-amendment power = UNRESOLVED**
+- **Executable authorization = NOT GRANTED**
+
+This determination does not negate the declared mandate or the declared Rulership identity. It preserves the distinction between **mandate provenance**, **rulership functions**, and **constitutional constituent / amendment power**.
+
+The absence of an explicit amendment-power grant in the recovered material MUST NOT be converted into a negative historical assertion that the Visioneer lacks such power. It means only that the presently recovered evidence does not establish that power to the constitutional certainty required by the existing governance framework.
+
+Therefore **M2-E remains an evidence-status determination, not a constitutional determination of absence**.
+
+Accordingly, §41.3 Source of Amendment Power and the downstream amendment-authority determinations remain unchanged.
+
 ### Engineering Boundary
 
 The mandate provenance and subsequent constitutional development do not themselves constitute application-level implementation authorization.
