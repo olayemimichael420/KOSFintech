@@ -67,6 +67,29 @@ Accordingly:
 
 The later constitutional architecture is not retroactively inserted into the original mandate declaration. It is recorded as subsequent development, ordering, clarification, and bounding of the declared mandate.
 
+### M2-D — Declared Visioneer / Rulership Holder
+
+The recovered mandate charter expressly identifies **Michael Olayemi as the Visioneer** and associates the Visioneer with the **Rulership** layer within the stated authority architecture.
+
+For provenance purposes, this establishes the following declared identity relationship:
+
+**Michael Olayemi = declared Visioneer / Rulership holder**
+
+The charter further describes the Rulership authority as received rather than seized and associates that role with mandate guardianship, constitutional convening, final sign-off, and delegation / oversight.
+
+This determination records those statements as **declared charter provenance evidence**. It does not independently establish the historical external conferral event, constitutional adoption of the charter, or every power attributed to the Rulership layer.
+
+In particular:
+
+- **Declared Visioneer / Rulership holder = ESTABLISHED BY DECLARED CHARTER PROVENANCE**
+- **Constitutionally authoritative holder determination = UNRESOLVED**
+- **Amendment power held by the Visioneer = UNRESOLVED**
+- **Self-amendment power = UNRESOLVED**
+- **Transferability / succession = UNRESOLVED**
+- **Executable authorization = NOT GRANTED**
+
+Accordingly, **M2-D does not by itself resolve §11 of the Governance Decision Matrix or §41.3 Source of Amendment Power**.
+
 ### Engineering Boundary
 
 The mandate provenance and subsequent constitutional development do not themselves constitute application-level implementation authorization.
