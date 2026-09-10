@@ -35,6 +35,66 @@ The historical whitespace reported by `git diff --check` is preserved intentiona
 `1136c6d` → Governance constitutional boundary
 `2bdca8a` → Constitutional governance change-control framework
 
+## Mandate Provenance — M1 / M2 Determination
+
+### M1 — Declared Mandate Provenance
+
+The supplied mandate document contains an explicit personal declaration by Michael Olayemi of receipt of the KOS mandate, expressed within the document's stated theological and constitutional framework.
+
+For provenance purposes, this declaration is recognized as the **declared provenance point** of the mandate.
+
+This determination records the declaration as historical provenance evidence. It does not independently establish the historical occurrence of an earlier external conferral event.
+
+### M0 — Independent Prior Conferral Event
+
+No separate earlier historical record independently establishing the original conferral event was recovered during the provenance review.
+
+Therefore:
+
+**M0 independent prior historical conferral = UNRESOLVED / NOT RECOVERED**
+
+This unresolved state is not converted into executable authority by the later declaration.
+
+### M2 — Subsequent Constitutional Development
+
+The constitutional-development record subsequent to the declared mandate develops and bounds the authority associated with that declaration through the progressively articulated structure of:
+
+`Visioneer / Rulership → KOS → KOSCorp → KOSFintech → bounded delegation / jurisdiction → DRCI / interpretive framework → governance → amendment / approval / ratification → implementation authorization`
+
+Accordingly:
+
+**M2 subsequent constitutional development around the declared mandate = ESTABLISHED**
+
+The later constitutional architecture is not retroactively inserted into the original mandate declaration. It is recorded as subsequent development, ordering, clarification, and bounding of the declared mandate.
+
+### Engineering Boundary
+
+The mandate provenance and subsequent constitutional development do not themselves constitute application-level implementation authorization.
+
+The current engineering trace is:
+
+`declared provenance → constitutional authority structure → authority assignment → authorization decision → application execution → evidence`
+
+The existing engineering implementation represents governance authority through explicit authority role, jurisdiction, authenticated identity, tenant boundary, active authority assignment, and deny-by-default policy.
+
+Application RBAC remains subordinate to governance authorization and does not itself create or infer governance authority.
+
+The repository contains persistence primitives for administration-authority records, but no operational application caller for creation or deactivation of those governance-authority assignments was discovered during the present trace.
+
+Therefore:
+
+- **Authority representation = IMPLEMENTED**
+- **Authority exercise authorization = IMPLEMENTED / FAIL-CLOSED**
+- **Application RBAC separation = ESTABLISHED**
+- **Operational governance-authority conferral workflow = NOT DISCOVERED**
+- **Automatic implementation authority from the mandate = NOT GRANTED**
+
+### Constitutional Effect
+
+This provenance clarification does not alter, override, or resolve existing constitutional determinations concerning source of amendment power, conferral, amendment power, amendment authority, adoption, or executable authorization.
+
+**Clarification of mandate provenance does not constitute implementation authorization.**
+
 ## Constitutional Safety Boundary
 
 This provenance record documents historical evidence only. It does not grant constitutional authority, governance authority, permissions, amendment powers, or executable authorization.
