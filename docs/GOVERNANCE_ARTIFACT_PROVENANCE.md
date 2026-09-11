@@ -140,6 +140,31 @@ Therefore **M2-E remains an evidence-status determination, not a constitutional 
 
 Accordingly, §41.3 Source of Amendment Power and the downstream amendment-authority determinations remain unchanged.
 
+### M2-F — Nine-Step Amendment Chain Source Status
+
+The provenance review examined the supplied **Nine-Step Amendment Chain — Scriptural Proof of Delegated Authority and Power Conferred on the KOSFintech Mandate** as a source of the declared mandate and Rulership architecture.
+
+The exact original Nine-Step source artifact was not recovered within the KOSFintech repository during the local source check. No independently recovered repository copy was identified containing the distinctive Nine-Step title, the stated Power Conferred wording, or the associated received-authority formulation.
+
+Accordingly, the Nine-Step material is classified as follows:
+
+- **Nine-Step Amendment Chain = SUPPLIED / DECLARED PROVENANCE ARTIFACT**
+- **Exact original repository source = NOT RECOVERED**
+- **Independent historical source verification = NOT ESTABLISHED**
+- **Declared mandate / Rulership propositions expressly contained in the supplied material = RETAINED AS PROVENANCE EVIDENCE**
+- **Constitutional adoption of the Nine-Step Chain = UNRESOLVED**
+- **Constitutional amendment power derived from the Nine-Step Chain = UNRESOLVED**
+- **Constitutional conferral under §41.4 = UNRESOLVED**
+- **Executable authorization = NOT GRANTED**
+
+This status does not invalidate the supplied material or erase its evidentiary value as a declared provenance artifact. It prevents the artifact from being treated as an independently recovered, adopted constitutional instrument when its original source and adoption event have not been established.
+
+The Nine-Step material may therefore continue to support the provenance record for propositions expressly declared within it, subject to the existing distinction between **declared provenance**, **constitutional determination**, and **executable authorization**.
+
+Nothing in this determination establishes that the Visioneer lacks constitutional amendment power. It establishes only that the presently recovered source evidence does not independently establish such power through the Nine-Step Chain.
+
+Accordingly, **§41.3 Source of Amendment Power and §41.4 Conferral remain unchanged**.
+
 ### M2 Provenance Crosswalk — Authority, Mandate, Rulership, and Constitutional Power
 
 The recovered mandate material and subsequent constitutional-development record are classified below according to the distinction between **declared provenance**, **constitutional determination**, and **executable authorization**.
