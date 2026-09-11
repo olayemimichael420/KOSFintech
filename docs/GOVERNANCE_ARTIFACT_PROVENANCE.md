@@ -67,6 +67,29 @@ Accordingly:
 
 The later constitutional architecture is not retroactively inserted into the original mandate declaration. It is recorded as subsequent development, ordering, clarification, and bounding of the declared mandate.
 
+### M2-B — Rulership as Declared Originating Governance Layer
+
+The recovered mandate charter places **Rulership / the Visioneer** as the originating governance layer within the stated authority architecture, beneath the declared Divine source and above the subordinate Priestly, Institutional, and Elemental layers.
+
+The charter associates this Rulership layer with the organization and ordering of the KOS mandate and with functions including mandate guardianship, constitutional convening, final sign-off, and delegation / oversight.
+
+For provenance purposes, this establishes the following declared relationship:
+
+**Rulership / Visioneer = declared originating governance layer**
+
+This determination records the charter's stated authority architecture as **declared provenance evidence**. It does not by itself establish adoption of that architecture as binding constitutional law, nor does it independently establish the historical external conferral event.
+
+In particular:
+
+- **Declared Rulership as originating governance layer = ESTABLISHED BY DECLARED CHARTER PROVENANCE**
+- **Constitutional adoption of the Rulership architecture = UNRESOLVED**
+- **Specific constitutional amendment power of Rulership = UNRESOLVED**
+- **Source of constitutional amendment power = UNRESOLVED**
+- **Constitutional conferral under §41.4 = UNRESOLVED**
+- **Executable authorization = NOT GRANTED**
+
+Accordingly, this M2-B determination strengthens the provenance chain between the declared mandate and the Rulership/Visioneer layer without converting that provenance into a constitutional grant of amendment power.
+
 ### M2-D — Declared Visioneer / Rulership Holder
 
 The recovered mandate charter expressly identifies **Michael Olayemi as the Visioneer** and associates the Visioneer with the **Rulership** layer within the stated authority architecture.
