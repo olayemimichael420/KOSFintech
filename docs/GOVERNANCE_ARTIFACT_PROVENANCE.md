@@ -165,6 +165,52 @@ Nothing in this determination establishes that the Visioneer lacks constitutiona
 
 Accordingly, **§41.3 Source of Amendment Power and §41.4 Conferral remain unchanged**.
 
+### M2-G — §41.4 Conferral Element Crosswalk
+
+The supplied mandate and Nine-Step material was cross-checked against the indispensable conferral elements defined by the existing §41.4 Constitutional Conferral and Establishment of Amendment Power determination.
+
+The crosswalk produces the following evidence classification:
+
+| §41.4 Element | Present Provenance Evidence | Determination |
+|---|---|---|
+| Source of authority | Divine authority / Word / Christ authority expressly declared | DECLARED PROVENANCE |
+| Conferring authority | Christ identified within the declared authority narrative | DECLARED PROVENANCE; INDEPENDENT VERIFICATION UNRESOLVED |
+| Conferring constitutional act | Authority is described as received / conferred, but no independently established distinct constitutional conferring act is identified | UNRESOLVED |
+| Recipient / holder | Michael Olayemi expressly identified as Visioneer / Rulership holder | ESTABLISHED BY DECLARED PROVENANCE |
+| Power conferred | KOS / KOSFintech mandate authority, mandate guardianship, convening, sign-off, delegation / oversight are declared | DECLARED FUNCTIONS; CONSTITUTIONAL POWER SCOPE UNRESOLVED |
+| Jurisdiction | KOS / KOSFintech scope and bounded jurisdiction are declared | DECLARED PROVENANCE; CONSTITUTIONAL JURISDICTION UNRESOLVED |
+| Scope | Authority is associated with required KOSFintech services and delegated components | DECLARED PROVENANCE; COMPLETE CONSTITUTIONAL SCOPE UNRESOLVED |
+| Limitations | Bounded jurisdiction and permission boundaries are described | DECLARED PROVENANCE; COMPLETE CONSTITUTIONAL LIMITS UNRESOLVED |
+| Delegability | Delegation / oversight is expressly described | DECLARED FUNCTION; CONSTITUTIONAL DELEGABILITY UNRESOLVED |
+| Transferability | No sufficient transfer / succession rule recovered | UNRESOLVED |
+| Self-amendment | No explicit grant recovered | UNRESOLVED |
+| Protected provisions | No explicit protected constitutional provisions recovered | UNRESOLVED |
+| Evidence of conferral | Supplied charter / Nine-Step material records the declaration | DECLARED PROVENANCE; INDEPENDENT CONFERRAL EVIDENCE UNRESOLVED |
+| Effective event | Receipt is associated with the stated personal verdict / declaration | DECLARED PROVENANCE; CONSTITUTIONAL EFFECTIVE EVENT UNRESOLVED |
+| Effective time | No independently established constitutional effective time recovered | UNRESOLVED |
+
+The crosswalk therefore establishes a more precise distinction than a simple mandate-presence determination.
+
+The presently recovered and supplied material supports a **declared conferral narrative for KOS / KOSFintech mandate authority**, including a declared source, recipient, Rulership identity, mandate scope, and governance functions.
+
+However, the presently recovered and supplied material does **not expressly establish the specific constitutional power to amend, alter, supplement, suspend, replace, or otherwise change the constitutional framework itself**.
+
+Accordingly:
+
+- **Declared mandate authority = ESTABLISHED BY DECLARED PROVENANCE**
+- **Declared Visioneer / Rulership holder = ESTABLISHED BY DECLARED PROVENANCE**
+- **Declared mandate governance functions = ESTABLISHED AS PROVENANCE EVIDENCE**
+- **Conferral narrative = DECLARED PROVENANCE**
+- **Complete constitutional conferral under §41.4 = UNRESOLVED**
+- **Constitutional amendment power = UNRESOLVED**
+- **Source of constitutional amendment power under §41.3 = UNRESOLVED**
+- **Amendment authority = UNRESOLVED**
+- **Executable authorization = NOT GRANTED**
+
+This is an evidence-status determination, not a negative historical determination. It does not establish that the Visioneer lacks constitutional amendment power. It establishes only that the presently recovered and supplied provenance evidence does not expressly establish that specific power to the certainty required by the existing constitutional framework.
+
+Accordingly, §41.3 and §41.4 remain unchanged.
+
 ### M2 Provenance Crosswalk — Authority, Mandate, Rulership, and Constitutional Power
 
 The recovered mandate material and subsequent constitutional-development record are classified below according to the distinction between **declared provenance**, **constitutional determination**, and **executable authorization**.
