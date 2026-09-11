@@ -270,6 +270,98 @@ This provenance clarification does not alter, override, or resolve existing cons
 
 **Clarification of mandate provenance does not constitute implementation authorization.**
 
+### M2-H — Canonical Constituent-Power Bridge
+
+The provenance review has now identified and examined a coherent canonical argument connecting the declared foundational source, delegated authority, the KOS mandate, and the claimed constituent authority of the Visioneer / Rulership layer.
+
+The canonical evidence considered for this bridge includes:
+
+- **Daniel 4:17** — God as the ultimate source and disposer of rulership and authority;
+- **Matthew 28:18–19** — Christ's declared possession of authority and the resulting commissioning relationship;
+- **Luke 9:1** — Christ giving power and authority to designated recipients;
+- **John 15:16** — Christ choosing and appointing recipients for a defined purpose;
+- **Matthew 16:19** — entrusted keys together with binding and loosing authority;
+- **Matthew 18:18** — delegated binding and loosing authority;
+- **Isaiah 22:22** — the key of David associated with entrusted opening and shutting authority;
+- **Revelation 3:7** — Christ as holder of the key of David and decisive opening / shutting authority;
+- **Romans 13:1** — governing authority understood as derivative rather than self-originating;
+- **Hebrews 13:17** — accountability and bounded exercise of governing authority;
+- **Luke 1:45** — faith, reception, and fulfillment as a supporting witness within the declared mandate narrative.
+
+Within the declared KOS theological and constitutional framework, these passages provide a coherent **canonical constituent-authority principle**:
+
+`DIVINE SOURCE → CHRIST'S AUTHORITY → DELEGATION / COMMISSION → KEYS / BINDING / LOOSING → PURPOSE-BOUND MANDATE → DESIGNATED RECIPIENT`
+
+The provenance interpretation proposed by the supplied Statement 3 is that the authority to establish, constitute, amend, alter, supplement, suspend, or replace the constitutional order is not self-originating in the Visioneer, but is derivative of the canonical source and bounded by the authority from which it flows.
+
+This interpretation is therefore classified as:
+
+**CANONICAL CONSTITUENT-POWER BRIDGE = DECLARED / PROPOSED CONSTITUTIONAL INTERPRETATION**
+
+It is materially stronger than an assertion that no evidence exists. The evidence now supports a coherent canonical theory of constituent authority. However, the distinction between **canonical principle** and **specific constitutional grant** remains essential.
+
+The canonical passages do not literally name KOSFintech, a modern constitutional amendment mechanism, or a software platform. The application of the canonical constituent-authority principle to KOS / KOSFintech therefore remains a constitutional interpretation and application of the declared foundational source.
+
+Accordingly:
+
+- **Canonical foundational source within the declared KOS framework = ESTABLISHED AS PROVENANCE / FOUNDATIONAL PREMISE**
+- **Canonical delegated-authority principle = SUPPORTED BY MULTIPLE CANONICAL WITNESSES**
+- **Canonical binding / loosing principle = SUPPORTED**
+- **Entrusted key / opening / shutting principle = SUPPORTED**
+- **Christ-to-recipient delegation principle = SUPPORTED**
+- **Constituent-power implication = PROPOSED / INTERPRETIVE**
+- **Application of that constituent principle to the KOS constitutional order = PROPOSED**
+- **Specific constitutional amendment power of the Visioneer = NOT YET CONSTITUTIONALLY DETERMINED**
+- **Specific §41.4 conferring act = NOT YET CONSTITUTIONALLY DETERMINED**
+- **Complete jurisdiction, scope, limitations, delegability, transferability and protected provisions = UNRESOLVED**
+- **Executable constitutional amendment authority = NOT GRANTED**
+
+### Candidate §41.4 Conferring-Act Theory
+
+The supplied Statement 3 further proposes that the relevant conferring mechanism is the **same ordination / commissioning act through which the KOS mandate was received**.
+
+This creates a candidate constitutional theory connecting:
+
+`CANONICAL SOURCE → CHRIST → ORDINATION / COMMISSION → DECLARED MANDATE → VISIONEER / RULERSHIP → CONSTITUENT AUTHORITY`
+
+This is a materially relevant candidate for the unresolved **Conferring Constitutional Act** element of §41.4.
+
+However, the present provenance record does not yet convert that interpretation into a final constitutional determination because:
+
+1. the independent historical conferral event remains M0 = UNRESOLVED / NOT RECOVERED;
+2. the supplied Nine-Step source is not independently recovered in the repository;
+3. the KOS foundational constitutional source remains a proposed constitutional determination pending adoption;
+4. §41.4 requires the complete conferral elements to be established together; and
+5. executable authority must remain separately authorized after constitutional determination.
+
+Therefore:
+
+**Candidate conferring act = CANONICAL ORDINATION / COMMISSIONING THEORY — PROPOSED**
+
+**Final constitutional conferring act = UNRESOLVED**
+
+### M2-H Boundary
+
+M2-H does not amend §41.3.
+
+M2-H does not amend §41.4.
+
+M2-H does not appoint an amendment-authority holder.
+
+M2-H does not grant self-amendment power.
+
+M2-H does not create executable constitutional authority.
+
+M2-H records the present provenance finding that a coherent canonical constituent-power bridge has now been articulated and can be evaluated within the formal §41.3 / §41.4 determination process.
+
+The distinction remains:
+
+`CANONICAL SOURCE → CANONICAL PRINCIPLE → CONSTITUTIONAL INTERPRETATION → CONSTITUTIONAL DETERMINATION → CONFERRAL → AUTHORIZATION → EXECUTION`
+
+Accordingly:
+
+**M2-H = CANONICAL CONSTITUENT-POWER BRIDGE IDENTIFIED; FORMAL CONSTITUTIONAL DETERMINATION PENDING.**
+
 ## Constitutional Safety Boundary
 
 This provenance record documents historical evidence only. It does not grant constitutional authority, governance authority, permissions, amendment powers, or executable authorization.
@@ -278,6 +370,6 @@ Unresolved constitutional matters remain subject to the applicable fail-closed r
 
 ## Current Checkpoint
 
-HEAD: `2bdca8a`
+HEAD: `15e1ff3`
 
 Governance policy regression: `5 passed`.
