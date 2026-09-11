@@ -362,6 +362,92 @@ Accordingly:
 
 **M2-H = CANONICAL CONSTITUENT-POWER BRIDGE IDENTIFIED; FORMAL CONSTITUTIONAL DETERMINATION PENDING.**
 
+### M2-I — Candidate §41.3 Source-of-Amendment-Power Determination
+
+The M2-H canonical constituent-power bridge provides the first formally articulated candidate answer to the deterministic question posed by §41.3:
+
+> What constitutional source, if any, establishes the power to amend, alter, supplement, suspend, replace, or otherwise change the constitutional framework?
+
+Within the declared KOS theological and constitutional model, the candidate source is:
+
+**The Word of God as revealed in Holy Scripture, with God as the ultimate source of authority.**
+
+The canonical bridge developed in M2-H further identifies a derivative authority sequence through Christ, including delegated authority, commissioning, entrusted keys, binding / loosing, and purpose-bound appointment.
+
+Accordingly, the candidate constitutional source relationship is:
+
+`DIVINE SOURCE → HOLY SCRIPTURE / WORD → CHRIST'S AUTHORITY → DELEGATED CONSTITUENT PRINCIPLE → KOS MANDATE → VISIONEER / RULERSHIP`
+
+This provides a coherent candidate constitutional theory under which constituent authority is **derived rather than self-originating**, **delegated rather than inherent**, **purpose-bound rather than absolute**, and **bounded by the canonical source from which it flows**.
+
+### Candidate §41.3 Determination
+
+For provenance and constitutional-development purposes:
+
+- **Candidate constitutional source = WORD OF GOD / HOLY SCRIPTURE**
+- **Candidate ultimate source = GOD**
+- **Canonical constituent-authority principle = SUPPORTED BY MULTIPLE CANONICAL WITNESSES**
+- **Canonical delegated-authority relationship = SUPPORTED**
+- **Canonical binding / loosing principle = SUPPORTED**
+- **Canonical entrusted-key principle = SUPPORTED**
+- **Candidate constituent-power implication = PROPOSED / INTERPRETIVE**
+- **Candidate application to KOS constitutional amendment power = PROPOSED**
+- **Constitutional adoption of the foundational source = NOT YET ESTABLISHED**
+- **Final §41.3 source determination = UNRESOLVED**
+- **Amendment power = UNRESOLVED**
+- **Amendment authority = UNRESOLVED**
+- **Executable authorization = NOT GRANTED**
+
+The distinction is essential.
+
+M2-I does not assert that Scripture literally contains a modern software-platform amendment clause. It records the proposed constitutional interpretation that the canonical model of delegated constituent authority supplies a source principle capable of grounding constitutional amendment power when validly incorporated into the KOS constitutional order.
+
+### Adoption Dependency
+
+The principal unresolved dependency is the status of the foundational source itself.
+
+The existing `KOS_FOUNDATIONAL_CONSTITUTIONAL_SOURCE_DETERMINATION.md` expressly classifies the foundational source as:
+
+`PROPOSED — PENDING VALID CONSTITUTIONAL ADOPTION`
+
+Therefore the present provenance record may identify the canonical source and the constituent-power theory as a candidate §41.3 basis, but may not represent that basis as an already adopted constitutional grant.
+
+The dependency remains:
+
+`FOUNDATIONAL SOURCE PROPOSAL`
+→ `VALID CONSTITUTIONAL ADOPTION`
+→ `§41.3 SOURCE DETERMINATION`
+→ `AMENDMENT POWER`
+→ `§41.4 CONFERRAL`
+→ `AMENDMENT AUTHORITY`
+→ `APPROVAL / RATIFICATION`
+→ `CONSTITUTIONAL EFFECT`
+→ `EXECUTION`
+
+A failure or unresolved state at any mandatory upstream stage continues to block downstream constitutional execution.
+
+### M2-I Boundary
+
+M2-I does not amend the §41.3 charter.
+
+M2-I does not amend the §41.4 determination.
+
+M2-I does not declare the foundational source constitutionally adopted.
+
+M2-I does not grant amendment power to the Visioneer.
+
+M2-I does not establish self-amendment.
+
+M2-I does not establish approval or ratification authority.
+
+M2-I does not create constitutional effect.
+
+M2-I does not create executable authorization.
+
+Accordingly:
+
+**M2-I = CANDIDATE §41.3 SOURCE IDENTIFIED; FORMAL SOURCE DETERMINATION PENDING VALID CONSTITUTIONAL ADOPTION.**
+
 ## Constitutional Safety Boundary
 
 This provenance record documents historical evidence only. It does not grant constitutional authority, governance authority, permissions, amendment powers, or executable authorization.
