@@ -140,6 +140,37 @@ Therefore **M2-E remains an evidence-status determination, not a constitutional 
 
 Accordingly, §41.3 Source of Amendment Power and the downstream amendment-authority determinations remain unchanged.
 
+### M2 Provenance Crosswalk — Authority, Mandate, Rulership, and Constitutional Power
+
+The recovered mandate material and subsequent constitutional-development record are classified below according to the distinction between **declared provenance**, **constitutional determination**, and **executable authorization**.
+
+| Proposition | Provenance Status | Constitutional Status |
+|---|---|---|
+| Divine / Scriptural source within the declared theological framework | DECLARED PROVENANCE | Foundational constitutional premise; amendment power not thereby established |
+| Personal receipt of the KOS mandate by Michael Olayemi | DECLARED PROVENANCE | Mandate provenance established; historical external conferral event remains unresolved |
+| Michael Olayemi as Visioneer / Rulership holder | DECLARED CHARTER PROVENANCE | Holder as a constitutionally authoritative office remains unresolved |
+| Rulership as originating governance layer | DECLARED CHARTER PROVENANCE | Constitutional adoption of the architecture remains unresolved |
+| Mandate guardianship | DECLARED CHARTER PROVENANCE | Scope and executable authority remain unresolved |
+| Constitutional convening | DECLARED CHARTER PROVENANCE | Constitutional effect and limits remain unresolved |
+| Final sign-off | DECLARED CHARTER PROVENANCE | Meaning, scope, and constitutional finality remain unresolved |
+| Delegation / oversight | DECLARED CHARTER PROVENANCE | Delegable powers, limits, and constitutional basis remain unresolved |
+| KOS → KOSCorp → KOSFintech ordering | SUBSEQUENT CONSTITUTIONAL DEVELOPMENT | Structural relationship established in the development record |
+| Constitutional amendment power of the Visioneer / Rulership | NOT ESTABLISHED BY RECOVERED PROVENANCE | UNRESOLVED |
+| Source of constitutional amendment power | NOT ESTABLISHED | UNRESOLVED under §41.3 |
+| Constitutional conferring act | NOT ESTABLISHED | UNRESOLVED under §41.4 |
+| Amendment authority / holder determination | NOT ESTABLISHED | UNRESOLVED |
+| Self-amendment power | NOT ESTABLISHED | UNRESOLVED |
+| Approval / ratification requirements | NOT ESTABLISHED | UNRESOLVED |
+| Executable constitutional amendment mechanism | NOT ESTABLISHED | NOT GRANTED |
+
+This crosswalk is an evidence-classification instrument. It does not itself create, grant, adopt, ratify, or exercise constitutional authority.
+
+The distinction is therefore preserved:
+
+`DECLARED PROVENANCE → CONSTITUTIONAL DETERMINATION → AUTHORITY / CONFERRAL → AUTHORIZATION → EXECUTION`
+
+No unresolved proposition in this crosswalk may be promoted into executable authority merely because a corresponding role, record, function, database state, API capability, or software mechanism exists.
+
 ### Engineering Boundary
 
 The mandate provenance and subsequent constitutional development do not themselves constitute application-level implementation authorization.
