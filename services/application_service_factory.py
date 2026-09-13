@@ -17,6 +17,10 @@ from repositories.user_repository import UserRepository
 from repositories.academic_session_repository import AcademicSessionRepository
 from repositories.academic_term_repository import AcademicTermRepository
 from repositories.academic_class_repository import AcademicClassRepository
+from repositories.academic_subject_repository import AcademicSubjectRepository
+from repositories.teacher_subject_assignment_repository import TeacherSubjectAssignmentRepository
+from repositories.teacher_subject_assignment_repository import TeacherSubjectAssignmentRepository
+from repositories.teacher_subject_assignment_repository import TeacherSubjectAssignmentRepository
 from repositories.student_enrollment_repository import StudentEnrollmentRepository
 
 from services.service_act_service import ServiceActService
@@ -81,6 +85,10 @@ class ApplicationServiceFactory:
         self._academic_session_repository = AcademicSessionRepository(connection)
         self._academic_term_repository = AcademicTermRepository(connection)
         self._academic_class_repository = AcademicClassRepository(connection)
+        self._academic_subject_repository = AcademicSubjectRepository(connection)
+        self._teacher_subject_assignment_repository = TeacherSubjectAssignmentRepository(connection)
+        self._teacher_subject_assignment_repository = TeacherSubjectAssignmentRepository(connection)
+        self._teacher_subject_assignment_repository = TeacherSubjectAssignmentRepository(connection)
         self._student_enrollment_repository = StudentEnrollmentRepository(connection)
 
         # ---------------------------------------------------------------
@@ -248,6 +256,18 @@ class ApplicationServiceFactory:
 
     def build_academic_class_repository(self):
         return self._academic_class_repository
+
+    def build_academic_subject_repository(self):
+        return self._academic_subject_repository
+
+    def build_teacher_subject_assignment_repository(self):
+        return self._teacher_subject_assignment_repository
+
+    def build_teacher_subject_assignment_repository(self):
+        return self._teacher_subject_assignment_repository
+
+    def build_teacher_subject_assignment_repository(self):
+        return self._teacher_subject_assignment_repository
 
     def build_student_enrollment_repository(self):
         return self._student_enrollment_repository
