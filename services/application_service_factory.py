@@ -14,6 +14,10 @@ from repositories.school_student_repository import SchoolStudentRepository
 from repositories.external_identity_repository import ExternalIdentityRepository
 from repositories.telegram_channel_binding_repository import TelegramChannelBindingRepository
 from repositories.user_repository import UserRepository
+from repositories.academic_session_repository import AcademicSessionRepository
+from repositories.academic_term_repository import AcademicTermRepository
+from repositories.academic_class_repository import AcademicClassRepository
+from repositories.student_enrollment_repository import StudentEnrollmentRepository
 
 from services.service_act_service import ServiceActService
 from services.service_request_service import ServiceRequestService
@@ -74,6 +78,10 @@ class ApplicationServiceFactory:
         self._external_identity_repository = ExternalIdentityRepository(connection)
         self._telegram_channel_binding_repository = TelegramChannelBindingRepository(connection)
         self._user_repository = UserRepository(connection)
+        self._academic_session_repository = AcademicSessionRepository(connection)
+        self._academic_term_repository = AcademicTermRepository(connection)
+        self._academic_class_repository = AcademicClassRepository(connection)
+        self._student_enrollment_repository = StudentEnrollmentRepository(connection)
 
         # ---------------------------------------------------------------
         # Core authorization service
@@ -231,6 +239,19 @@ class ApplicationServiceFactory:
 
     def build_user_repository(self):
         return self._user_repository
+
+    def build_academic_session_repository(self):
+        return self._academic_session_repository
+
+    def build_academic_term_repository(self):
+        return self._academic_term_repository
+
+    def build_academic_class_repository(self):
+        return self._academic_class_repository
+
+    def build_student_enrollment_repository(self):
+        return self._student_enrollment_repository
+
 
     # -------------------------------------------------------------------
     # Service access

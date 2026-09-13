@@ -337,6 +337,144 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS academic_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                start_date DATE NOT NULL,
+                end_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                FOREIGN KEY (tenant_id)
+                    REFERENCES schools(tenant_id),
+                UNIQUE (tenant_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_academic_sessions_id_tenant
+            ON academic_sessions(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS academic_terms (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                academic_session_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                start_date DATE NOT NULL,
+                end_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                FOREIGN KEY (academic_session_id, tenant_id)
+                    REFERENCES academic_sessions(id, tenant_id),
+                UNIQUE (tenant_id, academic_session_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_academic_terms_id_tenant
+            ON academic_terms(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS academic_classes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                education_level TEXT,
+                sequence INTEGER,
+                status TEXT NOT NULL DEFAULT 'active',
+                FOREIGN KEY (tenant_id)
+                    REFERENCES schools(tenant_id),
+                UNIQUE (tenant_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_academic_classes_id_tenant
+            ON academic_classes(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS student_enrollments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                student_id INTEGER NOT NULL,
+                academic_class_id INTEGER NOT NULL,
+                academic_session_id INTEGER NOT NULL,
+                academic_term_id INTEGER,
+                enrollment_date DATE,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (student_id, tenant_id)
+                    REFERENCES students(id, tenant_id),
+
+                FOREIGN KEY (academic_class_id, tenant_id)
+                    REFERENCES academic_classes(id, tenant_id),
+
+                FOREIGN KEY (academic_session_id, tenant_id)
+                    REFERENCES academic_sessions(id, tenant_id),
+
+                FOREIGN KEY (academic_term_id, tenant_id)
+                    REFERENCES academic_terms(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_student_enrollments_id_tenant
+            ON student_enrollments(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_student_enrollments_active_session
+            ON student_enrollments(
+                tenant_id,
+                student_id,
+                academic_session_id
+            )
+            WHERE status = 'active'
+              AND academic_term_id IS NULL
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_student_enrollments_active_term
+            ON student_enrollments(
+                tenant_id,
+                student_id,
+                academic_session_id,
+                academic_term_id
+            )
+            WHERE status = 'active'
+              AND academic_term_id IS NOT NULL
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS teachers (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,

@@ -1,5 +1,9 @@
 from services.application_service_factory import ApplicationServiceFactory
 from services.attendance_service import AttendanceService
+from services.academic_session_service import AcademicSessionService
+from services.academic_term_service import AcademicTermService
+from services.academic_class_service import AcademicClassService
+from services.student_enrollment_service import StudentEnrollmentService
 from services.student_service import StudentService
 from services.teacher_service import TeacherService
 from services.parent_service import ParentService
@@ -185,3 +189,36 @@ class ApplicationServices:
     @property
     def external_identity(self):
         return self.factory.build_external_identity_service()
+
+
+    def academic_session(self, tenant_id: str, user_id=None):
+        return AcademicSessionService(
+            repository=self.factory.build_academic_session_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def academic_term(self, tenant_id: str, user_id=None):
+        return AcademicTermService(
+            repository=self.factory.build_academic_term_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def academic_class(self, tenant_id: str, user_id=None):
+        return AcademicClassService(
+            repository=self.factory.build_academic_class_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def student_enrollment(self, tenant_id: str, user_id=None):
+        return StudentEnrollmentService(
+            repository=self.factory.build_student_enrollment_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
