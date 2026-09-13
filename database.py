@@ -476,6 +476,29 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS course_sections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                course_offering_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                FOREIGN KEY (course_offering_id, tenant_id)
+                    REFERENCES course_offerings(id, tenant_id),
+                UNIQUE (tenant_id, course_offering_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_course_sections_id_tenant
+            ON course_sections(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS teacher_subject_assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,

@@ -16,6 +16,7 @@ from repositories.telegram_channel_binding_repository import TelegramChannelBind
 from repositories.user_repository import UserRepository
 from repositories.academic_session_repository import AcademicSessionRepository
 from repositories.course_offering_repository import CourseOfferingRepository
+from repositories.course_section_repository import CourseSectionRepository
 from repositories.academic_term_repository import AcademicTermRepository
 from repositories.academic_class_repository import AcademicClassRepository
 from repositories.academic_subject_repository import AcademicSubjectRepository
@@ -83,6 +84,7 @@ class ApplicationServiceFactory:
         self._user_repository = UserRepository(connection)
         self._academic_session_repository = AcademicSessionRepository(connection)
         self._course_offering_repository = CourseOfferingRepository(connection)
+        self._course_section_repository = CourseSectionRepository(connection)
         self._academic_term_repository = AcademicTermRepository(connection)
         self._academic_class_repository = AcademicClassRepository(connection)
         self._academic_subject_repository = AcademicSubjectRepository(connection)
@@ -248,6 +250,9 @@ class ApplicationServiceFactory:
 
     def build_course_offering_repository(self):
         return self._course_offering_repository
+
+    def build_course_section_repository(self):
+        return self._course_section_repository
 
     def build_academic_session_repository(self):
         return self._academic_session_repository
