@@ -3,6 +3,7 @@ from services.attendance_service import AttendanceService
 from services.academic_session_service import AcademicSessionService
 from services.course_offering_service import CourseOfferingService
 from services.course_section_service import CourseSectionService
+from services.section_teacher_assignment_service import SectionTeacherAssignmentService
 from services.academic_term_service import AcademicTermService
 from services.academic_class_service import AcademicClassService
 from services.academic_subject_service import AcademicSubjectService
@@ -206,6 +207,14 @@ class ApplicationServices:
     def course_section(self, tenant_id: str, user_id=None):
         return CourseSectionService(
             repository=self.factory.build_course_section_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def section_teacher_assignment(self, tenant_id: str, user_id=None):
+        return SectionTeacherAssignmentService(
+            repository=self.factory.build_section_teacher_assignment_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,
