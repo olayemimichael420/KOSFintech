@@ -432,6 +432,50 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS course_offerings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                academic_class_id INTEGER NOT NULL,
+                academic_subject_id INTEGER NOT NULL,
+                academic_session_id INTEGER NOT NULL,
+                academic_term_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                FOREIGN KEY (academic_class_id, tenant_id)
+                    REFERENCES academic_classes(id, tenant_id),
+                FOREIGN KEY (academic_subject_id, tenant_id)
+                    REFERENCES academic_subjects(id, tenant_id),
+                FOREIGN KEY (academic_session_id, tenant_id)
+                    REFERENCES academic_sessions(id, tenant_id),
+                FOREIGN KEY (academic_term_id, tenant_id)
+                    REFERENCES academic_terms(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_course_offerings_id_tenant
+            ON course_offerings(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_course_offerings_unique_offering
+            ON course_offerings(
+                tenant_id,
+                academic_class_id,
+                academic_subject_id,
+                academic_session_id,
+                academic_term_id
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS teacher_subject_assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
