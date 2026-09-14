@@ -499,6 +499,30 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS section_student_enrollments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                course_section_id INTEGER NOT NULL,
+                student_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                FOREIGN KEY (course_section_id, tenant_id)
+                    REFERENCES course_sections(id, tenant_id),
+                FOREIGN KEY (student_id, tenant_id)
+                    REFERENCES students(id, tenant_id),
+                UNIQUE (tenant_id, course_section_id, student_id)
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_section_student_enrollments_id_tenant
+            ON section_student_enrollments(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS section_teacher_assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
