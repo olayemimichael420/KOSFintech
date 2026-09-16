@@ -14,6 +14,8 @@ from repositories.school_student_repository import SchoolStudentRepository
 from repositories.external_identity_repository import ExternalIdentityRepository
 from repositories.telegram_channel_binding_repository import TelegramChannelBindingRepository
 from repositories.user_repository import UserRepository
+from repositories.administration_repository import AdministrationRepository
+from repositories.tenant_repository import TenantRepository
 from repositories.academic_session_repository import AcademicSessionRepository
 from repositories.course_offering_repository import CourseOfferingRepository
 from repositories.course_section_repository import CourseSectionRepository
@@ -42,6 +44,8 @@ from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
 from services.administration_context_service import AdministrationContextService
+from services.administration_provisioning_service import AdministrationProvisioningService
+from services.tenant_service import TenantService
 from services.rbac_provisioning_service import RBACProvisioningService
 from services.telegram_identity_service import TelegramIdentityService
 from services.telegram_channel_binding_service import TelegramChannelBindingService
@@ -84,6 +88,8 @@ class ApplicationServiceFactory:
         self._external_identity_repository = ExternalIdentityRepository(connection)
         self._telegram_channel_binding_repository = TelegramChannelBindingRepository(connection)
         self._user_repository = UserRepository(connection)
+        self._administration_repository = AdministrationRepository(connection)
+        self._tenant_repository = TenantRepository(connection)
         self._academic_session_repository = AcademicSessionRepository(connection)
         self._course_offering_repository = CourseOfferingRepository(connection)
         self._course_section_repository = CourseSectionRepository(connection)
@@ -117,6 +123,14 @@ class ApplicationServiceFactory:
         self._rbac_provisioning_service = RBACProvisioningService(
             connection=connection,
             authorization_service=self._authorization_service,
+        )
+        self._administration_provisioning_service = (
+            AdministrationProvisioningService(
+                repository=self._administration_repository,
+            )
+        )
+        self._tenant_service = TenantService(
+            repository=self._tenant_repository,
         )
 
         # ---------------------------------------------------------------
@@ -343,3 +357,15 @@ class ApplicationServiceFactory:
 
     def build_rbac_provisioning_service(self):
         return self._rbac_provisioning_service
+
+    def build_administration_repository(self):
+        return self._administration_repository
+
+    def build_tenant_repository(self):
+        return self._tenant_repository
+
+    def build_administration_provisioning_service(self):
+        return self._administration_provisioning_service
+
+    def build_tenant_service(self):
+        return self._tenant_service

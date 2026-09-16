@@ -134,3 +134,58 @@ def test_factory_builds_authentication_service(connection):
 
     assert isinstance(service, AuthenticationService)
     assert service.connection is connection
+
+from repositories.administration_repository import AdministrationRepository
+from services.administration_provisioning_service import (
+    AdministrationProvisioningService,
+)
+
+
+def test_factory_builds_administration_provisioning_service(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    service = factory.build_administration_provisioning_service()
+
+    assert isinstance(service, AdministrationProvisioningService)
+    assert isinstance(service.repository, AdministrationRepository)
+    assert service.repository.connection is connection
+
+
+def test_factory_returns_same_administration_provisioning_service(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    assert (
+        factory.build_administration_provisioning_service()
+        is factory.build_administration_provisioning_service()
+    )
+
+from repositories.tenant_repository import TenantRepository
+from services.tenant_service import TenantService
+
+
+def test_factory_builds_tenant_repository(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    repository = factory.build_tenant_repository()
+
+    assert isinstance(repository, TenantRepository)
+    assert repository.connection is connection
+
+
+def test_factory_builds_tenant_service(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    service = factory.build_tenant_service()
+
+    assert isinstance(service, TenantService)
+    assert isinstance(service.repository, TenantRepository)
+    assert service.repository.connection is connection
+
+
+def test_factory_returns_same_tenant_service(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    assert (
+        factory.build_tenant_service()
+        is factory.build_tenant_service()
+    )

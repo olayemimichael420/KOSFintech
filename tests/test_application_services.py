@@ -269,3 +269,44 @@ def test_application_services_exposes_shared_authentication_service(connection):
     assert isinstance(services.authentication, AuthenticationService)
     assert services.authentication is factory.build_authentication_service()
     assert services.authentication.connection is connection
+
+from services.administration_provisioning_service import (
+    AdministrationProvisioningService,
+)
+
+
+def test_application_services_exposes_administration_provisioning(connection):
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assert isinstance(
+        services.administration_provisioning,
+        AdministrationProvisioningService,
+    )
+    assert (
+        services.administration_provisioning
+        is factory.build_administration_provisioning_service()
+    )
+
+from services.tenant_service import TenantService
+
+
+def test_application_services_exposes_tenant(connection):
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assert isinstance(
+        services.tenant,
+        TenantService,
+    )
+    assert (
+        services.tenant
+        is factory.build_tenant_service()
+    )
+
+
+def test_application_services_returns_same_tenant_service(connection):
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assert services.tenant is services.tenant

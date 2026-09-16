@@ -283,6 +283,18 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS tenants (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL UNIQUE,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS administrations (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL UNIQUE,
@@ -290,6 +302,69 @@ def init_db() -> None:
                 administration_type TEXT NOT NULL,
                 status TEXT NOT NULL DEFAULT 'active',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS institution_anchors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                institution_type TEXT NOT NULL,
+                name TEXT NOT NULL,
+                provenance_reference TEXT NOT NULL,
+                verification_status TEXT NOT NULL DEFAULT 'pending'
+                    CHECK(
+                        verification_status IN (
+                            'pending',
+                            'verified',
+                            'rejected'
+                        )
+                    ),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS service_bindings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                institution_anchor_id INTEGER NOT NULL,
+                tenant_id TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (institution_anchor_id)
+                    REFERENCES institution_anchors(id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS church_anchors (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                provenance_reference TEXT NOT NULL,
+                verification_status TEXT NOT NULL DEFAULT 'pending'
+                    CHECK(
+                        verification_status IN (
+                            'pending',
+                            'verified',
+                            'rejected'
+                        )
+                    ),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES administrations(tenant_id)
             )
             """
         )
