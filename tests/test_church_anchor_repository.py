@@ -14,14 +14,10 @@ def test_create_and_get_church_anchor(tmp_path, monkeypatch):
     try:
         connection.execute(
             """
-            INSERT INTO administrations (
-                tenant_id,
-                name,
-                administration_type
-            )
-            VALUES (?, ?, ?)
+            INSERT INTO tenants (tenant_id)
+            VALUES (?)
             """,
-            ("tenant-001", "Example Church Administration", "church"),
+            ("tenant-001",),
         )
         connection.commit()
 
@@ -65,16 +61,12 @@ def test_list_active_church_anchors(tmp_path, monkeypatch):
     try:
         connection.executemany(
             """
-            INSERT INTO administrations (
-                tenant_id,
-                name,
-                administration_type
-            )
-            VALUES (?, ?, ?)
+            INSERT INTO tenants (tenant_id)
+            VALUES (?)
             """,
             [
-                ("tenant-001", "Active Church Administration", "church"),
-                ("tenant-002", "Inactive Church Administration", "church"),
+                ("tenant-001",),
+                ("tenant-002",),
             ],
         )
         connection.commit()

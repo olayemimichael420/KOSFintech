@@ -66,20 +66,16 @@ def test_church_anchors_schema(tmp_path, monkeypatch):
 
         assert (
             "tenant_id",
-            "administrations",
+            "tenants",
             "tenant_id",
         ) in relationships
 
         connection.execute(
             """
-            INSERT INTO administrations (
-                tenant_id,
-                name,
-                administration_type
-            )
-            VALUES (?, ?, ?)
+            INSERT INTO tenants (tenant_id)
+            VALUES (?)
             """,
-            ("tenant-001", "Example Church Administration", "church"),
+            ("tenant-001",),
         )
 
         connection.execute(

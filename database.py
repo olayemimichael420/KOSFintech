@@ -366,7 +366,7 @@ def init_db() -> None:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (tenant_id)
-                    REFERENCES administrations(tenant_id)
+                    REFERENCES tenants(tenant_id)
             )
             """
         )
