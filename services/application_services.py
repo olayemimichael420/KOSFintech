@@ -23,6 +23,8 @@ from services.authorization_service import AuthorizationService
 from services.administration_context_service import AdministrationContextService
 from services.administration_provisioning_service import AdministrationProvisioningService
 from services.tenant_service import TenantService
+from services.institution_anchor_service import InstitutionAnchorService
+from services.service_binding_service import ServiceBindingService
 from services.rbac_provisioning_service import RBACProvisioningService
 from services.telegram_identity_service import TelegramIdentityService
 from services.telegram_channel_binding_service import TelegramChannelBindingService
@@ -73,6 +75,8 @@ class ApplicationServices:
             factory.build_administration_provisioning_service()
         )
         self._tenant = factory.build_tenant_service()
+        self._institution_anchor = factory.build_institution_anchor_service()
+        self._service_binding = factory.build_service_binding_service()
         self._rbac_provisioning = (
             factory.build_rbac_provisioning_service()
         )
@@ -151,6 +155,14 @@ class ApplicationServices:
     @property
     def tenant(self) -> TenantService:
         return self._tenant
+
+    @property
+    def institution_anchor(self) -> InstitutionAnchorService:
+        return self._institution_anchor
+
+    @property
+    def service_binding(self) -> ServiceBindingService:
+        return self._service_binding
 
     def attendance(self, tenant_id: str, user_id=None):
         return AttendanceService(

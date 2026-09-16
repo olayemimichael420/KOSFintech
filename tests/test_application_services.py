@@ -310,3 +310,27 @@ def test_application_services_returns_same_tenant_service(connection):
     services = ApplicationServices(factory)
 
     assert services.tenant is services.tenant
+
+
+def test_application_services_exposes_institution_anchor(connection):
+    from services.institution_anchor_service import InstitutionAnchorService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    service = services.institution_anchor
+
+    assert isinstance(service, InstitutionAnchorService)
+    assert service.repository.connection is connection
+
+
+def test_application_services_exposes_service_binding(connection):
+    from services.service_binding_service import ServiceBindingService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    service = services.service_binding
+
+    assert isinstance(service, ServiceBindingService)
+    assert service.repository.connection is connection
