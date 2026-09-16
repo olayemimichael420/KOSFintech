@@ -339,7 +339,9 @@ def init_db() -> None:
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 
                 FOREIGN KEY (institution_anchor_id)
-                    REFERENCES institution_anchors(id)
+                    REFERENCES institution_anchors(id),
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id)
             )
             """
         )

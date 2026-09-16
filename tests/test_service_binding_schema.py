@@ -55,6 +55,13 @@ def test_service_bindings_schema(tmp_path, monkeypatch):
             for row in foreign_keys
         )
 
+        assert any(
+            row["table"] == "tenants"
+            and row["from"] == "tenant_id"
+            and row["to"] == "tenant_id"
+            for row in foreign_keys
+        )
+
         assert "authority" not in columns
         assert "role" not in columns
         assert "permission" not in columns

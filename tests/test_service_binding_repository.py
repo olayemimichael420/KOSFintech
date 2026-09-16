@@ -2,8 +2,10 @@ import database
 
 from models.institution_anchor import InstitutionAnchor
 from models.service_binding import ServiceBinding
+from models.tenant import Tenant
 from repositories.institution_anchor_repository import InstitutionAnchorRepository
 from repositories.service_binding_repository import ServiceBindingRepository
+from repositories.tenant_repository import TenantRepository
 
 
 def test_service_binding_repository_create_and_get(tmp_path, monkeypatch):
@@ -16,6 +18,14 @@ def test_service_binding_repository_create_and_get(tmp_path, monkeypatch):
     try:
         institution_repository = InstitutionAnchorRepository(connection)
         repository = ServiceBindingRepository(connection)
+        tenant_repository = TenantRepository(connection)
+
+        tenant_repository.create(
+            Tenant(
+                id=None,
+                tenant_id="tenant-001",
+            )
+        )
 
         anchor = institution_repository.create(
             InstitutionAnchor(
@@ -80,6 +90,21 @@ def test_service_binding_repository_list_active(tmp_path, monkeypatch):
     try:
         institution_repository = InstitutionAnchorRepository(connection)
         repository = ServiceBindingRepository(connection)
+        tenant_repository = TenantRepository(connection)
+
+        tenant_repository.create(
+            Tenant(
+                id=None,
+                tenant_id="tenant-active",
+            )
+        )
+        tenant_repository.create(
+            Tenant(
+                id=None,
+                tenant_id="tenant-inactive",
+                status="inactive",
+            )
+        )
 
         anchor = institution_repository.create(
             InstitutionAnchor(
