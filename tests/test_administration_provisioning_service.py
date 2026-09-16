@@ -6,6 +6,14 @@ from services.administration_provisioning_service import (
 )
 
 
+class StubTenantRepository:
+    def __init__(self, tenant=None):
+        self.tenant = tenant
+
+    def get_by_tenant_id(self, tenant_id):
+        return self.tenant
+
+
 class StubAdministrationRepository:
     def __init__(self):
         self.created = []
@@ -23,7 +31,10 @@ class StubAdministrationRepository:
 
 def test_create_administration_provisions_tenant_bound_administration():
     repository = StubAdministrationRepository()
-    service = AdministrationProvisioningService(repository)
+    service = AdministrationProvisioningService(
+        repository,
+        StubTenantRepository(tenant=True),
+    )
 
     created = service.create(
         tenant_id="tenant-001",
@@ -49,7 +60,10 @@ def test_create_administration_provisions_tenant_bound_administration():
 
 def test_create_administration_rejects_blank_tenant_id():
     repository = StubAdministrationRepository()
-    service = AdministrationProvisioningService(repository)
+    service = AdministrationProvisioningService(
+        repository,
+        StubTenantRepository(tenant=True),
+    )
 
     with pytest.raises(ValueError, match="tenant_id is required"):
         service.create(
@@ -61,7 +75,10 @@ def test_create_administration_rejects_blank_tenant_id():
 
 def test_create_administration_rejects_blank_name():
     repository = StubAdministrationRepository()
-    service = AdministrationProvisioningService(repository)
+    service = AdministrationProvisioningService(
+        repository,
+        StubTenantRepository(tenant=True),
+    )
 
     with pytest.raises(ValueError, match="name is required"):
         service.create(
@@ -73,7 +90,10 @@ def test_create_administration_rejects_blank_name():
 
 def test_create_administration_rejects_blank_administration_type():
     repository = StubAdministrationRepository()
-    service = AdministrationProvisioningService(repository)
+    service = AdministrationProvisioningService(
+        repository,
+        StubTenantRepository(tenant=True),
+    )
 
     with pytest.raises(
         ValueError,
@@ -83,4 +103,21 @@ def test_create_administration_rejects_blank_administration_type():
             tenant_id="tenant-001",
             name="Example Church",
             administration_type="",
+        )
+
+
+def test_create_administration_rejects_unknown_tenant():
+    administration_repository = StubAdministrationRepository()
+    tenant_repository = StubTenantRepository()
+
+    service = AdministrationProvisioningService(
+        administration_repository,
+        tenant_repository,
+    )
+
+    with pytest.raises(ValueError, match="tenant not found"):
+        service.create(
+            tenant_id="tenant-unknown",
+            name="Example Church",
+            administration_type="church",
         )

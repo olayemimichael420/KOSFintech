@@ -1,5 +1,6 @@
 from models.administration import Administration
 from repositories.administration_repository import AdministrationRepository
+from repositories.tenant_repository import TenantRepository
 
 
 class AdministrationProvisioningService:
@@ -14,8 +15,10 @@ class AdministrationProvisioningService:
     def __init__(
         self,
         repository: AdministrationRepository,
+        tenant_repository: TenantRepository,
     ):
         self.repository = repository
+        self.tenant_repository = tenant_repository
 
     def create(
         self,
@@ -25,6 +28,9 @@ class AdministrationProvisioningService:
     ) -> Administration:
         if not tenant_id.strip():
             raise ValueError("tenant_id is required")
+
+        if self.tenant_repository.get_by_tenant_id(tenant_id) is None:
+            raise ValueError("tenant not found")
 
         if not name.strip():
             raise ValueError("name is required")

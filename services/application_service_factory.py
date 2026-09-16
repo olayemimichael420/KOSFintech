@@ -134,6 +134,7 @@ class ApplicationServiceFactory:
         self._administration_provisioning_service = (
             AdministrationProvisioningService(
                 repository=self._administration_repository,
+                tenant_repository=self._tenant_repository,
             )
         )
         self._tenant_identity_generator = TenantIdentityGenerator()

@@ -54,3 +54,23 @@ def test_list_active_tenants_returns_active_only(db_connection):
     assert [tenant.tenant_id for tenant in tenants] == [
         "tenant-active"
     ]
+
+
+def test_get_tenant_by_tenant_id_returns_tenant(db_connection):
+    repository = TenantRepository(db_connection)
+    created = repository.create(
+        Tenant(
+            id=None,
+            tenant_id="tenant-lookup",
+        )
+    )
+
+    assert repository.get_by_tenant_id("tenant-lookup") == created
+
+
+def test_get_tenant_by_tenant_id_returns_none_for_unknown_tenant(
+    db_connection,
+):
+    repository = TenantRepository(db_connection)
+
+    assert repository.get_by_tenant_id("does-not-exist") is None

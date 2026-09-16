@@ -53,6 +53,24 @@ class TenantRepository:
 
         return self._to_model(row)
 
+    def get_by_tenant_id(self, tenant_id: str) -> Optional[Tenant]:
+        row = self.connection.execute(
+            """
+            SELECT
+                id,
+                tenant_id,
+                status
+            FROM tenants
+            WHERE tenant_id = ?
+            """,
+            (tenant_id,),
+        ).fetchone()
+
+        if row is None:
+            return None
+
+        return self._to_model(row)
+
     def list_active(self) -> list[Tenant]:
         rows = self.connection.execute(
             """
