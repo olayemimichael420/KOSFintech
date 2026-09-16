@@ -15,6 +15,10 @@ from services.service_act_verification_service import ServiceActVerificationServ
 from services.verification_decision_service import VerificationDecisionService
 from services.verification_service import VerificationService
 from services.verification_workflow_service import VerificationWorkflowService
+from repositories.institution_anchor_repository import InstitutionAnchorRepository
+from repositories.service_binding_repository import ServiceBindingRepository
+from services.institution_anchor_service import InstitutionAnchorService
+from services.service_binding_service import ServiceBindingService
 
 
 @pytest.fixture
@@ -207,3 +211,41 @@ def test_factory_injects_tenant_identity_generator(connection):
     generator = factory.build_tenant_identity_generator()
 
     assert service.identity_generator is generator
+
+
+def test_factory_builds_institution_anchor_repository(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    repository = factory.build_institution_anchor_repository()
+
+    assert isinstance(repository, InstitutionAnchorRepository)
+    assert repository.connection is connection
+
+
+def test_factory_builds_institution_anchor_service(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    service = factory.build_institution_anchor_service()
+
+    assert isinstance(service, InstitutionAnchorService)
+    assert isinstance(service.repository, InstitutionAnchorRepository)
+    assert service.repository.connection is connection
+
+
+def test_factory_builds_service_binding_repository(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    repository = factory.build_service_binding_repository()
+
+    assert isinstance(repository, ServiceBindingRepository)
+    assert repository.connection is connection
+
+
+def test_factory_builds_service_binding_service(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    service = factory.build_service_binding_service()
+
+    assert isinstance(service, ServiceBindingService)
+    assert isinstance(service.repository, ServiceBindingRepository)
+    assert service.repository.connection is connection

@@ -16,6 +16,8 @@ from repositories.telegram_channel_binding_repository import TelegramChannelBind
 from repositories.user_repository import UserRepository
 from repositories.administration_repository import AdministrationRepository
 from repositories.tenant_repository import TenantRepository
+from repositories.institution_anchor_repository import InstitutionAnchorRepository
+from repositories.service_binding_repository import ServiceBindingRepository
 from repositories.academic_session_repository import AcademicSessionRepository
 from repositories.course_offering_repository import CourseOfferingRepository
 from repositories.course_section_repository import CourseSectionRepository
@@ -47,6 +49,8 @@ from services.administration_context_service import AdministrationContextService
 from services.administration_provisioning_service import AdministrationProvisioningService
 from services.tenant_identity_generator import TenantIdentityGenerator
 from services.tenant_service import TenantService
+from services.institution_anchor_service import InstitutionAnchorService
+from services.service_binding_service import ServiceBindingService
 from services.rbac_provisioning_service import RBACProvisioningService
 from services.telegram_identity_service import TelegramIdentityService
 from services.telegram_channel_binding_service import TelegramChannelBindingService
@@ -91,6 +95,8 @@ class ApplicationServiceFactory:
         self._user_repository = UserRepository(connection)
         self._administration_repository = AdministrationRepository(connection)
         self._tenant_repository = TenantRepository(connection)
+        self._institution_anchor_repository = InstitutionAnchorRepository(connection)
+        self._service_binding_repository = ServiceBindingRepository(connection)
         self._academic_session_repository = AcademicSessionRepository(connection)
         self._course_offering_repository = CourseOfferingRepository(connection)
         self._course_section_repository = CourseSectionRepository(connection)
@@ -134,6 +140,12 @@ class ApplicationServiceFactory:
         self._tenant_service = TenantService(
             repository=self._tenant_repository,
             identity_generator=self._tenant_identity_generator,
+        )
+        self._institution_anchor_service = InstitutionAnchorService(
+            repository=self._institution_anchor_repository,
+        )
+        self._service_binding_service = ServiceBindingService(
+            repository=self._service_binding_repository,
         )
 
         # ---------------------------------------------------------------
@@ -367,6 +379,12 @@ class ApplicationServiceFactory:
     def build_tenant_repository(self):
         return self._tenant_repository
 
+    def build_institution_anchor_repository(self):
+        return self._institution_anchor_repository
+
+    def build_service_binding_repository(self):
+        return self._service_binding_repository
+
     def build_administration_provisioning_service(self):
         return self._administration_provisioning_service
 
@@ -375,3 +393,9 @@ class ApplicationServiceFactory:
 
     def build_tenant_service(self):
         return self._tenant_service
+
+    def build_institution_anchor_service(self):
+        return self._institution_anchor_service
+
+    def build_service_binding_service(self):
+        return self._service_binding_service
