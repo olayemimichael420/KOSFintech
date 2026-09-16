@@ -1,3 +1,5 @@
+from repositories.tenant_repository import TenantRepository
+from services.tenant_identity_generator import TenantIdentityGenerator
 import pytest
 
 from models.tenant import Tenant
@@ -52,3 +54,18 @@ def test_create_tenant_rejects_invalid_status():
 
     with pytest.raises(ValueError, match="invalid tenant status"):
         service.create("tenant-001", status="suspended")
+
+
+def test_create_generates_tenant_id_when_not_supplied(db_connection):
+    repository = TenantRepository(db_connection)
+    generator = TenantIdentityGenerator()
+    service = TenantService(
+        repository=repository,
+        identity_generator=generator,
+    )
+
+    tenant = service.create()
+
+    assert tenant.tenant_id
+    assert len(tenant.tenant_id) == 36
+    assert tenant.tenant_id.count("-") == 4

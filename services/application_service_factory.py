@@ -45,6 +45,7 @@ from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
 from services.administration_context_service import AdministrationContextService
 from services.administration_provisioning_service import AdministrationProvisioningService
+from services.tenant_identity_generator import TenantIdentityGenerator
 from services.tenant_service import TenantService
 from services.rbac_provisioning_service import RBACProvisioningService
 from services.telegram_identity_service import TelegramIdentityService
@@ -129,8 +130,10 @@ class ApplicationServiceFactory:
                 repository=self._administration_repository,
             )
         )
+        self._tenant_identity_generator = TenantIdentityGenerator()
         self._tenant_service = TenantService(
             repository=self._tenant_repository,
+            identity_generator=self._tenant_identity_generator,
         )
 
         # ---------------------------------------------------------------
@@ -366,6 +369,9 @@ class ApplicationServiceFactory:
 
     def build_administration_provisioning_service(self):
         return self._administration_provisioning_service
+
+    def build_tenant_identity_generator(self):
+        return self._tenant_identity_generator
 
     def build_tenant_service(self):
         return self._tenant_service

@@ -5,6 +5,9 @@ from repositories.service_act_repository import ServiceActRepository
 from repositories.service_request_repository import ServiceRequestRepository
 from repositories.verification_repository import VerificationRepository
 from services.application_service_factory import ApplicationServiceFactory
+from repositories.tenant_repository import TenantRepository
+from services.tenant_identity_generator import TenantIdentityGenerator
+from services.tenant_service import TenantService
 from services.authentication_service import AuthenticationService
 from services.service_act_service import ServiceActService
 from services.service_request_service import ServiceRequestService
@@ -159,8 +162,6 @@ def test_factory_returns_same_administration_provisioning_service(connection):
         is factory.build_administration_provisioning_service()
     )
 
-from repositories.tenant_repository import TenantRepository
-from services.tenant_service import TenantService
 
 
 def test_factory_builds_tenant_repository(connection):
@@ -189,3 +190,20 @@ def test_factory_returns_same_tenant_service(connection):
         factory.build_tenant_service()
         is factory.build_tenant_service()
     )
+
+
+def test_factory_builds_tenant_identity_generator(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    generator = factory.build_tenant_identity_generator()
+
+    assert isinstance(generator, TenantIdentityGenerator)
+
+
+def test_factory_injects_tenant_identity_generator(connection):
+    factory = ApplicationServiceFactory(connection)
+
+    service = factory.build_tenant_service()
+    generator = factory.build_tenant_identity_generator()
+
+    assert service.identity_generator is generator

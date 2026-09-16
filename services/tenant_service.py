@@ -1,5 +1,6 @@
 from models.tenant import Tenant
 from repositories.tenant_repository import TenantRepository
+from services.tenant_identity_generator import TenantIdentityGenerator
 
 
 class TenantService:
@@ -12,14 +13,26 @@ class TenantService:
     or grant authorization.
     """
 
-    def __init__(self, repository: TenantRepository):
+    def __init__(
+        self,
+        repository: TenantRepository,
+        identity_generator: TenantIdentityGenerator | None = None,
+    ):
         self.repository = repository
+        self.identity_generator = (
+            identity_generator
+            if identity_generator is not None
+            else TenantIdentityGenerator()
+        )
 
     def create(
         self,
-        tenant_id: str,
+        tenant_id: str | None = None,
         status: str = "active",
     ) -> Tenant:
+        if tenant_id is None:
+            tenant_id = self.identity_generator.generate()
+
         if not tenant_id.strip():
             raise ValueError("tenant_id is required")
 
