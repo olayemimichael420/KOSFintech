@@ -1,10 +1,16 @@
 from models.service_binding import ServiceBinding
 from repositories.service_binding_repository import ServiceBindingRepository
+from repositories.tenant_repository import TenantRepository
 
 
 class ServiceBindingService:
-    def __init__(self, repository: ServiceBindingRepository):
+    def __init__(
+        self,
+        repository: ServiceBindingRepository,
+        tenant_repository: TenantRepository,
+    ):
         self.repository = repository
+        self.tenant_repository = tenant_repository
 
     def create(
         self,
@@ -14,6 +20,9 @@ class ServiceBindingService:
     ) -> ServiceBinding:
         if status not in {"active", "inactive"}:
             raise ValueError("invalid service binding status")
+
+        if self.tenant_repository.get_by_tenant_id(tenant_id) is None:
+            raise ValueError("tenant not found")
 
         binding = ServiceBinding(
             id=None,
