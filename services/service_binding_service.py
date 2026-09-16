@@ -1,4 +1,5 @@
 from models.service_binding import ServiceBinding
+from repositories.institution_anchor_repository import InstitutionAnchorRepository
 from repositories.service_binding_repository import ServiceBindingRepository
 from repositories.tenant_repository import TenantRepository
 
@@ -8,9 +9,11 @@ class ServiceBindingService:
         self,
         repository: ServiceBindingRepository,
         tenant_repository: TenantRepository,
+        institution_anchor_repository: InstitutionAnchorRepository,
     ):
         self.repository = repository
         self.tenant_repository = tenant_repository
+        self.institution_anchor_repository = institution_anchor_repository
 
     def create(
         self,
@@ -23,6 +26,9 @@ class ServiceBindingService:
 
         if self.tenant_repository.get_by_tenant_id(tenant_id) is None:
             raise ValueError("tenant not found")
+
+        if self.institution_anchor_repository.get(institution_anchor_id) is None:
+            raise ValueError("institution anchor not found")
 
         binding = ServiceBinding(
             id=None,

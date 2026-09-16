@@ -148,6 +148,7 @@ class ApplicationServiceFactory:
         self._service_binding_service = ServiceBindingService(
             repository=self._service_binding_repository,
             tenant_repository=self._tenant_repository,
+            institution_anchor_repository=self._institution_anchor_repository,
         )
 
         # ---------------------------------------------------------------

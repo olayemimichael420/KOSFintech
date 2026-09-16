@@ -20,7 +20,11 @@ def test_service_binding_service_create_and_get(tmp_path, monkeypatch):
         institution_repository = InstitutionAnchorRepository(connection)
         binding_repository = ServiceBindingRepository(connection)
         tenant_repository = TenantRepository(connection)
-        service = ServiceBindingService(binding_repository, tenant_repository)
+        service = ServiceBindingService(
+            binding_repository,
+            tenant_repository,
+            institution_repository,
+        )
 
         tenant_repository.create(
             Tenant(id=None, tenant_id="tenant-001")
@@ -67,7 +71,11 @@ def test_service_binding_service_list_active(tmp_path, monkeypatch):
         institution_repository = InstitutionAnchorRepository(connection)
         binding_repository = ServiceBindingRepository(connection)
         tenant_repository = TenantRepository(connection)
-        service = ServiceBindingService(binding_repository, tenant_repository)
+        service = ServiceBindingService(
+            binding_repository,
+            tenant_repository,
+            institution_repository,
+        )
 
         tenant_repository.create(
             Tenant(id=None, tenant_id="tenant-active")
@@ -119,6 +127,11 @@ class StubTenantRepository:
     def get_by_tenant_id(self, tenant_id):
         return None
 
+class StubInstitutionAnchorRepository:
+    def get(self, anchor_id):
+        return None
+
+
 
 def test_service_binding_service_rejects_unknown_tenant():
     binding_repository = StubServiceBindingRepository()
@@ -127,10 +140,37 @@ def test_service_binding_service_rejects_unknown_tenant():
     service = ServiceBindingService(
         binding_repository,
         tenant_repository,
+        StubInstitutionAnchorRepository(),
     )
 
     with pytest.raises(ValueError, match="tenant not found"):
         service.create(
             institution_anchor_id=1,
             tenant_id="tenant-unknown",
+        )
+
+def test_service_binding_service_rejects_unknown_institution_anchor():
+    binding_repository = StubServiceBindingRepository()
+
+    class ExistingTenantRepository:
+        def get_by_tenant_id(self, tenant_id):
+            return Tenant(id=1, tenant_id=tenant_id)
+
+    class StubInstitutionAnchorRepository:
+        def get(self, anchor_id):
+            return None
+
+    service = ServiceBindingService(
+        binding_repository,
+        ExistingTenantRepository(),
+        StubInstitutionAnchorRepository(),
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="institution anchor not found",
+    ):
+        service.create(
+            institution_anchor_id=999,
+            tenant_id="tenant-001",
         )
