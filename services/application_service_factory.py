@@ -26,6 +26,7 @@ from repositories.section_student_enrollment_repository import SectionStudentEnr
 from repositories.academic_term_repository import AcademicTermRepository
 from repositories.academic_class_repository import AcademicClassRepository
 from repositories.academic_subject_repository import AcademicSubjectRepository
+from repositories.church_program_repository import ChurchProgramRepository
 from repositories.teacher_subject_assignment_repository import TeacherSubjectAssignmentRepository
 from repositories.student_enrollment_repository import StudentEnrollmentRepository
 
@@ -105,6 +106,7 @@ class ApplicationServiceFactory:
         self._academic_term_repository = AcademicTermRepository(connection)
         self._academic_class_repository = AcademicClassRepository(connection)
         self._academic_subject_repository = AcademicSubjectRepository(connection)
+        self._church_program_repository = ChurchProgramRepository(connection)
         self._teacher_subject_assignment_repository = TeacherSubjectAssignmentRepository(connection)
         self._student_enrollment_repository = StudentEnrollmentRepository(connection)
 
@@ -307,6 +309,9 @@ class ApplicationServiceFactory:
 
     def build_academic_subject_repository(self):
         return self._academic_subject_repository
+
+    def build_church_program_repository(self):
+        return self._church_program_repository
 
     def build_teacher_subject_assignment_repository(self):
         return self._teacher_subject_assignment_repository
