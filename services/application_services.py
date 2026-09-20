@@ -9,6 +9,18 @@ from services.academic_term_service import AcademicTermService
 from services.academic_class_service import AcademicClassService
 from services.academic_subject_service import AcademicSubjectService
 from services.church_program_service import ChurchProgramService
+from services.church_activity_service import ChurchActivityService
+from services.teaching_session_service import TeachingSessionService
+from services.teaching_series_service import TeachingSeriesService
+from services.teaching_focus_service import TeachingFocusService
+from services.teaching_content_service import TeachingContentService
+from services.learning_evidence_service import LearningEvidenceService
+from services.assessment_service import AssessmentService
+from services.assessment_score_service import AssessmentScoreService
+from services.grade_service import GradeService
+from services.result_service import ResultService
+from services.progress_service import ProgressService
+from services.teaching_subject_service import TeachingSubjectService
 from services.teacher_subject_assignment_service import TeacherSubjectAssignmentService
 from services.student_enrollment_service import StudentEnrollmentService
 from services.student_service import StudentService
@@ -18,6 +30,12 @@ from services.parent_student_service import ParentStudentService
 from services.teacher_student_service import TeacherStudentService
 from services.school_student_service import SchoolStudentService
 from services.external_identity_service import ExternalIdentityService
+from services.person_identity_service import PersonIdentityService
+from services.teacher_preacher_service import TeacherPreacherService
+from services.teacher_preacher_member_service import TeacherPreacherMemberService
+from services.teaching_session_member_service import TeachingSessionMemberService
+from services.teaching_session_attendance_service import TeachingSessionAttendanceService
+from services.teacher_preacher_subject_assignment_service import TeacherPreacherSubjectAssignmentService
 from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
@@ -65,6 +83,7 @@ class ApplicationServices:
             factory.build_reputation_profile_service()
         )
         self._authentication = factory.build_authentication_service()
+        self._person_identity = factory.build_person_identity_service()
         self._authorization_context = (
             factory.build_authorization_context_service()
         )
@@ -122,6 +141,10 @@ class ApplicationServices:
     @property
     def authentication(self):
         return self._authentication
+
+    @property
+    def person_identity(self) -> PersonIdentityService:
+        return self._person_identity
 
     @property
     def telegram_identity(self) -> TelegramIdentityService:
@@ -269,6 +292,7 @@ class ApplicationServices:
     def academic_term(self, tenant_id: str, user_id=None):
         return AcademicTermService(
             repository=self.factory.build_academic_term_repository(),
+            academic_session_repository=self.factory.build_academic_session_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,
@@ -293,6 +317,161 @@ class ApplicationServices:
     def church_program(self, tenant_id: str, user_id=None):
         return ChurchProgramService(
             repository=self.factory.build_church_program_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def church_activity(self, tenant_id: str, user_id=None):
+        return ChurchActivityService(
+            repository=self.factory.build_church_activity_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teaching_session(self, tenant_id: str, user_id=None):
+        return TeachingSessionService(
+            repository=self.factory.build_teaching_session_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teaching_series(self, tenant_id: str, user_id=None):
+        return TeachingSeriesService(
+            repository=self.factory.build_teaching_series_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+            session_repository=self.factory.build_teaching_session_repository(),
+        )
+
+    def teaching_focus(self, tenant_id: str, user_id=None):
+        return TeachingFocusService(
+            repository=self.factory.build_teaching_focus_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+            series_repository=self.factory.build_teaching_series_repository(),
+        )
+
+    def teaching_content(self, tenant_id: str, user_id=None):
+        return TeachingContentService(
+            repository=self.factory.build_teaching_content_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+            focus_repository=self.factory.build_teaching_focus_repository(),
+        )
+
+    def learning_evidence(self, tenant_id: str, user_id=None):
+        return LearningEvidenceService(
+            repository=self.factory.build_learning_evidence_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def assessment(self, tenant_id: str, user_id=None):
+        return AssessmentService(
+            repository=self.factory.build_assessment_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def assessment_score(self, tenant_id: str, user_id=None):
+        return AssessmentScoreService(
+            repository=self.factory.build_assessment_score_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def grade(self, tenant_id: str, user_id=None):
+        return GradeService(
+            repository=self.factory.build_grade_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def result(self, tenant_id: str, user_id=None):
+        return ResultService(
+            repository=self.factory.build_result_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def progress(self, tenant_id: str, user_id=None):
+        return ProgressService(
+            repository=self.factory.build_progress_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teacher_preacher(self, tenant_id: str, user_id=None):
+        return TeacherPreacherService(
+            repository=self.factory.build_teacher_preacher_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teaching_subject(self, tenant_id: str, user_id=None):
+        return TeachingSubjectService(
+            repository=self.factory.build_teaching_subject_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teaching_session_member(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return TeachingSessionMemberService(
+            repository=self.factory.build_teaching_session_member_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teaching_session_attendance(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return TeachingSessionAttendanceService(
+            repository=self.factory.build_teaching_session_attendance_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teacher_preacher_subject_assignment(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return TeacherPreacherSubjectAssignmentService(
+            repository=self.factory.build_teacher_preacher_subject_assignment_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def teacher_preacher_member(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return TeacherPreacherMemberService(
+            repository=self.factory.build_teacher_preacher_member_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,

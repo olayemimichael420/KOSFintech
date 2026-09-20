@@ -107,6 +107,107 @@ def _migrate_user_schools_tenant_fk(connection: sqlite3.Connection) -> None:
     )
 
 
+def _migrate_church_anchors_tenant_fk(connection: sqlite3.Connection) -> None:
+    """Upgrade legacy ChurchAnchor FK from administrations to tenants."""
+    table = connection.execute(
+        """
+        SELECT sql
+        FROM sqlite_master
+        WHERE type = 'table'
+          AND name = 'church_anchors'
+        """
+    ).fetchone()
+
+    if table is None:
+        return
+
+    table_sql = table["sql"] or ""
+
+    if "REFERENCES tenants(tenant_id)" in table_sql:
+        return
+
+    invalid_rows = connection.execute(
+        """
+        SELECT ca.id, ca.tenant_id
+        FROM church_anchors AS ca
+        LEFT JOIN tenants AS t
+            ON t.tenant_id = ca.tenant_id
+        WHERE t.tenant_id IS NULL
+        """
+    ).fetchall()
+
+    if invalid_rows:
+        raise RuntimeError(
+            "Cannot migrate church_anchors: existing rows contain "
+            "tenant references that do not exist in tenants."
+        )
+
+    connection.execute(
+        """
+        CREATE TABLE church_anchors_new (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            tenant_id TEXT NOT NULL,
+            name TEXT NOT NULL,
+            provenance_reference TEXT NOT NULL,
+            verification_status TEXT NOT NULL DEFAULT 'pending'
+                CHECK(
+                    verification_status IN (
+                        'pending',
+                        'verified',
+                        'rejected'
+                    )
+                ),
+            status TEXT NOT NULL DEFAULT 'active'
+                CHECK(status IN ('active', 'inactive')),
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+            FOREIGN KEY (tenant_id)
+                REFERENCES tenants(tenant_id)
+        )
+        """
+    )
+
+    connection.execute(
+        """
+        INSERT INTO church_anchors_new (
+            id,
+            tenant_id,
+            name,
+            provenance_reference,
+            verification_status,
+            status,
+            created_at
+        )
+        SELECT
+            id,
+            tenant_id,
+            name,
+            provenance_reference,
+            verification_status,
+            status,
+            created_at
+        FROM church_anchors
+        """
+    )
+
+    connection.execute("DROP TABLE church_anchors")
+
+    connection.execute(
+        """
+        ALTER TABLE church_anchors_new
+        RENAME TO church_anchors
+        """
+    )
+
+    connection.execute(
+        """
+        CREATE UNIQUE INDEX IF NOT EXISTS
+        ux_church_anchors_id_tenant
+        ON church_anchors(id, tenant_id)
+        """
+    )
+
+
 def _migrate_talent_point_transactions(connection: sqlite3.Connection) -> None:
     """Upgrade the legacy Talent Point transaction schema for transfers."""
 
@@ -373,6 +474,42 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_church_anchors_id_tenant
+            ON church_anchors(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS memberships (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                person_id INTEGER NOT NULL,
+                church_anchor_id INTEGER NOT NULL,
+                membership_status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(membership_status IN ('active', 'inactive')),
+                effective_from TIMESTAMP,
+                effective_until TIMESTAMP,
+                provenance_reference TEXT NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (person_id)
+                    REFERENCES persons(id),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (church_anchor_id, tenant_id)
+                    REFERENCES church_anchors(id, tenant_id),
+
+                UNIQUE(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS church_programs (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
@@ -396,6 +533,446 @@ def init_db() -> None:
             CREATE UNIQUE INDEX IF NOT EXISTS
             ux_church_programs_id_tenant
             ON church_programs(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS church_activities (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                activity_type TEXT NOT NULL,
+                purpose TEXT,
+                program_id INTEGER,
+                status TEXT NOT NULL DEFAULT 'draft'
+                    CHECK(
+                        status IN (
+                            'draft',
+                            'scheduled',
+                            'approved',
+                            'live',
+                            'delivered',
+                            'recorded',
+                            'verified',
+                            'cancelled'
+                        )
+                    ),
+                delivery_mode TEXT NOT NULL DEFAULT 'physical'
+                    CHECK(
+                        delivery_mode IN (
+                            'physical',
+                            'online',
+                            'live_stream',
+                            'hybrid',
+                            'recorded',
+                            'on_demand'
+                        )
+                    ),
+                scheduled_start TIMESTAMP,
+                scheduled_end TIMESTAMP,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (program_id, tenant_id)
+                    REFERENCES church_programs(id, tenant_id),
+
+                UNIQUE(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_sessions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                start_date DATE NOT NULL,
+                end_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                UNIQUE (tenant_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_sessions_id_tenant
+            ON teaching_sessions(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_session_members (
+                tenant_id TEXT NOT NULL,
+                teaching_session_id INTEGER NOT NULL,
+                membership_id INTEGER NOT NULL,
+
+                PRIMARY KEY (
+                    tenant_id,
+                    teaching_session_id,
+                    membership_id
+                ),
+
+                FOREIGN KEY (teaching_session_id, tenant_id)
+                    REFERENCES teaching_sessions(id, tenant_id),
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_session_attendance (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_session_id INTEGER NOT NULL,
+                membership_id INTEGER NOT NULL,
+                attendance_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'present',
+                remark TEXT,
+
+                FOREIGN KEY (
+                    tenant_id,
+                    teaching_session_id,
+                    membership_id
+                )
+                REFERENCES teaching_session_members (
+                    tenant_id,
+                    teaching_session_id,
+                    membership_id
+                ),
+
+                UNIQUE (
+                    tenant_id,
+                    teaching_session_id,
+                    membership_id,
+                    attendance_date
+                )
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_session_attendance_id_tenant
+            ON teaching_session_attendance(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_series (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_session_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                start_date DATE NOT NULL,
+                end_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teaching_session_id, tenant_id)
+                    REFERENCES teaching_sessions(id, tenant_id),
+
+                UNIQUE (tenant_id, teaching_session_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_series_id_tenant
+            ON teaching_series(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_focuses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_series_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                start_date DATE NOT NULL,
+                end_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teaching_series_id, tenant_id)
+                    REFERENCES teaching_series(id, tenant_id),
+
+                UNIQUE (tenant_id, teaching_series_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_focuses_id_tenant
+            ON teaching_focuses(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_contents (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_focus_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                sequence INTEGER,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teaching_focus_id, tenant_id)
+                    REFERENCES teaching_focuses(id, tenant_id),
+
+                UNIQUE (tenant_id, teaching_focus_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_contents_id_tenant
+            ON teaching_contents(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS progresses (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                membership_id INTEGER NOT NULL,
+                teaching_content_id INTEGER NOT NULL,
+                progress_date DATE NOT NULL,
+                description TEXT NOT NULL,
+                remark TEXT,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id),
+
+                FOREIGN KEY (teaching_content_id, tenant_id)
+                    REFERENCES teaching_contents(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_progresses_id_tenant
+            ON progresses(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS assessments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_content_id INTEGER NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                assessment_date DATE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teaching_content_id, tenant_id)
+                    REFERENCES teaching_contents(id, tenant_id),
+
+                UNIQUE (tenant_id, teaching_content_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_assessments_id_tenant
+            ON assessments(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS assessment_scores (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                assessment_id INTEGER NOT NULL,
+                membership_id INTEGER NOT NULL,
+                score INTEGER NOT NULL,
+                scored_date DATE NOT NULL,
+                remark TEXT,
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (assessment_id, tenant_id)
+                    REFERENCES assessments(id, tenant_id),
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id),
+
+                UNIQUE (tenant_id, assessment_id, membership_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_assessment_scores_id_tenant
+            ON assessment_scores(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS grades (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                description TEXT,
+                minimum_score INTEGER NOT NULL,
+                maximum_score INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                UNIQUE (tenant_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_grades_id_tenant
+            ON grades(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS results (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                assessment_id INTEGER NOT NULL,
+                membership_id INTEGER NOT NULL,
+                grade_id INTEGER NOT NULL,
+                result TEXT NOT NULL,
+                result_date DATE NOT NULL,
+                remark TEXT,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (assessment_id, tenant_id)
+                    REFERENCES assessments(id, tenant_id),
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id),
+
+                FOREIGN KEY (grade_id, tenant_id)
+                    REFERENCES grades(id, tenant_id),
+
+                UNIQUE (tenant_id, assessment_id, membership_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_results_id_tenant
+            ON results(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS learning_evidence (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                membership_id INTEGER NOT NULL,
+                teaching_content_id INTEGER NOT NULL,
+                evidence_date DATE NOT NULL,
+                description TEXT NOT NULL,
+                remark TEXT,
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id),
+
+                FOREIGN KEY (teaching_content_id, tenant_id)
+                    REFERENCES teaching_contents(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_learning_evidence_id_tenant
+            ON learning_evidence(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_subjects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                UNIQUE (tenant_id, name)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_subjects_id_tenant
+            ON teaching_subjects(id, tenant_id)
             """
         )
 
@@ -899,6 +1476,119 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS persons (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teacher_preachers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                person_id INTEGER NOT NULL,
+                role TEXT NOT NULL
+                    CHECK(role IN ('teacher', 'preacher', 'teacher_preacher')),
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (person_id)
+                    REFERENCES persons(id),
+
+                UNIQUE (tenant_id, person_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teacher_preachers_id_tenant
+            ON teacher_preachers(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teacher_preacher_members (
+                tenant_id TEXT NOT NULL,
+                teacher_preacher_id INTEGER NOT NULL,
+                membership_id INTEGER NOT NULL,
+
+                PRIMARY KEY (
+                    tenant_id,
+                    teacher_preacher_id,
+                    membership_id
+                ),
+
+                FOREIGN KEY (teacher_preacher_id, tenant_id)
+                    REFERENCES teacher_preachers(id, tenant_id),
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id)
+            )
+            """
+        )
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teacher_preacher_subject_assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teacher_preacher_id INTEGER NOT NULL,
+                teaching_subject_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT "active"
+                    CHECK(status IN ("active", "inactive")),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teacher_preacher_id, tenant_id)
+                    REFERENCES teacher_preachers(id, tenant_id),
+
+                FOREIGN KEY (teaching_subject_id, tenant_id)
+                    REFERENCES teaching_subjects(id, tenant_id),
+
+                UNIQUE (tenant_id, teacher_preacher_id, teaching_subject_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teacher_preacher_subject_assignments_id_tenant
+            ON teacher_preacher_subject_assignments(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS person_users (
+                person_id INTEGER NOT NULL,
+                tenant_id TEXT NOT NULL,
+                user_id INTEGER NOT NULL,
+
+                PRIMARY KEY (tenant_id, user_id),
+
+                FOREIGN KEY (person_id)
+                    REFERENCES persons(id),
+
+                FOREIGN KEY (user_id, tenant_id)
+                    REFERENCES users(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
@@ -942,6 +1632,7 @@ def init_db() -> None:
         )
 
         _migrate_user_schools_tenant_fk(connection)
+        _migrate_church_anchors_tenant_fk(connection)
         _migrate_talent_point_transactions(connection)
 
         connection.execute(

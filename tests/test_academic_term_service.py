@@ -103,6 +103,7 @@ def _create_service(tenant_id="school-a", connection=None):
 
     service = AcademicTermService(
         repository=term_repository,
+        academic_session_repository=session_repository,
         tenant_id=tenant_id,
     )
 
@@ -142,6 +143,63 @@ def test_create_rejects_invalid_date_range():
         match="start date must not be after end date",
     ):
         service.create(term)
+
+
+def test_create_rejects_term_start_before_session():
+    service, _, session = _create_service()
+
+    term = AcademicTerm(
+        id=None,
+        tenant_id="school-a",
+        academic_session_id=session.id,
+        name="First Term",
+        start_date="2026-08-31",
+        end_date="2026-12-20",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="academic term must start on or after academic session start date",
+    ):
+        service.create(term)
+
+
+def test_create_rejects_term_end_after_session():
+    service, _, session = _create_service()
+
+    term = AcademicTerm(
+        id=None,
+        tenant_id="school-a",
+        academic_session_id=session.id,
+        name="First Term",
+        start_date="2026-09-01",
+        end_date="2027-08-01",
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="academic term must end on or before academic session end date",
+    ):
+        service.create(term)
+
+
+def test_create_accepts_term_aligned_to_session_boundaries():
+    service, _, session = _create_service()
+
+    term = AcademicTerm(
+        id=None,
+        tenant_id="school-a",
+        academic_session_id=session.id,
+        name="Full Session Term",
+        start_date="2026-09-01",
+        end_date="2027-07-31",
+    )
+
+    created = service.create(term)
+
+    assert created.id is not None
+    assert created.start_date == "2026-09-01"
+    assert created.end_date == "2027-07-31"
 
 
 def test_create_rejects_missing_session():

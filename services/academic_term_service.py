@@ -9,11 +9,13 @@ class AcademicTermService:
     def __init__(
         self,
         repository,
+        academic_session_repository,
         tenant_id: str,
         connection=None,
         user_id=None,
     ):
         self.repository = repository
+        self.academic_session_repository = academic_session_repository
         self.tenant_id = tenant_id
         self.connection = connection
         self.user_id = user_id
@@ -47,11 +49,23 @@ class AcademicTermService:
                 "academic term start date must not be after end date"
             )
 
-        if not self.repository.session_exists(
+        session = self.academic_session_repository.get(
             self.tenant_id,
             term.academic_session_id,
-        ):
+        )
+
+        if session is None:
             raise ValueError("academic session not found")
+
+        if term.start_date < session.start_date:
+            raise ValueError(
+                "academic term must start on or after academic session start date"
+            )
+
+        if term.end_date > session.end_date:
+            raise ValueError(
+                "academic term must end on or before academic session end date"
+            )
 
         return self.repository.create(term)
 

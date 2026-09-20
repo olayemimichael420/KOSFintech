@@ -27,6 +27,24 @@ from repositories.academic_term_repository import AcademicTermRepository
 from repositories.academic_class_repository import AcademicClassRepository
 from repositories.academic_subject_repository import AcademicSubjectRepository
 from repositories.church_program_repository import ChurchProgramRepository
+from repositories.church_activity_repository import ChurchActivityRepository
+from repositories.teaching_session_repository import TeachingSessionRepository
+from repositories.teaching_series_repository import TeachingSeriesRepository
+from repositories.teaching_focus_repository import TeachingFocusRepository
+from repositories.teaching_content_repository import TeachingContentRepository
+from repositories.learning_evidence_repository import LearningEvidenceRepository
+from repositories.assessment_repository import AssessmentRepository
+from repositories.assessment_score_repository import AssessmentScoreRepository
+from repositories.grade_repository import GradeRepository
+from repositories.result_repository import ResultRepository
+from repositories.progress_repository import ProgressRepository
+from repositories.teaching_subject_repository import TeachingSubjectRepository
+from repositories.person_repository import PersonRepository
+from repositories.teacher_preacher_repository import TeacherPreacherRepository
+from repositories.teacher_preacher_member_repository import TeacherPreacherMemberRepository
+from repositories.teaching_session_member_repository import TeachingSessionMemberRepository
+from repositories.teaching_session_attendance_repository import TeachingSessionAttendanceRepository
+from repositories.teacher_preacher_subject_assignment_repository import TeacherPreacherSubjectAssignmentRepository
 from repositories.teacher_subject_assignment_repository import TeacherSubjectAssignmentRepository
 from repositories.student_enrollment_repository import StudentEnrollmentRepository
 
@@ -42,6 +60,7 @@ from services.dispute_service import DisputeService
 from services.reputation_service import ReputationService
 from services.reputation_profile_service import ReputationProfileService
 from services.external_identity_service import ExternalIdentityService
+from services.person_identity_service import PersonIdentityService
 from services.permission_resolution_service import PermissionResolutionService
 from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
@@ -107,6 +126,24 @@ class ApplicationServiceFactory:
         self._academic_class_repository = AcademicClassRepository(connection)
         self._academic_subject_repository = AcademicSubjectRepository(connection)
         self._church_program_repository = ChurchProgramRepository(connection)
+        self._church_activity_repository = ChurchActivityRepository(connection)
+        self._teaching_session_repository = TeachingSessionRepository(connection)
+        self._teaching_series_repository = TeachingSeriesRepository(connection)
+        self._teaching_focus_repository = TeachingFocusRepository(connection)
+        self._teaching_content_repository = TeachingContentRepository(connection)
+        self._learning_evidence_repository = LearningEvidenceRepository(connection)
+        self._assessment_repository = AssessmentRepository(connection)
+        self._assessment_score_repository = AssessmentScoreRepository(connection)
+        self._grade_repository = GradeRepository(connection)
+        self._result_repository = ResultRepository(connection)
+        self._progress_repository = ProgressRepository(connection)
+        self._teaching_subject_repository = TeachingSubjectRepository(connection)
+        self._person_repository = PersonRepository(connection)
+        self._teacher_preacher_repository = TeacherPreacherRepository(connection)
+        self._teacher_preacher_member_repository = TeacherPreacherMemberRepository(connection)
+        self._teaching_session_member_repository = TeachingSessionMemberRepository(connection)
+        self._teaching_session_attendance_repository = TeachingSessionAttendanceRepository(connection)
+        self._teacher_preacher_subject_assignment_repository = TeacherPreacherSubjectAssignmentRepository(connection)
         self._teacher_subject_assignment_repository = TeacherSubjectAssignmentRepository(connection)
         self._student_enrollment_repository = StudentEnrollmentRepository(connection)
 
@@ -156,6 +193,10 @@ class ApplicationServiceFactory:
         # ---------------------------------------------------------------
         # Core service graph
         # ---------------------------------------------------------------
+
+        self._person_identity_service = PersonIdentityService(
+            repository=self._person_repository,
+        )
 
         self._service_act_service = ServiceActService(
             self._service_act_repository,
@@ -310,8 +351,62 @@ class ApplicationServiceFactory:
     def build_academic_subject_repository(self):
         return self._academic_subject_repository
 
+    def build_person_repository(self):
+        return self._person_repository
+
     def build_church_program_repository(self):
         return self._church_program_repository
+
+    def build_church_activity_repository(self):
+        return self._church_activity_repository
+
+    def build_teaching_session_repository(self):
+        return self._teaching_session_repository
+
+    def build_teaching_series_repository(self):
+        return self._teaching_series_repository
+
+    def build_teaching_focus_repository(self):
+        return self._teaching_focus_repository
+
+    def build_teaching_content_repository(self):
+        return self._teaching_content_repository
+
+    def build_learning_evidence_repository(self):
+        return self._learning_evidence_repository
+
+    def build_assessment_repository(self):
+        return self._assessment_repository
+
+    def build_assessment_score_repository(self):
+        return self._assessment_score_repository
+
+    def build_grade_repository(self):
+        return self._grade_repository
+
+    def build_result_repository(self):
+        return self._result_repository
+
+    def build_progress_repository(self):
+        return self._progress_repository
+
+    def build_teaching_subject_repository(self):
+        return self._teaching_subject_repository
+
+    def build_teacher_preacher_repository(self):
+        return self._teacher_preacher_repository
+
+    def build_teacher_preacher_member_repository(self):
+        return self._teacher_preacher_member_repository
+
+    def build_teaching_session_member_repository(self):
+        return self._teaching_session_member_repository
+
+    def build_teaching_session_attendance_repository(self):
+        return self._teaching_session_attendance_repository
+
+    def build_teacher_preacher_subject_assignment_repository(self):
+        return self._teacher_preacher_subject_assignment_repository
 
     def build_teacher_subject_assignment_repository(self):
         return self._teacher_subject_assignment_repository
@@ -356,6 +451,9 @@ class ApplicationServiceFactory:
 
     def build_reputation_profile_service(self):
         return self._reputation_profile_service
+
+    def build_person_identity_service(self):
+        return self._person_identity_service
 
     def build_external_identity_service(self):
         return self._external_identity_service

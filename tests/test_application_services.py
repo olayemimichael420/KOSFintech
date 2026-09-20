@@ -26,6 +26,22 @@ def connection(tmp_path, monkeypatch):
         connection.close()
 
 
+def test_application_services_exposes_church_activity(connection):
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    church_activity = services.church_activity("tenant-cmos")
+
+    from services.church_activity_service import ChurchActivityService
+
+    assert isinstance(church_activity, ChurchActivityService)
+    assert (
+        church_activity.repository
+        is services.factory.build_church_activity_repository()
+    )
+
+
 def test_application_services_exposes_verification_workflow(connection):
     services = ApplicationServices(
         ApplicationServiceFactory(connection)
@@ -275,6 +291,33 @@ from services.administration_provisioning_service import (
 )
 
 
+def test_application_services_exposes_teaching_session(connection):
+    from services.teaching_session_service import TeachingSessionService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teaching_session = services.teaching_session("tenant-cmos")
+
+    assert isinstance(teaching_session, TeachingSessionService)
+    assert (
+        teaching_session.repository
+        is factory.build_teaching_session_repository()
+    )
+    assert teaching_session.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_person_identity(connection):
+    from services.person_identity_service import PersonIdentityService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assert isinstance(services.person_identity, PersonIdentityService)
+    assert services.person_identity is factory.build_person_identity_service()
+    assert services.person_identity is services.person_identity
+
+
 def test_application_services_exposes_administration_provisioning(connection):
     factory = ApplicationServiceFactory(connection)
     services = ApplicationServices(factory)
@@ -334,3 +377,275 @@ def test_application_services_exposes_service_binding(connection):
 
     assert isinstance(service, ServiceBindingService)
     assert service.repository.connection is connection
+
+
+def test_application_services_exposes_teaching_series(connection):
+    from services.teaching_series_service import TeachingSeriesService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teaching_series = services.teaching_series("tenant-cmos")
+
+    assert isinstance(teaching_series, TeachingSeriesService)
+    assert (
+        teaching_series.repository
+        is factory.build_teaching_series_repository()
+    )
+    assert (
+        teaching_series.session_repository
+        is factory.build_teaching_session_repository()
+    )
+    assert teaching_series.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teaching_content(connection):
+    from services.teaching_content_service import TeachingContentService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teaching_content = services.teaching_content("tenant-cmos")
+
+    assert isinstance(teaching_content, TeachingContentService)
+    assert (
+        teaching_content.repository
+        is factory.build_teaching_content_repository()
+    )
+    assert (
+        teaching_content.focus_repository
+        is factory.build_teaching_focus_repository()
+    )
+    assert teaching_content.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teaching_subject(connection):
+    from services.teaching_subject_service import TeachingSubjectService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teaching_subject = services.teaching_subject("tenant-cmos")
+
+    assert isinstance(teaching_subject, TeachingSubjectService)
+    assert (
+        teaching_subject.repository
+        is factory.build_teaching_subject_repository()
+    )
+    assert teaching_subject.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teaching_focus(connection):
+    from services.teaching_focus_service import TeachingFocusService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teaching_focus = services.teaching_focus("tenant-cmos")
+
+    assert isinstance(teaching_focus, TeachingFocusService)
+    assert (
+        teaching_focus.repository
+        is factory.build_teaching_focus_repository()
+    )
+    assert (
+        teaching_focus.series_repository
+        is factory.build_teaching_series_repository()
+    )
+    assert teaching_focus.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teaching_focus(connection):
+    from services.teaching_focus_service import TeachingFocusService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teaching_focus = services.teaching_focus("tenant-cmos")
+
+    assert isinstance(teaching_focus, TeachingFocusService)
+    assert (
+        teaching_focus.repository
+        is factory.build_teaching_focus_repository()
+    )
+    assert (
+        teaching_focus.series_repository
+        is factory.build_teaching_series_repository()
+    )
+    assert teaching_focus.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teacher_preacher(connection):
+    from services.teacher_preacher_service import TeacherPreacherService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    teacher_preacher = services.teacher_preacher("tenant-cmos")
+
+    assert isinstance(teacher_preacher, TeacherPreacherService)
+    assert (
+        teacher_preacher.repository
+        is factory.build_teacher_preacher_repository()
+    )
+    assert teacher_preacher.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teaching_session_member(
+    connection,
+):
+    from services.teaching_session_member_service import (
+        TeachingSessionMemberService,
+    )
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    member = services.teaching_session_member("tenant-cmos")
+
+    assert isinstance(
+        member,
+        TeachingSessionMemberService,
+    )
+    assert (
+        member.repository
+        is factory.build_teaching_session_member_repository()
+    )
+    assert member.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teaching_session_attendance(
+    connection,
+):
+    from services.teaching_session_attendance_service import (
+        TeachingSessionAttendanceService,
+    )
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    attendance = services.teaching_session_attendance("tenant-cmos")
+
+    assert isinstance(
+        attendance,
+        TeachingSessionAttendanceService,
+    )
+    assert (
+        attendance.repository
+        is factory.build_teaching_session_attendance_repository()
+    )
+    assert attendance.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teacher_preacher_member(
+    connection,
+):
+    from services.teacher_preacher_member_service import (
+        TeacherPreacherMemberService,
+    )
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    member = services.teacher_preacher_member("tenant-cmos")
+
+    assert isinstance(
+        member,
+        TeacherPreacherMemberService,
+    )
+    assert (
+        member.repository
+        is factory.build_teacher_preacher_member_repository()
+    )
+    assert member.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_teacher_preacher_subject_assignment(
+    connection,
+):
+    from services.teacher_preacher_subject_assignment_service import (
+        TeacherPreacherSubjectAssignmentService,
+    )
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assignment = services.teacher_preacher_subject_assignment("tenant-cmos")
+
+    assert isinstance(
+        assignment,
+        TeacherPreacherSubjectAssignmentService,
+    )
+    assert (
+        assignment.repository
+        is factory.build_teacher_preacher_subject_assignment_repository()
+    )
+    assert assignment.tenant_id == "tenant-cmos"
+
+def test_application_services_exposes_learning_evidence(connection):
+    from services.learning_evidence_service import LearningEvidenceService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    evidence = services.learning_evidence("tenant-cmos")
+
+    assert isinstance(evidence, LearningEvidenceService)
+    assert (
+        evidence.repository
+        is factory.build_learning_evidence_repository()
+    )
+    assert evidence.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_assessment(connection):
+    from services.assessment_service import AssessmentService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    assessment = services.assessment("tenant-cmos")
+
+    assert isinstance(assessment, AssessmentService)
+    assert (
+        assessment.repository
+        is factory.build_assessment_repository()
+    )
+    assert assessment.tenant_id == "tenant-cmos"
+
+def test_application_services_builds_context_bound_result_service(connection):
+    from services.result_service import ResultService
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    result = services.result(
+        tenant_id="tenant-cmos",
+        user_id=1,
+    )
+
+    assert isinstance(result, ResultService)
+    assert result.tenant_id == "tenant-cmos"
+    assert result.user_id == 1
+    assert result.repository is services.factory.build_result_repository()
+    assert result.connection is connection
+
+
+def test_application_services_builds_context_bound_progress_service(connection):
+    from services.progress_service import ProgressService
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    progress = services.progress(
+        tenant_id="tenant-cmos",
+        user_id=1,
+    )
+
+    assert isinstance(progress, ProgressService)
+    assert progress.tenant_id == "tenant-cmos"
+    assert progress.user_id == 1
+    assert progress.repository is services.factory.build_progress_repository()
+    assert progress.connection is connection

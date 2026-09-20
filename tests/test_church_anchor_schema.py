@@ -42,6 +42,23 @@ def test_church_anchors_schema(tmp_path, monkeypatch):
 
         assert columns["id"]["pk"] == 1
 
+        indexes = connection.execute(
+            "PRAGMA index_list(church_anchors)"
+        ).fetchall()
+
+        index_names = {row["name"] for row in indexes}
+
+        assert "ux_church_anchors_id_tenant" in index_names
+
+        index_columns = connection.execute(
+            "PRAGMA index_info(ux_church_anchors_id_tenant)"
+        ).fetchall()
+
+        assert [row["name"] for row in index_columns] == [
+            "id",
+            "tenant_id",
+        ]
+
         for column in (
             "tenant_id",
             "name",
