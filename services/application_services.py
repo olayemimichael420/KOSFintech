@@ -8,6 +8,7 @@ from services.section_student_enrollment_service import SectionStudentEnrollment
 from services.academic_term_service import AcademicTermService
 from services.academic_class_service import AcademicClassService
 from services.academic_subject_service import AcademicSubjectService
+from services.membership_service import MembershipService
 from services.church_program_service import ChurchProgramService
 from services.church_activity_service import ChurchActivityService
 from services.teaching_session_service import TeachingSessionService
@@ -309,6 +310,14 @@ class ApplicationServices:
     def academic_subject(self, tenant_id: str, user_id=None):
         return AcademicSubjectService(
             repository=self.factory.build_academic_subject_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def membership(self, tenant_id: str, user_id=None):
+        return MembershipService(
+            repository=self.factory.build_membership_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,

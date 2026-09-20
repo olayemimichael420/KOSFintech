@@ -649,3 +649,22 @@ def test_application_services_builds_context_bound_progress_service(connection):
     assert progress.user_id == 1
     assert progress.repository is services.factory.build_progress_repository()
     assert progress.connection is connection
+
+
+def test_application_services_builds_context_bound_membership_service(connection):
+    from services.membership_service import MembershipService
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    membership = services.membership(
+        tenant_id="tenant-cmos",
+        user_id=1,
+    )
+
+    assert isinstance(membership, MembershipService)
+    assert membership.tenant_id == "tenant-cmos"
+    assert membership.user_id == 1
+    assert membership.repository is services.factory.build_membership_repository()
+    assert membership.connection is connection
