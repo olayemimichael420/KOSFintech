@@ -18,6 +18,7 @@ from services.teaching_focus_service import TeachingFocusService
 from services.teaching_content_service import TeachingContentService
 from services.teaching_content_teacher_preacher_assignment_service import TeachingContentTeacherPreacherAssignmentService
 from services.learning_evidence_service import LearningEvidenceService
+from services.cmos_assessment_outcome_workflow_service import CMOSAssessmentOutcomeWorkflowService
 from services.assessment_service import AssessmentService
 from services.assessment_score_service import AssessmentScoreService
 from services.grade_service import GradeService
@@ -394,6 +395,18 @@ class ApplicationServices:
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,
+        )
+
+    def cmos_assessment_outcome_workflow(self, tenant_id: str, user_id=None):
+        return CMOSAssessmentOutcomeWorkflowService(
+            assessment_score_service=self.assessment_score(
+                tenant_id=tenant_id,
+                user_id=user_id,
+            ),
+            result_service=self.result(
+                tenant_id=tenant_id,
+                user_id=user_id,
+            ),
         )
 
     def learning_evidence(self, tenant_id: str, user_id=None):
