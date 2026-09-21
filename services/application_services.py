@@ -12,9 +12,11 @@ from services.membership_service import MembershipService
 from services.church_program_service import ChurchProgramService
 from services.church_activity_service import ChurchActivityService
 from services.teaching_session_service import TeachingSessionService
+from services.teaching_session_subject_service import TeachingSessionSubjectService
 from services.teaching_series_service import TeachingSeriesService
 from services.teaching_focus_service import TeachingFocusService
 from services.teaching_content_service import TeachingContentService
+from services.teaching_content_teacher_preacher_assignment_service import TeachingContentTeacherPreacherAssignmentService
 from services.learning_evidence_service import LearningEvidenceService
 from services.assessment_service import AssessmentService
 from services.assessment_score_service import AssessmentScoreService
@@ -347,6 +349,14 @@ class ApplicationServices:
             user_id=user_id,
         )
 
+    def teaching_session_subject(self, tenant_id: str, user_id=None):
+        return TeachingSessionSubjectService(
+            repository=self.factory.build_teaching_session_subject_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
     def teaching_series(self, tenant_id: str, user_id=None):
         return TeachingSeriesService(
             repository=self.factory.build_teaching_series_repository(),
@@ -372,6 +382,18 @@ class ApplicationServices:
             connection=self.factory.connection,
             user_id=user_id,
             focus_repository=self.factory.build_teaching_focus_repository(),
+        )
+
+    def teaching_content_teacher_preacher_assignment(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return TeachingContentTeacherPreacherAssignmentService(
+            repository=self.factory.build_teaching_content_teacher_preacher_assignment_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
         )
 
     def learning_evidence(self, tenant_id: str, user_id=None):

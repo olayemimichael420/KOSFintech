@@ -30,9 +30,11 @@ from repositories.membership_repository import MembershipRepository
 from repositories.church_program_repository import ChurchProgramRepository
 from repositories.church_activity_repository import ChurchActivityRepository
 from repositories.teaching_session_repository import TeachingSessionRepository
+from repositories.teaching_session_subject_repository import TeachingSessionSubjectRepository
 from repositories.teaching_series_repository import TeachingSeriesRepository
 from repositories.teaching_focus_repository import TeachingFocusRepository
 from repositories.teaching_content_repository import TeachingContentRepository
+from repositories.teaching_content_teacher_preacher_assignment_repository import TeachingContentTeacherPreacherAssignmentRepository
 from repositories.learning_evidence_repository import LearningEvidenceRepository
 from repositories.assessment_repository import AssessmentRepository
 from repositories.assessment_score_repository import AssessmentScoreRepository
@@ -130,9 +132,11 @@ class ApplicationServiceFactory:
         self._church_program_repository = ChurchProgramRepository(connection)
         self._church_activity_repository = ChurchActivityRepository(connection)
         self._teaching_session_repository = TeachingSessionRepository(connection)
+        self._teaching_session_subject_repository = TeachingSessionSubjectRepository(connection)
         self._teaching_series_repository = TeachingSeriesRepository(connection)
         self._teaching_focus_repository = TeachingFocusRepository(connection)
         self._teaching_content_repository = TeachingContentRepository(connection)
+        self._teaching_content_teacher_preacher_assignment_repository = TeachingContentTeacherPreacherAssignmentRepository(connection)
         self._learning_evidence_repository = LearningEvidenceRepository(connection)
         self._assessment_repository = AssessmentRepository(connection)
         self._assessment_score_repository = AssessmentScoreRepository(connection)
@@ -368,6 +372,9 @@ class ApplicationServiceFactory:
     def build_teaching_session_repository(self):
         return self._teaching_session_repository
 
+    def build_teaching_session_subject_repository(self):
+        return self._teaching_session_subject_repository
+
     def build_teaching_series_repository(self):
         return self._teaching_series_repository
 
@@ -376,6 +383,9 @@ class ApplicationServiceFactory:
 
     def build_teaching_content_repository(self):
         return self._teaching_content_repository
+
+    def build_teaching_content_teacher_preacher_assignment_repository(self):
+        return self._teaching_content_teacher_preacher_assignment_repository
 
     def build_learning_evidence_repository(self):
         return self._learning_evidence_repository

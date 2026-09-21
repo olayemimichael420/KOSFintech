@@ -978,6 +978,37 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS teaching_session_subjects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_session_id INTEGER NOT NULL,
+                teaching_subject_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teaching_session_id, tenant_id)
+                    REFERENCES teaching_sessions(id, tenant_id),
+
+                FOREIGN KEY (teaching_subject_id, tenant_id)
+                    REFERENCES teaching_subjects(id, tenant_id),
+
+                UNIQUE (tenant_id, teaching_session_id, teaching_subject_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_session_subjects_id_tenant
+            ON teaching_session_subjects(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS telegram_channel_bindings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 provider TEXT NOT NULL,
@@ -1566,6 +1597,42 @@ def init_db() -> None:
             CREATE UNIQUE INDEX IF NOT EXISTS
             ux_teacher_preacher_subject_assignments_id_tenant
             ON teacher_preacher_subject_assignments(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS teaching_content_teacher_preacher_assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teaching_content_id INTEGER NOT NULL,
+                teacher_preacher_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT "active"
+                    CHECK(status IN ("active", "inactive")),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teaching_content_id, tenant_id)
+                    REFERENCES teaching_contents(id, tenant_id),
+
+                FOREIGN KEY (teacher_preacher_id, tenant_id)
+                    REFERENCES teacher_preachers(id, tenant_id),
+
+                UNIQUE (
+                    tenant_id,
+                    teaching_content_id,
+                    teacher_preacher_id
+                )
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_teaching_content_teacher_preacher_assignments_id_tenant
+            ON teaching_content_teacher_preacher_assignments(id, tenant_id)
             """
         )
 
