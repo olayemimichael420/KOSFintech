@@ -66,6 +66,20 @@ from handlers.learning_evidence_create import (
     DESCRIPTION as LEARNING_EVIDENCE_DESCRIPTION,
     REMARK as LEARNING_EVIDENCE_REMARK,
 )
+from handlers.assessment_create import (
+    assessment,
+    assessment_teaching_content_id,
+    assessment_name,
+    assessment_date,
+    assessment_description,
+    assessment_status,
+    cancel_assessment,
+    TEACHING_CONTENT_ID as ASSESSMENT_TEACHING_CONTENT_ID,
+    NAME as ASSESSMENT_NAME,
+    ASSESSMENT_DATE as ASSESSMENT_DATE,
+    DESCRIPTION as ASSESSMENT_DESCRIPTION,
+    STATUS as ASSESSMENT_STATUS,
+)
 from handlers.school_student_create import (
     linkstudent,
     school_student_id,
@@ -318,6 +332,52 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_learning_evidence",
                     cancel_learning_evidence,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("assessment", assessment)
+            ],
+            states={
+                ASSESSMENT_TEACHING_CONTENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_teaching_content_id,
+                    )
+                ],
+                ASSESSMENT_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_name,
+                    )
+                ],
+                ASSESSMENT_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_date,
+                    )
+                ],
+                ASSESSMENT_DESCRIPTION: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_description,
+                    )
+                ],
+                ASSESSMENT_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_assessment",
+                    cancel_assessment,
                 ),
             ],
         )
