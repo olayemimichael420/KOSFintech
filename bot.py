@@ -112,6 +112,14 @@ from handlers.result_create import (
     REMARK as RESULT_REMARK,
     STATUS as RESULT_STATUS,
 )
+from handlers.teaching_subject_create import (
+    teaching_subject,
+    teaching_subject_name,
+    teaching_subject_status,
+    cancel_teaching_subject,
+    NAME as TEACHING_SUBJECT_NAME,
+    STATUS as TEACHING_SUBJECT_STATUS,
+)
 from handlers.teaching_session_create import (
     teaching_session,
     teaching_session_name,
@@ -602,6 +610,34 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_result",
                     cancel_result,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("teaching_subject", teaching_subject)
+            ],
+            states={
+                TEACHING_SUBJECT_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_subject_name,
+                    )
+                ],
+                TEACHING_SUBJECT_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_subject_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_subject",
+                    cancel_teaching_subject,
                 ),
             ],
         )
