@@ -80,6 +80,21 @@ from handlers.assessment_create import (
     DESCRIPTION as ASSESSMENT_DESCRIPTION,
     STATUS as ASSESSMENT_STATUS,
 )
+from handlers.grade_create import (
+    grade,
+    grade_name,
+    grade_description,
+    grade_minimum_score,
+    grade_maximum_score,
+    grade_status,
+    cancel_grade,
+    NAME as GRADE_NAME,
+    DESCRIPTION as GRADE_DESCRIPTION,
+    MINIMUM_SCORE as GRADE_MINIMUM_SCORE,
+    MAXIMUM_SCORE as GRADE_MAXIMUM_SCORE,
+    STATUS as GRADE_STATUS,
+)
+
 from handlers.assessment_score_create import (
     assessment_score,
     assessment_score_assessment_id,
@@ -438,6 +453,52 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_assessment_score",
                     cancel_assessment_score,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("grade", grade)
+            ],
+            states={
+                GRADE_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        grade_name,
+                    )
+                ],
+                GRADE_DESCRIPTION: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        grade_description,
+                    )
+                ],
+                GRADE_MINIMUM_SCORE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        grade_minimum_score,
+                    )
+                ],
+                GRADE_MAXIMUM_SCORE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        grade_maximum_score,
+                    )
+                ],
+                GRADE_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        grade_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_grade",
+                    cancel_grade,
                 ),
             ],
         )
