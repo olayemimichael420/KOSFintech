@@ -134,6 +134,20 @@ from handlers.teaching_focus_create import (
     END_DATE as TEACHING_FOCUS_END_DATE,
     STATUS as TEACHING_FOCUS_STATUS,
 )
+from handlers.teaching_content_create import (
+    teaching_content,
+    teaching_content_focus_id,
+    teaching_content_name,
+    teaching_content_description,
+    teaching_content_sequence,
+    teaching_content_status,
+    cancel_teaching_content,
+    TEACHING_FOCUS_ID as TEACHING_CONTENT_FOCUS_ID,
+    NAME as TEACHING_CONTENT_NAME,
+    DESCRIPTION as TEACHING_CONTENT_DESCRIPTION,
+    SEQUENCE as TEACHING_CONTENT_SEQUENCE,
+    STATUS as TEACHING_CONTENT_STATUS,
+)
 from handlers.teaching_series_create import (
     teaching_series,
     teaching_series_session_id,
@@ -684,6 +698,52 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_teaching_focus",
                     cancel_teaching_focus,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("teaching_content", teaching_content)
+            ],
+            states={
+                TEACHING_CONTENT_FOCUS_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_focus_id,
+                    )
+                ],
+                TEACHING_CONTENT_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_name,
+                    )
+                ],
+                TEACHING_CONTENT_DESCRIPTION: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_description,
+                    )
+                ],
+                TEACHING_CONTENT_SEQUENCE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_sequence,
+                    )
+                ],
+                TEACHING_CONTENT_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_content",
+                    cancel_teaching_content,
                 ),
             ],
         )
