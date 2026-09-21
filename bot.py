@@ -112,6 +112,22 @@ from handlers.result_create import (
     REMARK as RESULT_REMARK,
     STATUS as RESULT_STATUS,
 )
+from handlers.progress_create import (
+    progress,
+    progress_membership_id,
+    progress_teaching_content_id,
+    progress_date,
+    progress_description,
+    progress_remark,
+    progress_status,
+    cancel_progress,
+    MEMBERSHIP_ID as PROGRESS_MEMBERSHIP_ID,
+    TEACHING_CONTENT_ID as PROGRESS_TEACHING_CONTENT_ID,
+    PROGRESS_DATE,
+    DESCRIPTION as PROGRESS_DESCRIPTION,
+    REMARK as PROGRESS_REMARK,
+    STATUS as PROGRESS_STATUS,
+)
 
 from handlers.assessment_score_create import (
     assessment_score,
@@ -575,6 +591,58 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_result",
                     cancel_result,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("progress", progress)
+            ],
+            states={
+                PROGRESS_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        progress_membership_id,
+                    )
+                ],
+                PROGRESS_TEACHING_CONTENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        progress_teaching_content_id,
+                    )
+                ],
+                PROGRESS_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        progress_date,
+                    )
+                ],
+                PROGRESS_DESCRIPTION: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        progress_description,
+                    )
+                ],
+                PROGRESS_REMARK: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        progress_remark,
+                    )
+                ],
+                PROGRESS_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        progress_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_progress",
+                    cancel_progress,
                 ),
             ],
         )
