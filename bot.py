@@ -112,6 +112,17 @@ from handlers.result_create import (
     REMARK as RESULT_REMARK,
     STATUS as RESULT_STATUS,
 )
+from handlers.teaching_session_create import (
+    teaching_session,
+    teaching_session_name,
+    teaching_session_start_date,
+    teaching_session_end_date,
+    cancel_teaching_session,
+    NAME as TEACHING_SESSION_NAME,
+    START_DATE as TEACHING_SESSION_START_DATE,
+    END_DATE as TEACHING_SESSION_END_DATE,
+)
+
 from handlers.progress_create import (
     progress,
     progress_membership_id,
@@ -591,6 +602,40 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_result",
                     cancel_result,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("teaching_session", teaching_session)
+            ],
+            states={
+                TEACHING_SESSION_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_name,
+                    )
+                ],
+                TEACHING_SESSION_START_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_start_date,
+                    )
+                ],
+                TEACHING_SESSION_END_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_end_date,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_session",
+                    cancel_teaching_session,
                 ),
             ],
         )
