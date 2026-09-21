@@ -120,6 +120,20 @@ from handlers.teaching_subject_create import (
     NAME as TEACHING_SUBJECT_NAME,
     STATUS as TEACHING_SUBJECT_STATUS,
 )
+from handlers.teaching_series_create import (
+    teaching_series,
+    teaching_series_session_id,
+    teaching_series_name,
+    teaching_series_start_date,
+    teaching_series_end_date,
+    teaching_series_status,
+    cancel_teaching_series,
+    TEACHING_SESSION_ID as TEACHING_SERIES_SESSION_ID,
+    NAME as TEACHING_SERIES_NAME,
+    START_DATE as TEACHING_SERIES_START_DATE,
+    END_DATE as TEACHING_SERIES_END_DATE,
+    STATUS as TEACHING_SERIES_STATUS,
+)
 from handlers.teaching_session_create import (
     teaching_session,
     teaching_session_name,
@@ -610,6 +624,52 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_result",
                     cancel_result,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("teaching_series", teaching_series)
+            ],
+            states={
+                TEACHING_SERIES_SESSION_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_series_session_id,
+                    )
+                ],
+                TEACHING_SERIES_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_series_name,
+                    )
+                ],
+                TEACHING_SERIES_START_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_series_start_date,
+                    )
+                ],
+                TEACHING_SERIES_END_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_series_end_date,
+                    )
+                ],
+                TEACHING_SERIES_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_series_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_series",
+                    cancel_teaching_series,
                 ),
             ],
         )
