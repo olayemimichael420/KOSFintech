@@ -80,6 +80,20 @@ from handlers.assessment_create import (
     DESCRIPTION as ASSESSMENT_DESCRIPTION,
     STATUS as ASSESSMENT_STATUS,
 )
+from handlers.assessment_score_create import (
+    assessment_score,
+    assessment_score_assessment_id,
+    assessment_score_membership_id,
+    assessment_score_value,
+    assessment_score_date,
+    assessment_score_remark,
+    cancel_assessment_score,
+    ASSESSMENT_ID as ASSESSMENT_SCORE_ASSESSMENT_ID,
+    MEMBERSHIP_ID as ASSESSMENT_SCORE_MEMBERSHIP_ID,
+    SCORE as ASSESSMENT_SCORE_VALUE,
+    SCORED_DATE as ASSESSMENT_SCORE_DATE,
+    REMARK as ASSESSMENT_SCORE_REMARK,
+)
 from handlers.school_student_create import (
     linkstudent,
     school_student_id,
@@ -378,6 +392,52 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_assessment",
                     cancel_assessment,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("assessment_score", assessment_score)
+            ],
+            states={
+                ASSESSMENT_SCORE_ASSESSMENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_score_assessment_id,
+                    )
+                ],
+                ASSESSMENT_SCORE_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_score_membership_id,
+                    )
+                ],
+                ASSESSMENT_SCORE_VALUE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_score_value,
+                    )
+                ],
+                ASSESSMENT_SCORE_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_score_date,
+                    )
+                ],
+                ASSESSMENT_SCORE_REMARK: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        assessment_score_remark,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_assessment_score",
+                    cancel_assessment_score,
                 ),
             ],
         )
