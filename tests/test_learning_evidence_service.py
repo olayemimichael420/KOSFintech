@@ -134,3 +134,86 @@ def test_record_does_not_require_attendance_or_assessment():
 
     assert service.record(evidence) == evidence
     assert repository.created == [evidence]
+
+class FakePermissionService:
+    def __init__(self, granted=None):
+        self.granted = set(granted or [])
+
+    def has_permission(
+        self,
+        user_id,
+        permission_name,
+        tenant_id,
+    ):
+        return permission_name in self.granted
+
+
+def test_record_requires_write_permission():
+    repository = FakeRepository()
+    service = LearningEvidenceService(
+        repository=repository,
+        tenant_id="tenant-a",
+        connection=object(),
+        user_id=1,
+    )
+    service.permission_service = FakePermissionService()
+
+    try:
+        service.record(_evidence())
+    except PermissionError as exc:
+        assert str(exc) == "missing permission: learning_evidence.write"
+    else:
+        raise AssertionError("expected write permission failure")
+
+    assert repository.created == []
+
+
+def test_record_allows_granted_write_permission():
+    repository = FakeRepository()
+    service = LearningEvidenceService(
+        repository=repository,
+        tenant_id="tenant-a",
+        connection=object(),
+        user_id=1,
+    )
+    service.permission_service = FakePermissionService(
+        {"learning_evidence.write"}
+    )
+
+    evidence = _evidence()
+
+    assert service.record(evidence) == evidence
+    assert repository.created == [evidence]
+
+
+def test_list_requires_read_permission():
+    repository = FakeRepository()
+    service = LearningEvidenceService(
+        repository=repository,
+        tenant_id="tenant-a",
+        connection=object(),
+        user_id=1,
+    )
+    service.permission_service = FakePermissionService()
+
+    try:
+        service.list()
+    except PermissionError as exc:
+        assert str(exc) == "missing permission: learning_evidence.read"
+    else:
+        raise AssertionError("expected read permission failure")
+
+
+def test_list_allows_granted_read_permission():
+    repository = FakeRepository()
+    service = LearningEvidenceService(
+        repository=repository,
+        tenant_id="tenant-a",
+        connection=object(),
+        user_id=1,
+    )
+    service.permission_service = FakePermissionService(
+        {"learning_evidence.read"}
+    )
+
+    assert service.list() == []

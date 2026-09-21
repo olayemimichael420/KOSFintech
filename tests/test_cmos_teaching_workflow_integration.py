@@ -251,6 +251,32 @@ def test_cmos_teaching_workflow_end_to_end(db_connection):
         )
     )
 
+    # Read-back verification through the application-service boundaries.
+    assert services.membership(tenant_id).get(membership.id).tenant_id == tenant_id
+    assert services.teaching_session(tenant_id).get(session.id).tenant_id == tenant_id
+    assert services.teaching_subject(tenant_id).get(subject.id).tenant_id == tenant_id
+    assert services.teaching_session_subject(tenant_id).get(session_subject.id).tenant_id == tenant_id
+    assert services.teaching_series(tenant_id).get(series.id).tenant_id == tenant_id
+    assert services.teaching_focus(tenant_id).get(focus.id).tenant_id == tenant_id
+    assert services.teaching_content(tenant_id).get(content.id).tenant_id == tenant_id
+    assert services.teaching_content_teacher_preacher_assignment(tenant_id).get(
+        assignment.id
+    ).tenant_id == tenant_id
+    assert services.teaching_session_member(tenant_id).get(
+        session.id, membership.id
+    ).tenant_id == tenant_id
+    assert services.teaching_session_attendance(tenant_id).get(
+        attendance.id
+    ).tenant_id == tenant_id
+    assert services.learning_evidence(tenant_id).get(evidence.id).tenant_id == tenant_id
+    assert services.assessment(tenant_id).get(assessment.id).tenant_id == tenant_id
+    assert services.assessment_score(tenant_id).get(
+        recorded_score.id
+    ).tenant_id == tenant_id
+    assert services.grade(tenant_id).get(grade.id).tenant_id == tenant_id
+    assert services.result(tenant_id).get(recorded_result.id).tenant_id == tenant_id
+    assert services.progress(tenant_id).get(progress.id).tenant_id == tenant_id
+
     # The complete scenario remains tenant/member/content coherent.
     assert session.id is not None
     assert session_subject.id is not None
