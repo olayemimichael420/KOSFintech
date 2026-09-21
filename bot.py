@@ -120,6 +120,20 @@ from handlers.teaching_subject_create import (
     NAME as TEACHING_SUBJECT_NAME,
     STATUS as TEACHING_SUBJECT_STATUS,
 )
+from handlers.teaching_focus_create import (
+    teaching_focus,
+    teaching_focus_series_id,
+    teaching_focus_name,
+    teaching_focus_start_date,
+    teaching_focus_end_date,
+    teaching_focus_status,
+    cancel_teaching_focus,
+    TEACHING_SERIES_ID as TEACHING_FOCUS_SERIES_ID,
+    NAME as TEACHING_FOCUS_NAME,
+    START_DATE as TEACHING_FOCUS_START_DATE,
+    END_DATE as TEACHING_FOCUS_END_DATE,
+    STATUS as TEACHING_FOCUS_STATUS,
+)
 from handlers.teaching_series_create import (
     teaching_series,
     teaching_series_session_id,
@@ -624,6 +638,52 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_result",
                     cancel_result,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("teaching_focus", teaching_focus)
+            ],
+            states={
+                TEACHING_FOCUS_SERIES_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_focus_series_id,
+                    )
+                ],
+                TEACHING_FOCUS_NAME: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_focus_name,
+                    )
+                ],
+                TEACHING_FOCUS_START_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_focus_start_date,
+                    )
+                ],
+                TEACHING_FOCUS_END_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_focus_end_date,
+                    )
+                ],
+                TEACHING_FOCUS_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_focus_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_focus",
+                    cancel_teaching_focus,
                 ),
             ],
         )
