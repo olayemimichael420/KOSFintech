@@ -94,6 +94,24 @@ from handlers.grade_create import (
     MAXIMUM_SCORE as GRADE_MAXIMUM_SCORE,
     STATUS as GRADE_STATUS,
 )
+from handlers.result_create import (
+    result,
+    result_assessment_id,
+    result_membership_id,
+    result_grade_id,
+    result_value,
+    result_date,
+    result_remark,
+    result_status,
+    cancel_result,
+    ASSESSMENT_ID as RESULT_ASSESSMENT_ID,
+    MEMBERSHIP_ID as RESULT_MEMBERSHIP_ID,
+    GRADE_ID as RESULT_GRADE_ID,
+    RESULT as RESULT_VALUE,
+    RESULT_DATE as RESULT_DATE_STATE,
+    REMARK as RESULT_REMARK,
+    STATUS as RESULT_STATUS,
+)
 
 from handlers.assessment_score_create import (
     assessment_score,
@@ -499,6 +517,64 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_grade",
                     cancel_grade,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("result", result)
+            ],
+            states={
+                RESULT_ASSESSMENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_assessment_id,
+                    )
+                ],
+                RESULT_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_membership_id,
+                    )
+                ],
+                RESULT_GRADE_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_grade_id,
+                    )
+                ],
+                RESULT_VALUE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_value,
+                    )
+                ],
+                RESULT_DATE_STATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_date,
+                    )
+                ],
+                RESULT_REMARK: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_remark,
+                    )
+                ],
+                RESULT_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        result_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_result",
+                    cancel_result,
                 ),
             ],
         )
