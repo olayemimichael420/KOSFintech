@@ -1,0 +1,211 @@
+import pytest
+
+from handlers.teaching_session_subject_create import (
+    TEACHING_SESSION_ID,
+    TEACHING_SUBJECT_ID,
+    cancel_teaching_session_subject,
+    teaching_session_subject,
+    teaching_session_subject_session_id,
+    teaching_session_subject_subject_id,
+)
+
+
+class FakeMessage:
+    def __init__(self, text=""):
+        self.text = text
+        self.replies = []
+
+    async def reply_text(self, text):
+        self.replies.append(text)
+
+
+class FakeUpdate:
+    def __init__(self, text=""):
+        self.message = FakeMessage(text)
+
+
+class FakeApplication:
+    def __init__(self, bot_data):
+        self.bot_data = bot_data
+
+
+class FakeContext:
+    def __init__(self, bot_data):
+        self.application = FakeApplication(bot_data)
+        self.user_data = {}
+
+
+class FakeAdministrationContext:
+    def __init__(self, tenant_id="tenant-a", user_id="user-a"):
+        self.tenant_id = tenant_id
+        self.user_id = user_id
+
+
+class FakeSubjectService:
+    def __init__(self):
+        self.created = []
+
+    def create(self, offering):
+        self.created.append(offering)
+        return offering
+
+
+class FakeServices:
+    def __init__(self, subject_service):
+        self._subject_service = subject_service
+
+    def teaching_session_subject(self, tenant_id, user_id=None):
+        return self._subject_service
+
+
+def make_context(resolver=None, service=None):
+    if resolver is None:
+        resolver = lambda update, context: FakeAdministrationContext()
+
+    if service is None:
+        service = FakeSubjectService()
+
+    return FakeContext(
+        {
+            "get_administration_context": resolver,
+            "services": FakeServices(service),
+        }
+    )
+
+
+@pytest.mark.asyncio
+async def test_start_denies_without_administration_context():
+    update = FakeUpdate()
+    context = make_context(lambda update, context: None)
+
+    result = await teaching_session_subject(update, context)
+
+    assert result == -1
+    assert "Access denied" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_start_prompts_for_session_id():
+    update = FakeUpdate()
+    context = make_context()
+
+    result = await teaching_session_subject(update, context)
+
+    assert result == TEACHING_SESSION_ID
+    assert "teaching session ID" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_session_id_must_be_integer():
+    update = FakeUpdate("abc")
+    context = make_context()
+
+    result = await teaching_session_subject_session_id(update, context)
+
+    assert result == TEACHING_SESSION_ID
+    assert "Invalid teaching session ID" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_session_id_must_be_positive():
+    update = FakeUpdate("0")
+    context = make_context()
+
+    result = await teaching_session_subject_session_id(update, context)
+
+    assert result == TEACHING_SESSION_ID
+    assert "positive integer" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_valid_session_id_prompts_for_subject_id():
+    update = FakeUpdate("12")
+    context = make_context()
+
+    result = await teaching_session_subject_session_id(update, context)
+
+    assert result == TEACHING_SUBJECT_ID
+    assert context.user_data["teaching_session_subject_session_id"] == 12
+
+
+@pytest.mark.asyncio
+async def test_subject_id_must_be_integer():
+    update = FakeUpdate("abc")
+    context = make_context()
+
+    result = await teaching_session_subject_subject_id(update, context)
+
+    assert result == TEACHING_SUBJECT_ID
+    assert "Invalid teaching subject ID" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_subject_id_must_be_positive():
+    update = FakeUpdate("0")
+    context = make_context()
+    context.user_data["teaching_session_subject_session_id"] = 12
+
+    result = await teaching_session_subject_subject_id(update, context)
+
+    assert result == TEACHING_SUBJECT_ID
+    assert "positive integer" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_expired_session_is_rejected():
+    update = FakeUpdate("7")
+    context = make_context()
+
+    result = await teaching_session_subject_subject_id(update, context)
+
+    assert result == -1
+    assert "session expired" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_authorized_offering_is_created():
+    update = FakeUpdate("21")
+    service = FakeSubjectService()
+    context = make_context(service=service)
+    context.user_data["teaching_session_subject_session_id"] = 12
+
+    result = await teaching_session_subject_subject_id(update, context)
+
+    assert result == -1
+    assert len(service.created) == 1
+
+    offering = service.created[0]
+    assert offering.tenant_id == "tenant-a"
+    assert offering.teaching_session_id == 12
+    assert offering.teaching_subject_id == 21
+    assert "offering created" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_permission_error_is_handled():
+    class DeniedService:
+        def create(self, offering):
+            raise PermissionError("denied")
+
+    update = FakeUpdate("21")
+    context = make_context(service=DeniedService())
+    context.user_data["teaching_session_subject_session_id"] = 12
+
+    result = await teaching_session_subject_subject_id(update, context)
+
+    assert result == -1
+    assert "permission is required" in update.message.replies[-1]
+
+
+@pytest.mark.asyncio
+async def test_cancel_clears_context():
+    update = FakeUpdate()
+    context = make_context()
+    context.user_data["teaching_session_subject_session_id"] = 12
+    context.user_data["teaching_session_subject_subject_id"] = 21
+
+    result = await cancel_teaching_session_subject(update, context)
+
+    assert result == -1
+    assert context.user_data == {}
+    assert "cancelled" in update.message.replies[-1]

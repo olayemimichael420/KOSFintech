@@ -183,6 +183,39 @@ from handlers.teaching_session_create import (
     START_DATE as TEACHING_SESSION_START_DATE,
     END_DATE as TEACHING_SESSION_END_DATE,
 )
+from handlers.teaching_session_member_create import (
+    teaching_session_member,
+    teaching_session_member_session_id,
+    teaching_session_member_membership_id,
+    cancel_teaching_session_member,
+    TEACHING_SESSION_ID as TEACHING_SESSION_MEMBER_SESSION_ID,
+    MEMBERSHIP_ID as TEACHING_SESSION_MEMBER_MEMBERSHIP_ID,
+)
+from handlers.teaching_session_subject_create import (
+    teaching_session_subject,
+    teaching_session_subject_session_id,
+    teaching_session_subject_subject_id,
+    cancel_teaching_session_subject,
+    TEACHING_SESSION_ID as TEACHING_SESSION_SUBJECT_SESSION_ID,
+    TEACHING_SUBJECT_ID as TEACHING_SESSION_SUBJECT_SUBJECT_ID,
+)
+
+from handlers.teacher_preacher_member_create import (
+    teacher_preacher_member,
+    teacher_preacher_member_teacher_preacher_id,
+    teacher_preacher_member_membership_id,
+    cancel_teacher_preacher_member,
+    TEACHER_PREACHER_ID as TEACHER_PREACHER_MEMBER_TEACHER_PREACHER_ID,
+    MEMBERSHIP_ID as TEACHER_PREACHER_MEMBER_MEMBERSHIP_ID,
+)
+from handlers.teacher_preacher_subject_assignment_create import (
+    teacher_preacher_subject_assignment,
+    teacher_preacher_subject_assignment_teacher_preacher_id,
+    teacher_preacher_subject_assignment_teaching_subject_id,
+    cancel_teacher_preacher_subject_assignment,
+    TEACHER_PREACHER_ID as TEACHER_PREACHER_SUBJECT_ASSIGNMENT_TEACHER_PREACHER_ID,
+    TEACHING_SUBJECT_ID as TEACHER_PREACHER_SUBJECT_ASSIGNMENT_TEACHING_SUBJECT_ID,
+)
 
 from handlers.progress_create import (
     progress,
@@ -900,6 +933,130 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_teaching_session",
                     cancel_teaching_session,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler(
+                    "teaching_session_member",
+                    teaching_session_member,
+                )
+            ],
+            states={
+                TEACHING_SESSION_MEMBER_SESSION_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_member_session_id,
+                    )
+                ],
+                TEACHING_SESSION_MEMBER_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_member_membership_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_session_member",
+                    cancel_teaching_session_member,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler(
+                    "teaching_session_subject",
+                    teaching_session_subject,
+                )
+            ],
+            states={
+                TEACHING_SESSION_SUBJECT_SESSION_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_subject_session_id,
+                    )
+                ],
+                TEACHING_SESSION_SUBJECT_SUBJECT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_session_subject_subject_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_session_subject",
+                    cancel_teaching_session_subject,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler(
+                    "teacher_preacher_member",
+                    teacher_preacher_member,
+                )
+            ],
+            states={
+                TEACHER_PREACHER_MEMBER_TEACHER_PREACHER_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teacher_preacher_member_teacher_preacher_id,
+                    )
+                ],
+                TEACHER_PREACHER_MEMBER_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teacher_preacher_member_membership_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teacher_preacher_member",
+                    cancel_teacher_preacher_member,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler(
+                    "teacher_preacher_subject_assignment",
+                    teacher_preacher_subject_assignment,
+                )
+            ],
+            states={
+                TEACHER_PREACHER_SUBJECT_ASSIGNMENT_TEACHER_PREACHER_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teacher_preacher_subject_assignment_teacher_preacher_id,
+                    )
+                ],
+                TEACHER_PREACHER_SUBJECT_ASSIGNMENT_TEACHING_SUBJECT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teacher_preacher_subject_assignment_teaching_subject_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teacher_preacher_subject_assignment",
+                    cancel_teacher_preacher_subject_assignment,
                 ),
             ],
         )
