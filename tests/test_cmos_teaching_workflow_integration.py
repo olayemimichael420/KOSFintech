@@ -15,6 +15,9 @@ from models.teaching_session_member import TeachingSessionMemberLink
 from models.teaching_session_subject import TeachingSessionSubject
 from models.teaching_subject import TeachingSubject
 from models.teacher_preacher import TeacherPreacher, TeacherPreacherRole
+from models.teacher_preacher_subject_assignment import (
+    TeacherPreacherSubjectAssignment,
+)
 from models.teaching_content_teacher_preacher_assignment import (
     TeachingContentTeacherPreacherAssignment,
 )
@@ -136,6 +139,21 @@ def test_cmos_teaching_workflow_end_to_end(db_connection):
             role=TeacherPreacherRole.TEACHER,
         )
     )
+
+    subject_assignment = services.teacher_preacher_subject_assignment(
+        tenant_id
+    ).create(
+        TeacherPreacherSubjectAssignment(
+            id=None,
+            tenant_id=tenant_id,
+            teacher_preacher_id=teacher.id,
+            teaching_subject_id=subject.id,
+        )
+    )
+
+    assert subject_assignment.tenant_id == tenant_id
+    assert subject_assignment.teacher_preacher_id == teacher.id
+    assert subject_assignment.teaching_subject_id == subject.id
 
     assignment = services.teaching_content_teacher_preacher_assignment(
         tenant_id
