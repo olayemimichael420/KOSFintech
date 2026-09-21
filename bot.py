@@ -40,6 +40,18 @@ from handlers.attendance_create import (
     REMARK,
 )
 from handlers.attendance_today import attendance_today
+from handlers.teaching_session_attendance_create import (
+    teaching_attendance,
+    teaching_attendance_session_id,
+    teaching_attendance_membership_id,
+    teaching_attendance_date,
+    teaching_attendance_status,
+    cancel_teaching_attendance,
+    TEACHING_SESSION_ID,
+    MEMBERSHIP_ID as TEACHING_ATTENDANCE_MEMBERSHIP_ID,
+    ATTENDANCE_DATE as TEACHING_ATTENDANCE_DATE,
+    STATUS as TEACHING_ATTENDANCE_STATUS,
+)
 from handlers.school_student_create import (
     linkstudent,
     school_student_id,
@@ -210,6 +222,46 @@ def build_application() -> Application:
     )
     application.add_handler(
         CommandHandler("attendance_today", attendance_today)
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("teaching_attendance", teaching_attendance)
+            ],
+            states={
+                TEACHING_SESSION_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_attendance_session_id,
+                    )
+                ],
+                TEACHING_ATTENDANCE_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_attendance_membership_id,
+                    )
+                ],
+                TEACHING_ATTENDANCE_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_attendance_date,
+                    )
+                ],
+                TEACHING_ATTENDANCE_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_attendance_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_teaching_attendance",
+                    cancel_teaching_attendance,
+                ),
+            ],
+        )
     )
 
     application.add_handler(
