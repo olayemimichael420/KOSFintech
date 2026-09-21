@@ -148,6 +148,17 @@ from handlers.teaching_content_create import (
     SEQUENCE as TEACHING_CONTENT_SEQUENCE,
     STATUS as TEACHING_CONTENT_STATUS,
 )
+from handlers.teaching_content_teacher_preacher_assignment_create import (
+    teaching_content_teacher_preacher_assignment,
+    teaching_content_assignment_content_id,
+    teaching_content_assignment_teacher_preacher_id,
+    teaching_content_assignment_status,
+    cancel_teaching_content_teacher_preacher_assignment,
+    TEACHING_CONTENT_ID as TEACHING_CONTENT_ASSIGNMENT_CONTENT_ID,
+    TEACHER_PREACHER_ID as TEACHING_CONTENT_ASSIGNMENT_TEACHER_PREACHER_ID,
+    STATUS as TEACHING_CONTENT_ASSIGNMENT_STATUS,
+)
+
 from handlers.teaching_series_create import (
     teaching_series,
     teaching_series_session_id,
@@ -744,6 +755,43 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_teaching_content",
                     cancel_teaching_content,
+                ),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler(
+                    "content_tp_assign",
+                    teaching_content_teacher_preacher_assignment,
+                )
+            ],
+            states={
+                TEACHING_CONTENT_ASSIGNMENT_CONTENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_assignment_content_id,
+                    )
+                ],
+                TEACHING_CONTENT_ASSIGNMENT_TEACHER_PREACHER_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_assignment_teacher_preacher_id,
+                    )
+                ],
+                TEACHING_CONTENT_ASSIGNMENT_STATUS: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        teaching_content_assignment_status,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_content_tp_assign",
+                    cancel_teaching_content_teacher_preacher_assignment,
                 ),
             ],
         )
