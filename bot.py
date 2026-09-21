@@ -52,6 +52,20 @@ from handlers.teaching_session_attendance_create import (
     ATTENDANCE_DATE as TEACHING_ATTENDANCE_DATE,
     STATUS as TEACHING_ATTENDANCE_STATUS,
 )
+from handlers.learning_evidence_create import (
+    learning_evidence,
+    learning_evidence_membership_id,
+    learning_evidence_teaching_content_id,
+    learning_evidence_date,
+    learning_evidence_description,
+    learning_evidence_remark,
+    cancel_learning_evidence,
+    MEMBERSHIP_ID as LEARNING_EVIDENCE_MEMBERSHIP_ID,
+    TEACHING_CONTENT_ID as LEARNING_EVIDENCE_TEACHING_CONTENT_ID,
+    EVIDENCE_DATE as LEARNING_EVIDENCE_DATE,
+    DESCRIPTION as LEARNING_EVIDENCE_DESCRIPTION,
+    REMARK as LEARNING_EVIDENCE_REMARK,
+)
 from handlers.school_student_create import (
     linkstudent,
     school_student_id,
@@ -259,6 +273,51 @@ def build_application() -> Application:
                 CommandHandler(
                     "cancel_teaching_attendance",
                     cancel_teaching_attendance,
+                ),
+            ],
+        )
+    )
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler("learning_evidence", learning_evidence)
+            ],
+            states={
+                LEARNING_EVIDENCE_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        learning_evidence_membership_id,
+                    )
+                ],
+                LEARNING_EVIDENCE_TEACHING_CONTENT_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        learning_evidence_teaching_content_id,
+                    )
+                ],
+                LEARNING_EVIDENCE_DATE: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        learning_evidence_date,
+                    )
+                ],
+                LEARNING_EVIDENCE_DESCRIPTION: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        learning_evidence_description,
+                    )
+                ],
+                LEARNING_EVIDENCE_REMARK: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        learning_evidence_remark,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_learning_evidence",
+                    cancel_learning_evidence,
                 ),
             ],
         )
