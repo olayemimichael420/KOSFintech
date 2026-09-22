@@ -42,6 +42,22 @@ def test_application_services_exposes_church_activity(connection):
     )
 
 
+def test_application_services_exposes_church_program(connection):
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    church_program = services.church_program("tenant-cmos")
+
+    from services.church_program_service import ChurchProgramService
+
+    assert isinstance(church_program, ChurchProgramService)
+    assert (
+        church_program.repository
+        is services.factory.build_church_program_repository()
+    )
+
+
 def test_application_services_exposes_verification_workflow(connection):
     services = ApplicationServices(
         ApplicationServiceFactory(connection)
