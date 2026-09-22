@@ -587,6 +587,28 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS church_activity_participations (
+                tenant_id TEXT NOT NULL,
+                church_activity_id INTEGER NOT NULL,
+                membership_id INTEGER NOT NULL,
+
+                PRIMARY KEY (
+                    tenant_id,
+                    church_activity_id,
+                    membership_id
+                ),
+
+                FOREIGN KEY (church_activity_id, tenant_id)
+                    REFERENCES church_activities(id, tenant_id),
+
+                FOREIGN KEY (membership_id, tenant_id)
+                    REFERENCES memberships(id, tenant_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS teaching_sessions (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,

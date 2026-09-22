@@ -270,6 +270,14 @@ from handlers.parent_student_create import (
     PARENT_ID as PARENT_STUDENT_PARENT_ID,
     STUDENT_ID as PARENT_STUDENT_STUDENT_ID,
 )
+from handlers.church_activity_participation_create import (
+    church_activity_participation,
+    church_activity_participation_activity_id,
+    church_activity_participation_membership_id,
+    cancel_church_activity_participation,
+    CHURCH_ACTIVITY_ID,
+    MEMBERSHIP_ID as CHURCH_ACTIVITY_PARTICIPATION_MEMBERSHIP_ID,
+)
 
 
 logging.basicConfig(
@@ -1035,7 +1043,7 @@ def build_application() -> Application:
         ConversationHandler(
             entry_points=[
                 CommandHandler(
-                    "teacher_preacher_subject_assignment",
+                    "tp_subject_assignment",
                     teacher_preacher_subject_assignment,
                 )
             ],
@@ -1055,7 +1063,7 @@ def build_application() -> Application:
             },
             fallbacks=[
                 CommandHandler(
-                    "cancel_teacher_preacher_subject_assignment",
+                    "cancel_tp_subject_assignment",
                     cancel_teacher_preacher_subject_assignment,
                 ),
             ],
@@ -1212,6 +1220,37 @@ def build_application() -> Application:
             },
             fallbacks=[
                 CommandHandler("cancel", cancel_attendance),
+            ],
+        )
+    )
+
+    application.add_handler(
+        ConversationHandler(
+            entry_points=[
+                CommandHandler(
+                    "church_activity_participation",
+                    church_activity_participation,
+                )
+            ],
+            states={
+                CHURCH_ACTIVITY_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        church_activity_participation_activity_id,
+                    )
+                ],
+                CHURCH_ACTIVITY_PARTICIPATION_MEMBERSHIP_ID: [
+                    MessageHandler(
+                        filters.TEXT & ~filters.COMMAND,
+                        church_activity_participation_membership_id,
+                    )
+                ],
+            },
+            fallbacks=[
+                CommandHandler(
+                    "cancel_cap",
+                    cancel_church_activity_participation,
+                ),
             ],
         )
     )

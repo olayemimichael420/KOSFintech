@@ -38,6 +38,7 @@ from services.person_identity_service import PersonIdentityService
 from services.teacher_preacher_service import TeacherPreacherService
 from services.teacher_preacher_member_service import TeacherPreacherMemberService
 from services.teaching_session_member_service import TeachingSessionMemberService
+from services.church_activity_participation_service import ChurchActivityParticipationService
 from services.teaching_session_attendance_service import TeachingSessionAttendanceService
 from services.teacher_preacher_subject_assignment_service import TeacherPreacherSubjectAssignmentService
 from services.authentication_service import AuthenticationService
@@ -480,6 +481,18 @@ class ApplicationServices:
     ):
         return TeachingSessionMemberService(
             repository=self.factory.build_teaching_session_member_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def church_activity_participation(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return ChurchActivityParticipationService(
+            repository=self.factory.build_church_activity_participation_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,
