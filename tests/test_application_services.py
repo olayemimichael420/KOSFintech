@@ -613,6 +613,40 @@ def test_application_services_exposes_assessment(connection):
     )
     assert assessment.tenant_id == "tenant-cmos"
 
+def test_application_services_exposes_assessment_score(connection):
+    from services.assessment_score_service import AssessmentScoreService
+
+    factory = ApplicationServiceFactory(connection)
+    services = ApplicationServices(factory)
+
+    score = services.assessment_score("tenant-cmos")
+
+    assert isinstance(score, AssessmentScoreService)
+    assert (
+        score.repository
+        is factory.build_assessment_score_repository()
+    )
+    assert score.tenant_id == "tenant-cmos"
+
+
+def test_application_services_exposes_cmos_assessment_outcome_workflow(
+    connection,
+):
+    from services.cmos_assessment_outcome_workflow_service import (
+        CMOSAssessmentOutcomeWorkflowService,
+    )
+
+    services = ApplicationServices(
+        ApplicationServiceFactory(connection)
+    )
+
+    workflow = services.cmos_assessment_outcome_workflow("tenant-cmos")
+
+    assert isinstance(workflow, CMOSAssessmentOutcomeWorkflowService)
+    assert workflow.assessment_score_service.tenant_id == "tenant-cmos"
+    assert workflow.result_service.tenant_id == "tenant-cmos"
+
+
 def test_application_services_builds_context_bound_result_service(connection):
     from services.result_service import ResultService
 
