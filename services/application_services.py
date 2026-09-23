@@ -41,6 +41,7 @@ from services.teaching_session_member_service import TeachingSessionMemberServic
 from services.church_activity_participation_service import ChurchActivityParticipationService
 from services.teaching_session_attendance_service import TeachingSessionAttendanceService
 from services.teacher_preacher_subject_assignment_service import TeacherPreacherSubjectAssignmentService
+from services.session_teacher_preacher_assignment_service import SessionTeacherPreacherAssignmentService
 from services.authentication_service import AuthenticationService
 from services.authorization_context_service import AuthorizationContextService
 from services.authorization_service import AuthorizationService
@@ -517,6 +518,18 @@ class ApplicationServices:
     ):
         return TeacherPreacherSubjectAssignmentService(
             repository=self.factory.build_teacher_preacher_subject_assignment_repository(),
+            tenant_id=tenant_id,
+            connection=self.factory.connection,
+            user_id=user_id,
+        )
+
+    def session_teacher_preacher_assignment(
+        self,
+        tenant_id: str,
+        user_id=None,
+    ):
+        return SessionTeacherPreacherAssignmentService(
+            repository=self.factory.build_session_teacher_preacher_assignment_repository(),
             tenant_id=tenant_id,
             connection=self.factory.connection,
             user_id=user_id,

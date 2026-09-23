@@ -49,6 +49,7 @@ from repositories.teaching_session_member_repository import TeachingSessionMembe
 from repositories.church_activity_participation_repository import ChurchActivityParticipationRepository
 from repositories.teaching_session_attendance_repository import TeachingSessionAttendanceRepository
 from repositories.teacher_preacher_subject_assignment_repository import TeacherPreacherSubjectAssignmentRepository
+from repositories.session_teacher_preacher_assignment_repository import SessionTeacherPreacherAssignmentRepository
 from repositories.teacher_subject_assignment_repository import TeacherSubjectAssignmentRepository
 from repositories.student_enrollment_repository import StudentEnrollmentRepository
 
@@ -152,6 +153,7 @@ class ApplicationServiceFactory:
         self._church_activity_participation_repository = ChurchActivityParticipationRepository(connection)
         self._teaching_session_attendance_repository = TeachingSessionAttendanceRepository(connection)
         self._teacher_preacher_subject_assignment_repository = TeacherPreacherSubjectAssignmentRepository(connection)
+        self._session_teacher_preacher_assignment_repository = SessionTeacherPreacherAssignmentRepository(connection)
         self._teacher_subject_assignment_repository = TeacherSubjectAssignmentRepository(connection)
         self._student_enrollment_repository = StudentEnrollmentRepository(connection)
 
@@ -427,6 +429,9 @@ class ApplicationServiceFactory:
 
     def build_teacher_preacher_subject_assignment_repository(self):
         return self._teacher_preacher_subject_assignment_repository
+
+    def build_session_teacher_preacher_assignment_repository(self):
+        return self._session_teacher_preacher_assignment_repository
 
     def build_teacher_subject_assignment_repository(self):
         return self._teacher_subject_assignment_repository

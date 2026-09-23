@@ -1624,6 +1624,38 @@ def init_db() -> None:
 
         connection.execute(
             """
+            CREATE TABLE IF NOT EXISTS session_teacher_preacher_assignments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id TEXT NOT NULL,
+                teacher_preacher_id INTEGER NOT NULL,
+                teaching_session_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active'
+                    CHECK(status IN ('active', 'inactive')),
+
+                FOREIGN KEY (tenant_id)
+                    REFERENCES tenants(tenant_id),
+
+                FOREIGN KEY (teacher_preacher_id, tenant_id)
+                    REFERENCES teacher_preachers(id, tenant_id),
+
+                FOREIGN KEY (teaching_session_id, tenant_id)
+                    REFERENCES teaching_sessions(id, tenant_id),
+
+                UNIQUE (tenant_id, teacher_preacher_id, teaching_session_id)
+            )
+            """
+        )
+
+        connection.execute(
+            """
+            CREATE UNIQUE INDEX IF NOT EXISTS
+            ux_session_teacher_preacher_assignments_id_tenant
+            ON session_teacher_preacher_assignments(id, tenant_id)
+            """
+        )
+
+        connection.execute(
+            """
             CREATE TABLE IF NOT EXISTS teaching_content_teacher_preacher_assignments (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 tenant_id TEXT NOT NULL,
