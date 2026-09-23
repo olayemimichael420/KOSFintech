@@ -15,6 +15,7 @@ from models.teaching_session_member import TeachingSessionMemberLink
 from models.teaching_session_subject import TeachingSessionSubject
 from models.teaching_subject import TeachingSubject
 from models.teacher_preacher import TeacherPreacher, TeacherPreacherRole
+from models.teacher_preacher_member import TeacherPreacherMemberLink
 from models.teacher_preacher_subject_assignment import (
     TeacherPreacherSubjectAssignment,
 )
@@ -139,6 +140,13 @@ def test_cmos_teaching_workflow_end_to_end(db_connection):
             role=TeacherPreacherRole.TEACHER,
         )
     )
+    teacher_member = services.teacher_preacher_member(tenant_id).create(
+        TeacherPreacherMemberLink(
+            tenant_id=tenant_id,
+            teacher_preacher_id=teacher.id,
+            membership_id=membership.id,
+        )
+    )
 
     subject_assignment = services.teacher_preacher_subject_assignment(
         tenant_id
@@ -259,6 +267,9 @@ def test_cmos_teaching_workflow_end_to_end(db_connection):
     assert services.teaching_series(tenant_id).get(series.id).tenant_id == tenant_id
     assert services.teaching_focus(tenant_id).get(focus.id).tenant_id == tenant_id
     assert services.teaching_content(tenant_id).get(content.id).tenant_id == tenant_id
+    assert services.teacher_preacher_member(tenant_id).get(
+        teacher.id, membership.id
+    ).tenant_id == tenant_id
     assert services.teaching_content_teacher_preacher_assignment(tenant_id).get(
         assignment.id
     ).tenant_id == tenant_id
@@ -281,6 +292,8 @@ def test_cmos_teaching_workflow_end_to_end(db_connection):
     assert session.id is not None
     assert session_subject.id is not None
     assert assignment.id is not None
+    assert teacher_member.teacher_preacher_id == teacher.id
+    assert teacher_member.membership_id == membership.id
     assert session_member.membership_id == membership.id
     assert attendance.membership_id == membership.id
     assert evidence.membership_id == membership.id
