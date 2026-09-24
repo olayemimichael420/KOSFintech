@@ -10,7 +10,7 @@
 
 Commit:
 
-    b060c59
+    e9f183bcbf44da1b4b8ff2e3c95bfc9b8a5dfccc
 
 Branch:
 
@@ -18,7 +18,7 @@ Branch:
 
 Commit description:
 
-    Harden tenant-scoped administration authorization
+    Integrate Teacher Preacher member relationship into CMOS workflow
 
 This commit is the current verified source-code baseline unless a later
 baseline is explicitly recorded.
@@ -36,7 +36,7 @@ Test command:
 
 Verified result:
 
-    110 passed
+    1511 passed, 12 skipped, 4 warnings
 
 The existing passing test suite is part of the development contract.
 
