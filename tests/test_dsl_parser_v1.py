@@ -29,6 +29,28 @@ END
 """
 
 
+SESSION_TEACHER_PREACHER_ASSIGNMENT = """DECLARATION SessionTeacherPreacherAssignment
+PROPOSITION "SessionTeacherPreacherAssignment represents a tenant-scoped relationship between an existing TeacherPreacher capacity and an existing TeachingSession."
+REQUIRES "tenant scope"
+REQUIRES "TeacherPreacher capacity"
+REQUIRES "TeachingSession"
+ESTABLISHES "TeacherPreacher-to-TeachingSession assignment"
+PRESERVES "active | inactive state representation"
+PRESERVES "tenant-scoped foreign-key integrity"
+DOES_NOT_ESTABLISH "membership"
+DOES_NOT_ESTABLISH "authentication"
+DOES_NOT_ESTABLISH "ecclesiastical authority"
+DOES_NOT_ESTABLISH "participation"
+DOES_NOT_ESTABLISH "attendance"
+DOES_NOT_ESTABLISH "learning"
+DOES_NOT_ESTABLISH "assessment"
+DOES_NOT_ESTABLISH "result"
+DOES_NOT_ESTABLISH "progress"
+DOES_NOT_ESTABLISH "application authorization merely from the assignment relationship"
+END
+"""
+
+
 def test_parser_v1_reuses_the_same_semantic_shape():
     service_act = parse_declaration(SERVICE_ACT)
     teaching_subject = parse_declaration(TEACHING_SUBJECT)
@@ -52,8 +74,20 @@ def test_parser_v1_reuses_the_same_semantic_shape():
     assert teaching_subject.does_not_establish
 
 
+def test_parser_v1_handles_session_teacher_preacher_assignment_without_expansion():
+    parsed = parse_declaration(SESSION_TEACHER_PREACHER_ASSIGNMENT)
+
+    assert parsed.name == "SessionTeacherPreacherAssignment"
+    assert "TeacherPreacher capacity" in parsed.requires
+    assert "TeachingSession" in parsed.requires
+    assert "TeacherPreacher-to-TeachingSession assignment" in parsed.establishes
+    assert "active | inactive state representation" in parsed.preserves
+    assert "ecclesiastical authority" in parsed.does_not_establish
+    assert "application authorization merely from the assignment relationship" in parsed.does_not_establish
+
+
 def test_parser_v1_is_lossless_for_the_declared_structure():
-    source = TEACHING_SUBJECT
+    source = SESSION_TEACHER_PREACHER_ASSIGNMENT
     parsed = parse_declaration(source)
     assert parse_declaration(render_declaration(parsed)) == parsed
 
