@@ -16,8 +16,8 @@ from p3_relation_algebra import (
 
 
 def test_p3_01_equivalent_symmetry_blocks():
-    boundary = [Boundary("A", "B")]
-    facts = [Fact("B", Relation.EQUIVALENT, "A")]
+    boundary = [Boundary("A", "B", scope="S")]
+    facts = [Fact("B", Relation.EQUIVALENT, "A", scope="S")]
     assert evaluate(boundary, facts, source_scope="S") is Conformance.CONFLICT
 
 
@@ -28,10 +28,10 @@ def test_p3_02_may_grant_is_asymmetric():
 
 
 def test_p3_03_equivalent_transitivity_blocks():
-    boundary = [Boundary("A", "C")]
+    boundary = [Boundary("A", "C", scope="S")]
     facts = [
-        Fact("A", Relation.EQUIVALENT, "B"),
-        Fact("B", Relation.EQUIVALENT, "C"),
+        Fact("A", Relation.EQUIVALENT, "B", scope="S"),
+        Fact("B", Relation.EQUIVALENT, "C", scope="S"),
     ]
     assert evaluate(boundary, facts, source_scope="S") is Conformance.CONFLICT
 
@@ -83,8 +83,8 @@ def test_p3_08_duplicate_boundaries_normalize_to_one_commitment():
 
 
 def test_p3_09_contradictory_boundary_is_fail_closed():
-    boundary = [Boundary("A", "B")]
-    facts = [Fact("A", Relation.IDENTITY, "B")]
+    boundary = [Boundary("A", "B", scope="S")]
+    facts = [Fact("A", Relation.IDENTITY, "B", scope="S")]
     assert evaluate(boundary, facts, source_scope="S") is Conformance.CONFLICT
 
 
@@ -116,3 +116,56 @@ def test_p3_12_permitted_scope_transition_is_evaluated():
         target_scope="DOMAIN_B",
         transition=transition,
     ) is Conformance.EVALUATE
+
+
+def test_p4_01_long_promotion_chain_blocks():
+    boundary = [Boundary("A", "E", scope="S")]
+    facts = [
+        Fact("A", Relation.EQUIVALENT, "B", scope="S"),
+        Fact("B", Relation.EQUIVALENT, "C", scope="S"),
+        Fact("C", Relation.EQUIVALENT, "D", scope="S"),
+        Fact("D", Relation.EQUIVALENT, "E", scope="S"),
+    ]
+    assert evaluate(boundary, facts, source_scope="S") is Conformance.CONFLICT
+
+
+def test_p4_02_mixed_chain_does_not_promote():
+    boundary = [Boundary("A", "E", scope="S")]
+    facts = [
+        Fact("A", Relation.EQUIVALENT, "B", scope="S"),
+        Fact("B", Relation.MAY_GRANT, "C", scope="S"),
+        Fact("C", Relation.EQUIVALENT, "D", scope="S"),
+        Fact("D", Relation.OWNS, "E", scope="S"),
+    ]
+    assert evaluate(boundary, facts, source_scope="S") is Conformance.ALLOW
+
+
+def test_p4_03_non_promotion_cycle_does_not_promote():
+    boundary = [Boundary("A", "C", scope="S")]
+    facts = [
+        Fact("A", Relation.MAY_GRANT, "B", scope="S"),
+        Fact("B", Relation.OWNS, "C", scope="S"),
+        Fact("C", Relation.MAY_BE_USED_BY, "A", scope="S"),
+    ]
+    assert evaluate(boundary, facts, source_scope="S") is Conformance.ALLOW
+
+
+def test_p4_04_promotion_cycle_blocks():
+    boundary = [Boundary("A", "C", scope="S")]
+    facts = [
+        Fact("A", Relation.EQUIVALENT, "B", scope="S"),
+        Fact("B", Relation.EQUIVALENT, "C", scope="S"),
+        Fact("C", Relation.EQUIVALENT, "A", scope="S"),
+    ]
+    assert evaluate(boundary, facts, source_scope="S") is Conformance.CONFLICT
+
+
+def test_p4_05_irrelevant_graph_does_not_contaminate_result():
+    boundary = [Boundary("A", "B", scope="S")]
+    facts = [
+        Fact("A", Relation.MAY_GRANT, "B", scope="S"),
+        Fact("X", Relation.EQUIVALENT, "Y", scope="S"),
+        Fact("Y", Relation.EQUIVALENT, "Z", scope="S"),
+        Fact("Z", Relation.EQUIVALENT, "W", scope="S"),
+    ]
+    assert evaluate(boundary, facts, source_scope="S") is Conformance.ALLOW
