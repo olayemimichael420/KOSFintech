@@ -1,0 +1,263 @@
+# KOS-DEV-0013 — CIT_MOS Existing Service Mechanism Engineering Correspondence Mutation Evidence
+
+**Status:** DEVELOPMENTAL — ENGINEERING CORRESPONDENCE EVIDENCE
+
+**Production Dependency:** NONE
+
+**Authority Effect:** NONE
+
+**Implementation Status:** NOT IMPLEMENTED
+
+**Repository Checkpoint:** a5f64ef7fe5603e443f81a718b49e0edf1eea6cc
+
+## 1. Purpose
+
+This artifact records a controlled mutation experiment performed against existing KOSFintech ServiceRequest and ServiceAct engineering mechanisms.
+
+The purpose was to determine whether selected existing controls are behaviorally consequential and therefore capable of serving as engineering evidence for correspondence with portions of the CIT_MOS minimum semantic contract.
+
+The experiment does not establish new CIT_MOS production semantics.
+
+## 2. Experimental Boundary
+
+The experiment was conducted in the isolated worktree:
+
+`.cit_mos_mutation_test`
+
+
+
+The isolated worktree was based on the same repository checkpoint as `main`:
+
+`a5f64ef7fe5603e443f81a718b49e0edf1eea6cc`
+
+
+
+No production implementation change was applied to `main`.
+
+The experiment therefore constitutes controlled engineering evidence rather than a production modification.
+
+## 3. Baseline
+
+Before mutation:
+
+...................................                                      [100%]
+35 passed in 71.52s (0:01:11)
+
+Result:
+
+**35 passed**
+
+This establishes the pre-mutation behavioral baseline for the inspected ServiceRequest and ServiceAct test surfaces.
+
+## 4. Mutation Evidence
+
+### 4.1 ServiceRequest creation permission gate
+
+The `service_request.write` permission requirement on ServiceRequest creation was temporarily removed.
+
+Result:
+
+**1 failed, 13 passed**
+
+The failing test was:
+
+`test_create_service_act_requires_authorized_request`
+
+`test_create_requires_write_permission`
+
+
+
+The expected `PermissionError` was not raised.
+
+**Engineering finding:** the application permission gate is behaviorally consequential to the existing ServiceRequest creation contract.
+
+### 4.2 ServiceRequest requester-only authorization eligibility
+
+The requester-only actor condition for transition to `AUTHORIZED` was temporarily removed.
+
+Result:
+
+**1 failed, 13 passed**
+
+The failing test was:
+
+`test_create_service_act_requires_authorized_request`
+
+`test_create_requires_write_permission`
+
+
+
+The expected `PermissionError` was not raised.
+
+**Engineering finding:** requester identity eligibility is behaviorally consequential to the existing ServiceRequest authorization transition.
+
+### 4.3 ServiceAct creation prerequisite
+
+The ServiceAct creation requirement that the associated ServiceRequest be  was temporarily removed.
+
+Result:
+
+**1 failed, 20 passed**
+
+The failing test was:
+
+`test_create_service_act_requires_authorized_request`
+
+`test_create_requires_write_permission`
+
+
+
+The expected `PermissionError` was not raised.
+
+**Engineering finding:** the ServiceRequest lifecycle state is behaviorally consequential to downstream ServiceAct creation.
+
+### 4.4 ServiceAct completion transition safeguard
+
+The ServiceAct transition graph was temporarily modified to permit direct `CREATED -> COMPLETED`.
+
+The direct-completion test continued to pass while actor eligibility remained restrictive.
+
+**Engineering finding:** the transition graph is one independent safeguard against direct completion.
+
+### 4.5 ServiceAct completion actor-eligibility safeguard
+
+The actor-eligibility fallback was separately modified to permit otherwise rejected transitions.
+
+The direct-completion test remained blocked while the transition graph continued to reject .
+
+**Engineering finding:** actor eligibility is a second independent safeguard against direct completion.
+
+### 4.6 Combined completion mutations
+
+Both completion safeguards were temporarily removed:
+
+1. `CREATED -> COMPLETED` was admitted by the transition graph.
+2. actor eligibility was permitted.
+
+The direct-completion test then failed:
+
+`test_service_act_cannot_be_completed_directly`
+
+
+
+**Failure:** `DID NOT RAISE PermissionError` 
+
+**Engineering finding:** the existing ServiceAct completion controls operate together as behaviorally consequential safeguards.
+
+## 5. Restoration Verification
+
+The original ServiceAct implementation was restored.
+
+The restored ServiceAct test suite produced:
+
+**21 passed**
+
+The ServiceRequest mutation surfaces were likewise restored after each mutation, with the relevant ServiceRequest suite returning to its passing state.
+
+The mutation experiment was therefore closed without retaining the experimental code changes as production implementation.
+
+## 6. Engineering Correspondence
+
+The experiment provides bounded evidence that existing mechanisms correspond behaviorally to several concepts already represented in the CIT_MOS minimum semantic contract:
+
+| Existing mechanism | Evidence-supported correspondence |
+|---|---|
+| ServiceRequest | Candidate service/request boundary |
+| requester / recipient | Candidate participant and provider/recipient relationship evidence |
+| ServiceRequest lifecycle states | Existing lifecycle/control evidence |
+|  | Application permission evidence |
+| requester-only authorization eligibility | Actor eligibility / responsibility-control evidence |
+| ServiceRequest `AUTHORIZED` prerequisite | Workflow dependency evidence |
+| ServiceAct | Candidate service-value/action/activity boundary |
+| ServiceAct lifecycle controls | Lifecycle and workflow evidence |
+| Verification-controlled completion | Evidence/verification/completion correspondence |
+| Audit events | Operational/audit evidence |
+
+These are correspondence observations only.
+
+They do not establish that the existing engineering entities are already the final CIT_MOS semantic entities.
+
+## 7. Required Non-Equivalences
+
+The experiment does not establish:
+
+- CIT_MOS semantic validation;
+- CIT_MOS production authorization;
+- CIT_MOS-specific authority;
+- constitutional authority;
+- institutional authority;
+- legal authority;
+- production deployment authorization;
+- CIT_MOS tenant identity;
+- CIT_MOS ownership;
+- CIT_MOS governance office or officer;
+- semantic inheritance from ServiceRequest or ServiceAct;
+- automatic promotion of existing KOSFintech mechanisms into CIT_MOS production semantics.
+
+In particular:
+
+**Application Permission != CIT_MOS Authority**
+
+**Workflow State != Constitutional Authority**
+
+**Actor Eligibility != Institutional Appointment**
+
+**Audit Evidence != Constitutional Proof**
+
+**Mutation Evidence != Semantic Validation**
+
+**Engineering Correspondence != Production Authorization**
+
+**Successful Test != Constitutional Finality**
+
+**Git Commit != Constitutional Finality**
+
+## 8. Relation to KOS-DEV-0012
+
+KOS-DEV-0012 establishes the CIT_MOS Unified Minimum Semantic Contract.
+
+This artifact supplies a controlled engineering-evidence layer beneath that contract.
+
+The progression remains:
+
+**Independent Requirement → Minimum Semantic Contract → Engineering Correspondence → Semantic Validation → Operational Model → Tests/Verification → Evidence Closure → Applicable Authorization**
+
+The mutation experiment advances only the **Engineering Correspondence** evidence layer.
+
+It does not silently advance the subsequent gates.
+
+## 9. Relation to Existing CIT_MOS Closure and Pause Records
+
+This artifact does not replace or reopen:
+
+- CIT_MOS Evidence Closure;
+- CIT_MOS Development-Service Semantic Pause.
+
+Those records continue to establish that CIT_MOS semantic development remains controlled and that unresolved concepts require independent evidence.
+
+This artifact adds a narrowly bounded engineering evidence record produced through controlled behavioral mutation testing.
+
+## 10. Current Determination
+
+**CIT_MOS ENGINEERING CORRESPONDENCE EVIDENCE: ESTABLISHED — BOUNDED**
+
+The experiment demonstrates that selected ServiceRequest and ServiceAct controls are behaviorally consequential and can therefore serve as engineering evidence for correspondence with portions of the CIT_MOS minimum semantic contract.
+
+No CIT_MOS production semantic contract, operational authorization, constitutional authority, institutional authority, or production implementation authorization is created by this evidence.
+
+Further advancement requires the applicable validation gate.
+
+## 11. Provenance
+
+**Evidence source:** controlled mutation testing of existing KOSFintech ServiceRequest and ServiceAct mechanisms.
+
+**Mutation environment:** isolated `.cit_mos_mutation_test` worktree.
+
+**Base checkpoint:** `a5f64ef7fe5603e443f81a718b49e0edf1eea6cc` 
+
+**Main branch:** `main` 
+
+**Main production implementation:** unchanged by the experiment.
+
+**Continuity requirement:** preserve this artifact together with the CIT_MOS minimum semantic contract, Evidence Closure, Semantic Pause, and subsequent validation records.
+
